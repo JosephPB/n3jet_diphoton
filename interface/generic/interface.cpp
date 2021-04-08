@@ -54,7 +54,11 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
       })
     , metadatas(training_reruns, std::vector<std::vector<double>>(pairs + 1, std::vector<double>(10)))
     , kerasModels(training_reruns, std::vector<nn::KerasModel>(pairs + 1))
+#if (RUNS == 1)
+    , resfile("res-" + std::to_string(A))
+#else
     , resfile("res")
+#endif
     , results_buffer()
 {
     std::generate(model_dirs.begin(), model_dirs.end(), [n = 0]() mutable { return std::to_string(n++) + "/"; });

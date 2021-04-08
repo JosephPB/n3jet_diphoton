@@ -1,8 +1,6 @@
 // TODO
 // 3. Naive vs FKS NN implementations
 //    https://github.com/JosephPB/n3jet/blob/master/n3jet/c%2B%2B_calls/ex_3g2A_multiple_single.cpp
-// 4. Pass average of N training reruns to Sherpa or running each one individually
-//    set training_reruns AND training index I with compile flag to 1, then bash script for loop (same rseed, diff -A.I)
 #pragma once
 
 #include <array>
@@ -26,7 +24,20 @@ namespace NN2A {
 
 constexpr int d { 4 };
 
+#ifndef LEGS
+static_assert(false, "You must choose the number of legs with -DLEGS=#!");
+#endif
+
 constexpr int legs { LEGS };
+
+#if (defined(NN) || defined(BOTH))
+#ifndef RUNS
+static_assert(false, "You must choose the number of NN runs to average over with -DRUNS=#!");
+#endif
+#if (RUNS == 1) && !defined(A)
+static_assert(false, "You must set the index of the NN run with -DA=#!");
+#endif
+#endif
 
 #if !defined(NN) && !defined(NJET)
 static_assert(false, "You must choose one of -DNN and -DNJET!");
@@ -55,7 +66,7 @@ private:
 
     // n.b. there is an additional FKS pair for the cut network (for non-divergent regions)
     static constexpr int pairs { n_choose_2[legs] - 1 };
-    static constexpr int training_reruns { 20 };
+    static constexpr int training_reruns { RUNS };
 
     const std::string cut_dirs;
     const std::string model_base;
