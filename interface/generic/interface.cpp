@@ -58,7 +58,8 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
     , results_buffer()
 {
     std::generate(model_dirs.begin(), model_dirs.end(), [n = 0]() mutable { return std::to_string(n++) + "/"; });
-#ifndef NJET
+
+#if defined(NN) || defined(BOTH)
     for (int i { 0 }; i < training_reruns; ++i) {
         // Near networks
         for (int j { 0 }; j < pairs; ++j) {
