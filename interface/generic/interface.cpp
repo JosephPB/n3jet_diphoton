@@ -100,6 +100,8 @@ NN2A::SquaredMatrixElement::~SquaredMatrixElement()
         file = std::ifstream(name);
     } while (file.is_open());
 
+    std::cout << "\nWriting out results to new file `" << name << "`...\n";
+
     std::ofstream o(name, std::ios::trunc);
     o.setf(std::ios_base::scientific);
     o.precision(16);
@@ -110,34 +112,38 @@ NN2A::SquaredMatrixElement::~SquaredMatrixElement()
         }
         o << '\n';
     }
+    std::cout << "    Done.\n";
 #endif
-    std::cout << "\nGoodbye :)\n";
 }
 
 void NN2A::SquaredMatrixElement::PrintSummary() const
 {
-    msg_Info() << "Using NN2A Interface with the following parameters:"
+    msg_Info() << "Using NJet/NN " << NN2A::legs - 2 << "G2A interface to Sherpa with the following parameters:"
                << '\n'
+               << "  mur = " << m_mur << '\n'
+               << "  alpha_s = " << m_alphas << '\n'
+               << "  alpha = " << m_alpha << '\n'
                << "  1/alpha = " << 1. / m_alpha << '\n'
                << "  ----------------------------------------"
                << '\n';
 }
 
-// code to compute amplitude here
+double NN2A::SquaredMatrixElement::dot(const ATOOLS::Vec4D_Vector& point, int k, int j) const
+{
+    return point[j][0] * point[k][0] - (point[j][1] * point[k][1] + point[j][2] * point[k][2] + point[j][3] * point[k][3]);
+}
+
 //double NN2A::SquaredMatrixElement::Calculate(const double point[NN2A::legs][NN2A::d]) const
 double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector& point)
 {
-#ifdef TEST
-    return 1.;
-#endif
-
 #ifdef UNIT
     return 1.;
 #endif
 
-    //long double s_23 = point[2][0] * point[3][0] - (point[2][1] * point[3][1] + point[2][2] * point[3][2] + point[2][3] * point[3][3]);
-
-#ifndef NJET
+#if defined(NN) || defined(BOTH)
+#ifdef TIMING
+    TP nnt1 { std::chrono::high_resolution_clock::now() };
+#endif
     std::array<double, training_reruns> results;
 
     // moms is an vector of training_reruns results, each of which is an vector of FKS pairs results, each of which is an vector of flattened momenta
@@ -156,11 +162,13 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector& point)
         }
     }
 
+    const double s_com { dot(point, 0, 1) };
+
     // cut/near check
     int cut_near { 0 };
     for (int j { 0 }; j < NN2A::legs - 1; ++j) {
         for (int k { j + 1 }; k < NN2A::legs; ++k) {
-            const double prod { point[j][0] * point[k][0] - (point[j][1] * point[k][1] + point[j][2] * point[k][2] + point[j][3] * point[k][3]) };
+            const double prod { dot(point, j, k) };
             const double dist { prod / s_com };
             if (dist < delta) {
                 cut_near += 1;
@@ -169,66 +177,62 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector& point)
     }
 
     // inference
-    //bool cut_network = true;
-    //int pair_chosen = 8;
-
     for (int j { 0 }; j < training_reruns; ++j) {
         if (cut_near >= 1) {
             // the point is near an IR singularity
             // infer over all FKS pairs
             results[j] = 0;
             for (int k { 0 }; k < pairs; ++k) {
-                //if (cut_network == false && pair_chosen == k) {
                 const double result { kerasModels[j][k].compute_output(moms[j][k])[0] };
                 const double result_pair { nn::destandardise(result, metadatas[j][k][8], metadatas[j][k][9]) };
                 results[j] += result_pair;
-                //} else {
-                //const double result_pair = 0.;
-                //results[j] += result_pair;
-                //}
             }
         } else {
             // the point is in a non-divergent region
             // use the 'cut' network which is the final entry in the pair network
-            //if (cut_network == true){
             const double result { kerasModels[j][pairs].compute_output(moms[j][pairs])[0] };
             results[j] = nn::destandardise(result, metadatas[j][pairs][8], metadatas[j][pairs][9]);
-            //} else {
-            //results[j] = 0.;
-            //}
         }
     }
 
     const double mean { std::accumulate(results.cbegin(), results.cend(), 0.) / training_reruns };
-
+#ifdef TIMING
+    TP nnt2 { std::chrono::high_resolution_clock::now() };
+    const long int nndur { std::chrono::duration_cast<std::chrono::nanoseconds>(nnt2 - nnt1).count() };
+#endif
 #endif
 
 #if defined(NJET) || defined(BOTH)
-    double LHMomenta[NN2A::legs * NN2A::n];
+#ifdef TIMING
+    TP njett1 { std::chrono::high_resolution_clock::now() };
+#endif
+    double LHMomenta[NN2A::legs * n];
     for (std::size_t p { 0 }; p < NN2A::legs; ++p) {
         for (std::size_t mu { 0 }; mu < NN2A::d; ++mu) {
-            LHMomenta[mu + p * NN2A::n] = point[p][mu];
+            LHMomenta[mu + p * n] = point[p][mu];
         }
         // Set masses
-        LHMomenta[d + p * NN2A::n] = 0.;
+        LHMomenta[d + p * n] = 0.;
     }
 
     int alphasReturnStatus;
     OLP_SetParameter("alphas", &m_alphas, &zero, &alphasReturnStatus);
     assert(alphasReturnStatus == 1);
 
-    // set alpha QED (answer changes if this changed, so does something)
     int alphaReturnStatus;
     OLP_SetParameter("alpha", &m_alpha, &zero, &alphaReturnStatus);
     assert(alphaReturnStatus == 1);
 
     double out[11];
-    double acc { 0. };
+    double njet_acc { 0. };
     const int channel { 1 };
-    OLP_EvalSubProcess2(&channel, LHMomenta, &m_mur, out, &acc);
+    OLP_EvalSubProcess2(&channel, LHMomenta, &m_mur, out, &njet_acc);
 
     double njet_ans { out[4] };
-
+#ifdef TIMING
+    TP njett2 { std::chrono::high_resolution_clock::now() };
+    const long int njetdur { std::chrono::duration_cast<std::chrono::nanoseconds>(njett2 - njett1).count() };
+#endif
 #endif
 
 #ifdef REC
@@ -247,14 +251,25 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector& point)
         //         o << point[l][mu] << " ";
         //     }
         // }
-#ifndef NJET
+
+#if defined(NN) || defined(BOTH)
         results_vector.push_back(mean);
         // o << mean << " ";
 #endif
+
 #if defined(NJET) || defined(BOTH)
         results_vector.push_back(njet_ans);
         // o << njet_ans << " ";
 #endif
+
+#if (defined(NN) || defined(BOTH)) && defined(TIMING)
+        results_vector.push_back(nndur);
+#endif
+
+#if (defined(NJET) || defined(BOTH)) && defined(TIMING)
+        results_vector.push_back(njetdur);
+#endif
+
         results_buffer.push_back(results_vector);
         // o << '\n';
     }
@@ -262,29 +277,32 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector& point)
 
 #ifdef NJET
     return njet_ans;
-#else
+#endif
+
+#ifdef NN
     return mean;
 #endif
 }
 
-// Interface class constructor and member implementations
+// Interface
+// ~~~~~~~~~
 
 NN2A::Interface::Interface()
-    : ME_Generator_Base("NN2A")
+    : ME_Generator_Base("NN" + std::to_string(NN2A::legs - 2) + "G2A")
 {
 }
 
 bool NN2A::Interface::Initialize(
-    const std::string& path, const std::string& file,
-    MODEL::Model_Base* const model,
-    BEAM::Beam_Spectra_Handler* const beam,
-    PDF::ISR_Handler* const isr)
+    const std::string& /* path */, const std::string& /* file */,
+    MODEL::Model_Base* const /* model */,
+    BEAM::Beam_Spectra_Handler* const /* beam */,
+    PDF::ISR_Handler* const /* isr */)
 {
     return true;
 }
 
 PHASIC::Process_Base*
-NN2A::Interface::InitializeProcess(const PHASIC::Process_Info& pi, bool add)
+NN2A::Interface::InitializeProcess(const PHASIC::Process_Info& /* pi */, bool /* add */)
 {
     return NULL;
 }
@@ -299,28 +317,18 @@ bool NN2A::Interface::NewLibraries()
     return false;
 }
 
-void NN2A::Interface::SetClusterDefinitions(PDF::Cluster_Definitions_Base* const defs) { }
+void NN2A::Interface::SetClusterDefinitions(PDF::Cluster_Definitions_Base* const /* defs */) { }
 
-ATOOLS::Cluster_Amplitude*
-NN2A::Interface::ClusterConfiguration(PHASIC::Process_Base* const proc, const size_t& mode)
-{
-    return NULL;
-}
-
-// Process class constructor and member implementations
+// Process
+// ~~~~~~~
 
 NN2A::Process::Process(
     const PHASIC::Process_Info& pi,
     const ATOOLS::Flavour_Vector& flavs,
-    const bool swap, const bool anti)
+    const bool /* swap */, const bool /* anti */)
     : Tree_ME2_Base(pi, flavs)
     , m_me()
 {
-    //m_me.SetParameter("alpha", AlphaQED());
-    //m_me.RecalcDependentParameters();
-
-    //Data_Reader reader(" ", ";", "#", "=");
-
     m_me.PrintSummary();
 
     //rpa->gen.AddCitation(1, string("<Description of calculation> from \\cite{xxx:2019yy}"));
@@ -337,12 +345,12 @@ double NN2A::Process::Calc(const ATOOLS::Vec4D_Vector& p)
     return m_me.Calculate(p);
 }
 
-int NN2A::Process::OrderQCD(const int& id)
+int NN2A::Process::OrderQCD(const int& /* id */)
 {
     return NN2A::legs - 2;
 }
 
-int NN2A::Process::OrderEW(const int& id)
+int NN2A::Process::OrderEW(const int& /* id */)
 {
     return 2;
 }
@@ -353,15 +361,15 @@ DECLARE_GETTER(NN2A::Interface, "NN2A", PHASIC::ME_Generator_Base, PHASIC::ME_Ge
 
 PHASIC::ME_Generator_Base*
 ATOOLS::Getter<PHASIC::ME_Generator_Base, PHASIC::ME_Generator_Key, NN2A::Interface>::
-operator()(const PHASIC::ME_Generator_Key& key) const
+operator()(const PHASIC::ME_Generator_Key& /* key */) const
 {
     return new NN2A::Interface();
 }
 
 void ATOOLS::Getter<PHASIC::ME_Generator_Base, PHASIC::ME_Generator_Key, NN2A::Interface>::
-    PrintInfo(std::ostream& str, const size_t width) const
+    PrintInfo(std::ostream& str, const std::size_t /* width */) const
 {
-    str << "Interface to the NN2A calculation";
+    str << "Interface to the NN/NJet diphoton+gluons calculation";
 }
 
 using namespace PHASIC;
@@ -378,13 +386,14 @@ operator()(const PHASIC::Process_Info& pi) const
     assert(pi.m_fi.m_nloqcdtype == nlo_type::lo);
     Flavour_Vector fl(pi.ExtractFlavours());
 
-    // TODO if n=5
+#if LEGS == 5
     // // check for g g  -> g a a
-    // assert(fl[0].Kfcode() == kf_gluon && fl[1].Kfcode() == kf_gluon && fl[4].Kfcode() == kf_gluon
-    //     && fl[2].Kfcode() == kf_photon && fl[3].Kfcode() == kf_photon);
-
+    assert(fl[0].Kfcode() == kf_gluon && fl[1].Kfcode() == kf_gluon && fl[4].Kfcode() == kf_gluon
+        && fl[2].Kfcode() == kf_photon && fl[3].Kfcode() == kf_photon);
+#elif LEGS == 5
     // check for g g  -> g g a a
     assert(fl[0].Kfcode() == kf_gluon && fl[1].Kfcode() == kf_gluon && fl[4].Kfcode() == kf_gluon && fl[5].Kfcode() == kf_gluon
         && fl[2].Kfcode() == kf_photon && fl[3].Kfcode() == kf_photon);
+#endif
     return new NN2A::Process(pi, fl, 0, 0);
 }
