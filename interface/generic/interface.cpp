@@ -19,8 +19,6 @@
 
 #include "interface.hpp"
 
-#define NN_MODEL "100k_new_sherpa"
-
 // Use (void) to silent unused warnings.
 #define assertm(exp, msg) assert(((void)msg, exp))
 
@@ -34,7 +32,7 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
     , delta(2e-2)
     , x(1e-2)
     , cut_dirs("cut_0.02/")
-    , model_base("./models/parallel_fixed/" + std::string(NN_MODEL) + "/")
+    , model_base("amodel")
     , model_dirs()
 #ifdef NAIVE
     , metadatas(training_reruns, std::vector<double>(10))

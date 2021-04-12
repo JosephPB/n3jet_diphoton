@@ -34,6 +34,9 @@ static_assert(false, "You must choose the number of NN runs to average over with
 #if (RUNS == 1) && !defined(A)
 static_assert(false, "You must set the index of the NN run with -DA=#!");
 #endif
+#ifndef NN_MODEL
+static_assert(false, "You must choose the path to the model directory with -DNN_MODEL=\"\\\"/path/to/model\\\"\"!");
+#endif
 #endif
 
 #if !defined(NN) && !defined(NJET)
@@ -61,7 +64,11 @@ private:
 
     const double zero, m_alpha, m_alphas, m_mur, delta, x;
 
+#ifdef RUNS
     static constexpr int training_reruns { RUNS };
+#else
+    static constexpr int training_reruns { 0 };
+#endif
 
     const std::string cut_dirs;
     const std::string model_base;
