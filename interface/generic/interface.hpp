@@ -1,6 +1,3 @@
-// TODO
-// 3. Naive vs FKS NN implementations
-//    https://github.com/JosephPB/n3jet/blob/master/n3jet/c%2B%2B_calls/ex_3g2A_multiple_single.cpp
 #pragma once
 
 #include <array>
@@ -64,19 +61,27 @@ private:
 
     const double zero, m_alpha, m_alphas, m_mur, delta, x;
 
-    // n.b. there is an additional FKS pair for the cut network (for non-divergent regions)
-    static constexpr int pairs { n_choose_2[legs] - 1 };
     static constexpr int training_reruns { RUNS };
 
     const std::string cut_dirs;
     const std::string model_base;
 
     std::array<std::string, training_reruns> model_dirs;
+
+#ifdef NAIVE
+    std::vector<std::vector<double>> metadatas;
+    std::array<std::string, training_reruns> model_dir_models;
+    std::vector<nn::KerasModel> kerasModels;
+#else
+    // n.b. there is an additional FKS pair for the cut network (for non-divergent regions)
+    static constexpr int pairs { n_choose_2[legs] - 1 };
+
     const std::array<std::string, pairs> pair_dirs;
 
     std::vector<std::vector<std::vector<double>>> metadatas;
     std::array<std::array<std::string, pairs + 1>, training_reruns> model_dir_models;
     std::vector<std::vector<nn::KerasModel>> kerasModels;
+#endif
 
     const std::string resfile;
 

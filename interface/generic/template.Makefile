@@ -12,10 +12,11 @@ DEFS+=-DNN # do NN calculation only (or return NN result with BOTH)
 # DEFS+=-DBOTH # generate both NN and NJet and choose return by one of two above flags
 DEFS+=-DREC # record results
 DEFS+=-DTIMING # recording runtime information
+# DEFS+=-DNAIVE # use naive single NN implementation
 
 .PHONY: clean all
 
-all: interface-AAAAA.so
+all: libInterfaceAAAAA.so
 
 interface.o: interface.cpp interface.hpp Makefile
 	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS) $(DEFS)
@@ -23,7 +24,7 @@ interface.o: interface.cpp interface.hpp Makefile
 model_fns.o: model_fns.cpp model_fns.h
 	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS) $(DEFS)
 
-interface-AAAAA.so: interface.o model_fns.o
+libInterfaceAAAAA.so: interface.o model_fns.o
 	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LIBS)
 
 clean:

@@ -36,6 +36,11 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
     , cut_dirs("cut_0.02/")
     , model_base("./models/parallel_fixed/" + std::string(NN_MODEL) + "/")
     , model_dirs()
+#ifdef NAIVE
+    , metadatas(training_reruns, std::vector<double>(10))
+    , model_dir_models()
+    , kerasModels(training_reruns)
+#else
     , pair_dirs({
           "pair_0.02_0/",
           "pair_0.02_1/",
@@ -53,7 +58,9 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
           "pair_0.02_13/",
       })
     , metadatas(training_reruns, std::vector<std::vector<double>>(pairs + 1, std::vector<double>(10)))
+    , model_dir_models()
     , kerasModels(training_reruns, std::vector<nn::KerasModel>(pairs + 1))
+#endif
 #if (RUNS == 1)
     , resfile("res-" + std::to_string(A))
 #else
@@ -64,6 +71,18 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
     std::generate(model_dirs.begin(), model_dirs.end(), [n = 0]() mutable { return std::to_string(n++) + "/"; });
 
 #if defined(NN) || defined(BOTH)
+#ifdef NAIVE
+    for (int i { 0 }; i < training_reruns; ++i) {
+        // Naive networks
+        std::string metadata_file { model_base + model_dirs[i] + "dataset_metadata.dat" };
+        std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
+        for (int k { 0 }; k < 10; ++k) {
+            metadatas[i][k] = metadata[k];
+        };
+        model_dir_models[i] = model_base + model_dirs[i] + "model.nnet";
+        kerasModels[i].load_weights(model_dir_models[i]);
+    }
+#else
     for (int i { 0 }; i < training_reruns; ++i) {
         // Near networks
         for (int j { 0 }; j < pairs; ++j) {
@@ -84,6 +103,7 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
         model_dir_models[i][pairs] = model_base + model_dirs[i] + cut_dirs + "model.nnet";
         kerasModels[i][pairs].load_weights(model_dir_models[i][pairs]);
     }
+#endif
 #endif
 #if defined(NJET) || defined(BOTH)
     const std::string f { "OLE_contract_" + std::to_string(NN2A::legs - 2) + "g2A.lh" };
@@ -149,10 +169,39 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector& point)
 #ifdef TIMING
     TP nnt1 { std::chrono::high_resolution_clock::now() };
 #endif
+#ifdef NAIVE
+    std::array<double, training_reruns> results;
+
+    // moms is an vector of training_reruns results, each of which is an vector of flattened momenta
+    // std::array<std::array<double, NN2A::legs * NN2A::d>, training_reruns> moms;
+    std::vector<std::vector<double>> moms(training_reruns, std::vector<double>(NN2A::legs * NN2A::d));
+
+    // flatten momenta
+    for (int p { 0 }; p < NN2A::legs; ++p) {
+        for (int mu { 0 }; mu < NN2A::d; ++mu) {
+            // standardise input
+            for (int k { 0 }; k < training_reruns; ++k) {
+                moms[k][p * NN2A::d + mu] = nn::standardise(point[p][mu], metadatas[k][mu], metadatas[k][NN2A::d + mu]);
+            }
+        }
+    }
+
+    // inference
+    double results_sum { 0. };
+    for (int j { 0 }; j < training_reruns; ++j) {
+        const double result { kerasModels[j].compute_output(moms[j])[0] };
+        results_sum += nn::destandardise(result, metadatas[j][8], metadatas[j][9]);
+    }
+
+    const double mean { results_sum / training_reruns };
+#else
     std::array<double, training_reruns> results;
 
     // moms is an vector of training_reruns results, each of which is an vector of FKS pairs results, each of which is an vector of flattened momenta
     std::vector<std::vector<std::vector<double>>> moms(training_reruns, std::vector<std::vector<double>>(pairs + 1, std::vector<double>(NN2A::legs * NN2A::d)));
+
+    // NN compute_output accepts vectors - could edit model_fns
+    // std::array<std::array<std::array<double, NN2A::legs * NN2A::d>, pairs + 1>, training_reruns> moms;
 
     // flatten momenta
     for (int p { 0 }; p < NN2A::legs; ++p) {
@@ -201,6 +250,7 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector& point)
     }
 
     const double mean { std::accumulate(results.cbegin(), results.cend(), 0.) / training_reruns };
+#endif
 #ifdef TIMING
     TP nnt2 { std::chrono::high_resolution_clock::now() };
     const long int nndur { std::chrono::duration_cast<std::chrono::nanoseconds>(nnt2 - nnt1).count() };

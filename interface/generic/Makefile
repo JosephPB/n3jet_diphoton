@@ -12,6 +12,7 @@ DEFS+=-DNN # do NN calculation only (or return NN result with BOTH)
 # DEFS+=-DBOTH # generate both NN and NJet and choose return by one of two above flags
 DEFS+=-DREC # record results
 DEFS+=-DTIMING # recording runtime information
+DEFS+=-DNAIVE # use naive single NN implementation
 
 .PHONY: clean wipe all
 
