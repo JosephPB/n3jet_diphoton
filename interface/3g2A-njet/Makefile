@@ -19,7 +19,7 @@ DEFS+=-DNJET # do NJet calculation only (or return NJet result with BOTH)
 
 .PHONY: clean all
 
-all: libSherpaNJet3g2A.so
+all: libSherpaNJet3g2A.so OLE_contract_3g2A.lh
 
 interface.o: ${SRC_DIR}/interface.cpp ${SRC_DIR}/interface.hpp Makefile
 	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS) $(DEFS)
@@ -30,5 +30,8 @@ model_fns.o: ${SRC_DIR}/model_fns.cpp ${SRC_DIR}/model_fns.h
 libSherpaNJet3g2A.so: interface.o model_fns.o
 	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LIBS)
 
+OLE_contract_3g2A.lh: OLE_order_3g2A.lh
+	njet.py -o $@ $<
+
 clean:
-	-rm *.so *.o
+	-rm *.so *.o OLE_contract_3g2A.lh
