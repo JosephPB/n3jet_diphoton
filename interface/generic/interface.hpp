@@ -75,16 +75,16 @@ private:
 
     std::array<std::string, training_reruns> model_dirs;
 
+    // n.b. there is an additional FKS pair for the cut network (for non-divergent regions)
+    static constexpr int pairs { n_choose_2[legs] - 1 };
+
+    std::array<std::string, pairs> pair_dirs;
+
 #ifdef NAIVE
     std::vector<std::vector<double>> metadatas;
     std::array<std::string, training_reruns> model_dir_models;
     std::vector<nn::KerasModel> kerasModels;
 #else
-    // n.b. there is an additional FKS pair for the cut network (for non-divergent regions)
-    static constexpr int pairs { n_choose_2[legs] - 1 };
-
-    const std::array<std::string, pairs> pair_dirs;
-
     std::vector<std::vector<std::vector<double>>> metadatas;
     std::array<std::array<std::string, pairs + 1>, training_reruns> model_dir_models;
     std::vector<std::vector<nn::KerasModel>> kerasModels;

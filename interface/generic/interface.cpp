@@ -34,27 +34,12 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
     , cut_dirs("cut_0.02/")
     , model_base("amodel")
     , model_dirs()
+    , pair_dirs()
 #ifdef NAIVE
     , metadatas(training_reruns, std::vector<double>(10))
     , model_dir_models()
     , kerasModels(training_reruns)
 #else
-    , pair_dirs({
-          "pair_0.02_0/",
-          "pair_0.02_1/",
-          "pair_0.02_2/",
-          "pair_0.02_3/",
-          "pair_0.02_4/",
-          "pair_0.02_5/",
-          "pair_0.02_6/",
-          "pair_0.02_7/",
-          "pair_0.02_8/",
-          "pair_0.02_9/",
-          "pair_0.02_10/",
-          "pair_0.02_11/",
-          "pair_0.02_12/",
-          "pair_0.02_13/",
-      })
     , metadatas(training_reruns, std::vector<std::vector<double>>(pairs + 1, std::vector<double>(10)))
     , model_dir_models()
     , kerasModels(training_reruns, std::vector<nn::KerasModel>(pairs + 1))
@@ -67,6 +52,7 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
     , results_buffer()
 {
     std::generate(model_dirs.begin(), model_dirs.end(), [n = 0]() mutable { return std::to_string(n++) + "/"; });
+    std::generate(pair_dirs.begin(), pair_dirs.end(), [n = 0]() mutable { return "pair_0.02_" + std::to_string(n++) + "/"; });
 
 #if defined(NN) || defined(BOTH)
 #ifdef NAIVE
