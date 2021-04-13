@@ -60,34 +60,38 @@ private:
     static constexpr int n { 5 }; // momenta fifth entry is mass
 
     // binomial_coefficient
-    static constexpr std::array<int, 11> n_choose_2 { { 0, 0, 1, 3, 6, 10, 15, 21, 28, 36, 45 } };
+    // static constexpr std::array<int, 11> n_choose_2 { { 0, 0, 1, 3, 6, 10, 15, 21, 28, 36, 45 } };
 
     const double zero, m_alpha, m_alphas, m_mur, delta, x;
 
 #ifdef RUNS
     static constexpr int training_reruns { RUNS };
-#else
-    static constexpr int training_reruns { 0 };
+// #else
+//     static constexpr int training_reruns { 0 };
 #endif
 
-    const std::string cut_dirs;
-    const std::string model_base;
+    // const std::string cut_dirs;
+    // const std::string model_base;
 
-    std::array<std::string, training_reruns> model_dirs;
+    // std::array<std::string, training_reruns> model_dirs;
 
     // n.b. there is an additional FKS pair for the cut network (for non-divergent regions)
-    static constexpr int pairs { n_choose_2[legs] - 1 };
+    // static constexpr int pairs { n_choose_2[legs] - 1 };
 
-    std::array<std::string, pairs> pair_dirs;
+    // std::array<std::string, pairs> pair_dirs;
 
+#if (defined(NN) || defined(BOTH))
 #ifdef NAIVE
-    std::vector<std::vector<double>> metadatas;
-    std::array<std::string, training_reruns> model_dir_models;
-    std::vector<nn::KerasModel> kerasModels;
+    nn::NaiveNetworks networks;
+    // std::vector<std::vector<double>> metadatas;
+    // std::array<std::string, training_reruns> model_dir_models;
+    // std::vector<nn::KerasModel> kerasModels;
 #else
-    std::vector<std::vector<std::vector<double>>> metadatas;
-    std::array<std::array<std::string, pairs + 1>, training_reruns> model_dir_models;
-    std::vector<std::vector<nn::KerasModel>> kerasModels;
+    nn::FKSNetworks networks;
+    // std::vector<std::vector<std::vector<double>>> metadatas;
+    // std::array<std::array<std::string, pairs + 1>, training_reruns> model_dir_models;
+    // std::vector<std::vector<nn::KerasModel>> kerasModels;
+#endif
 #endif
 
     const std::string resfile;

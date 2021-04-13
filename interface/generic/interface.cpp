@@ -31,18 +31,21 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
     , m_mur(91.188)
     , delta(2e-2)
     , x(1e-2)
-    , cut_dirs("cut_0.02/")
-    , model_base(NN_MODEL)
-    , model_dirs()
-    , pair_dirs()
+#if (defined(NN) || defined(BOTH))
+    , networks(NN2A::legs, training_reruns, NN_MODEL)
+#endif
+    // , cut_dirs("cut_0.02/")
+    // , model_base(NN_MODEL)
+    // , model_dirs()
+    // , pair_dirs()
 #ifdef NAIVE
-    , metadatas(training_reruns, std::vector<double>(10))
-    , model_dir_models()
-    , kerasModels(training_reruns)
+    // , networks.metadatas(training_reruns, std::vector<double>(10))
+    // , model_dir_models()
+    // , kerasModels(training_reruns)
 #else
-    , metadatas(training_reruns, std::vector<std::vector<double>>(pairs + 1, std::vector<double>(10)))
-    , model_dir_models()
-    , kerasModels(training_reruns, std::vector<nn::KerasModel>(pairs + 1))
+    // , networks.metadatas(training_reruns, std::vector<std::vector<double>>(pairs + 1, std::vector<double>(10)))
+    // , model_dir_models()
+    // , kerasModels(training_reruns, std::vector<nn::KerasModel>(pairs + 1))
 #endif
 #if (RUNS == 1)
     , resfile("res-" + std::to_string(A))
@@ -51,42 +54,42 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
 #endif
     , results_buffer()
 {
-    std::generate(model_dirs.begin(), model_dirs.end(), [n = 0]() mutable { return std::to_string(n++) + "/"; });
-    std::generate(pair_dirs.begin(), pair_dirs.end(), [n = 0]() mutable { return "pair_0.02_" + std::to_string(n++) + "/"; });
+    // std::generate(model_dirs.begin(), model_dirs.end(), [n = 0]() mutable { return std::to_string(n++) + "/"; });
+    // std::generate(pair_dirs.begin(), pair_dirs.end(), [n = 0]() mutable { return "pair_0.02_" + std::to_string(n++) + "/"; });
 
 #if defined(NN) || defined(BOTH)
 #ifdef NAIVE
-    for (int i { 0 }; i < training_reruns; ++i) {
-        // Naive networks
-        std::string metadata_file { model_base + model_dirs[i] + "dataset_metadata.dat" };
-        std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
-        for (int k { 0 }; k < 10; ++k) {
-            metadatas[i][k] = metadata[k];
-        };
-        model_dir_models[i] = model_base + model_dirs[i] + "model.nnet";
-        kerasModels[i].load_weights(model_dir_models[i]);
-    }
+    // for (int i { 0 }; i < training_reruns; ++i) {
+    //     // Naive networks
+    //     std::string metadata_file { model_base + model_dirs[i] + "dataset_metadata.dat" };
+    //     std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
+    //     for (int k { 0 }; k < 10; ++k) {
+    //         networks.metadatas[i][k] = metadata[k];
+    //     };
+    //     model_dir_models[i] = model_base + model_dirs[i] + "model.nnet";
+    //     kerasModels[i].load_weights(model_dir_models[i]);
+    // }
 #else
-    for (int i { 0 }; i < training_reruns; ++i) {
-        // Near networks
-        for (int j { 0 }; j < pairs; ++j) {
-            std::string metadata_file { model_base + model_dirs[i] + pair_dirs[j] + "dataset_metadata.dat" };
-            std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
-            for (int k { 0 }; k < 10; ++k) {
-                metadatas[i][j][k] = metadata[k];
-            };
-            model_dir_models[i][j] = model_base + model_dirs[i] + pair_dirs[j] + "model.nnet";
-            kerasModels[i][j].load_weights(model_dir_models[i][j]);
-        };
-        // Cut networks
-        std::string metadata_file { model_base + model_dirs[i] + cut_dirs + "dataset_metadata.dat" };
-        std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
-        for (int k { 0 }; k < 10; ++k) {
-            metadatas[i][pairs][k] = metadata[k];
-        };
-        model_dir_models[i][pairs] = model_base + model_dirs[i] + cut_dirs + "model.nnet";
-        kerasModels[i][pairs].load_weights(model_dir_models[i][pairs]);
-    }
+    // for (int i { 0 }; i < training_reruns; ++i) {
+    //     // Near networks
+    //     for (int j { 0 }; j < pairs; ++j) {
+    //         std::string metadata_file { model_base + model_dirs[i] + pair_dirs[j] + "dataset_metadata.dat" };
+    //         std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
+    //         for (int k { 0 }; k < 10; ++k) {
+    //             networks.metadatas[i][j][k] = metadata[k];
+    //         };
+    //         model_dir_models[i][j] = model_base + model_dirs[i] + pair_dirs[j] + "model.nnet";
+    //         kerasModels[i][j].load_weights(model_dir_models[i][j]);
+    //     };
+    //     // Cut networks
+    //     std::string metadata_file { model_base + model_dirs[i] + cut_dirs + "dataset_metadata.dat" };
+    //     std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
+    //     for (int k { 0 }; k < 10; ++k) {
+    //         networks.metadatas[i][pairs][k] = metadata[k];
+    //     };
+    //     model_dir_models[i][pairs] = model_base + model_dirs[i] + cut_dirs + "model.nnet";
+    //     kerasModels[i][pairs].load_weights(model_dir_models[i][pairs]);
+    // }
 #endif
 #endif
 #if defined(NJET) || defined(BOTH)
@@ -164,15 +167,15 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector& point)
         for (int mu { 0 }; mu < NN2A::d; ++mu) {
             // standardise input
             for (int k { 0 }; k < training_reruns; ++k) {
-                moms[k][p * NN2A::d + mu] = nn::standardise(point[p][mu], metadatas[k][mu], metadatas[k][NN2A::d + mu]);
+                moms[k][p * NN2A::d + mu] = nn::standardise(point[p][mu], networks.metadatas[k][mu], networks.metadatas[k][NN2A::d + mu]);
             }
         }
     }
 
     // inference
     for (int j { 0 }; j < training_reruns; ++j) {
-        const double result { kerasModels[j].compute_output(moms[j])[0] };
-        results_sum += nn::destandardise(result, metadatas[j][8], metadatas[j][9]);
+        const double result { networks.kerasModels[j].compute_output(moms[j])[0] };
+        results_sum += nn::destandardise(result, networks.metadatas[j][8], networks.metadatas[j][9]);
     }
 #else
     // moms is an vector of training_reruns results, each of which is an vector of FKS pairs results, each of which is an vector of flattened momenta
@@ -187,9 +190,9 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector& point)
             // standardise input
             for (int k { 0 }; k < training_reruns; ++k) {
                 for (int j { 0 }; j <= pairs; ++j) {
-                    moms[k][j][p * NN2A::d + mu] = nn::standardise(point[p][mu], metadatas[k][j][mu], metadatas[k][j][NN2A::d + mu]);
+                    moms[k][j][p * NN2A::d + mu] = nn::standardise(point[p][mu], networks.metadatas[k][j][mu], networks.metadatas[k][j][NN2A::d + mu]);
                 }
-                moms[k][pairs][p * NN2A::d + mu] = nn::standardise(point[p][mu], metadatas[k][pairs][mu], metadatas[k][pairs][NN2A::d + mu]);
+                moms[k][pairs][p * NN2A::d + mu] = nn::standardise(point[p][mu], networks.metadatas[k][pairs][mu], networks.metadatas[k][pairs][NN2A::d + mu]);
             }
         }
     }
@@ -214,15 +217,15 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector& point)
             // the point is near an IR singularity
             // infer over all FKS pairs
             for (int k { 0 }; k < pairs; ++k) {
-                const double result { kerasModels[j][k].compute_output(moms[j][k])[0] };
-                const double result_pair { nn::destandardise(result, metadatas[j][k][8], metadatas[j][k][9]) };
+                const double result { networks.kerasModels[j][k].compute_output(moms[j][k])[0] };
+                const double result_pair { nn::destandardise(result, networks.metadatas[j][k][8], networks.metadatas[j][k][9]) };
                 results_sum += result_pair;
             }
         } else {
             // the point is in a non-divergent region
             // use the 'cut' network which is the final entry in the pair network
-            const double result { kerasModels[j][pairs].compute_output(moms[j][pairs])[0] };
-            results_sum += nn::destandardise(result, metadatas[j][pairs][8], metadatas[j][pairs][9]);
+            const double result { networks.kerasModels[j][pairs].compute_output(moms[j][pairs])[0] };
+            results_sum += nn::destandardise(result, networks.metadatas[j][pairs][8], networks.metadatas[j][pairs][9]);
         }
     }
 #endif

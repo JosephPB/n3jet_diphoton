@@ -1,5 +1,6 @@
 #include "model_fns.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
@@ -334,4 +335,64 @@ void nn::LayerActivation::load_weights(std::ifstream& fin)
     std::cout << "Loading weights for Activation layer" << '\n';
 #endif
     fin >> activation_type;
+}
+
+nn::Networks::Networks(const int legs, const int runs, const std::string& model_path)
+    : pairs(n_choose_2[legs] - 1)
+    , cut_dirs("cut_0.02/")
+    , model_base(model_path)
+    , model_dirs(runs)
+    , pair_dirs(pairs)
+{
+    std::generate(model_dirs.begin(), model_dirs.end(), [n = 0]() mutable { return std::to_string(n++) + "/"; });
+    std::generate(pair_dirs.begin(), pair_dirs.end(), [n = 0]() mutable { return "pair_0.02_" + std::to_string(n++) + "/"; });
+}
+
+nn::NaiveNetworks::NaiveNetworks(const int legs, const int runs, const std::string& model_path)
+    : Networks(legs, runs, model_path)
+    , kerasModels(runs)
+    , metadatas(runs, std::vector<double>(10))
+    , model_dir_models(runs)
+{
+    for (int i { 0 }; i < runs; ++i) {
+        // Naive networks
+        const std::string metadata_file { model_base + model_dirs[i] + "dataset_metadata.dat" };
+        const std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
+        std::copy(metadata.cbegin(), metadata.cend(), metadatas[i].begin());
+        // for (int k { 0 }; k < 10; ++k) {
+        //     metadatas[i][k] = metadata[k];
+        // };
+        model_dir_models[i] = model_base + model_dirs[i] + "model.nnet";
+        kerasModels[i].load_weights(model_dir_models[i]);
+    }
+}
+
+nn::FKSNetworks::FKSNetworks(const int legs, const int runs, const std::string& model_path)
+    : Networks(legs, runs, model_path)
+    , kerasModels(runs, std::vector<nn::KerasModel>(pairs + 1))
+    , metadatas(runs, std::vector<std::vector<double>>(pairs + 1, std::vector<double>(10)))
+    , model_dir_models(runs, std::vector<std::string>(pairs + 1))
+{
+    for (int i { 0 }; i < runs; ++i) {
+        // Near networks
+        for (int j { 0 }; j < pairs; ++j) {
+            const std::string metadata_file { model_base + model_dirs[i] + pair_dirs[j] + "dataset_metadata.dat" };
+            const std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
+            std::copy(metadata.cbegin(), metadata.cend(), metadatas[i][j].begin());
+            // for (int k { 0 }; k < 10; ++k) {
+            //     metadatas[i][j][k] = metadata[k];
+            // };
+            model_dir_models[i][j] = model_base + model_dirs[i] + pair_dirs[j] + "model.nnet";
+            kerasModels[i][j].load_weights(model_dir_models[i][j]);
+        };
+        // Cut networks
+        const std::string metadata_file { model_base + model_dirs[i] + cut_dirs + "dataset_metadata.dat" };
+        const std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
+        std::copy(metadata.cbegin(), metadata.cend(), metadatas[i][pairs].begin());
+        // for (int k { 0 }; k < 10; ++k) {
+        //     metadatas[i][pairs][k] = metadata[k];
+        // };
+        model_dir_models[i][pairs] = model_base + model_dirs[i] + cut_dirs + "model.nnet";
+        kerasModels[i][pairs].load_weights(model_dir_models[i][pairs]);
+    }
 }

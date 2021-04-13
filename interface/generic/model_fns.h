@@ -1,6 +1,7 @@
 #ifndef PREDICT__H
 #define PREDICT__H
 
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -79,6 +80,44 @@ private:
 };
 
 //double one_point_NN(KerasModel& object, std::vector<std::vector<double> > scaler_properties, std::vector<double> data);
+
+class Networks {
+public:
+    Networks(int legs, int runs, const std::string& model_path);
+
+protected:
+    const int pairs;
+    const std::string cut_dirs;
+    const std::string model_base;
+
+    std::vector<std::string> model_dirs;
+    std::vector<std::string> pair_dirs;
+
+private:
+    static constexpr std::array<int, 11> n_choose_2 { { 0, 0, 1, 3, 6, 10, 15, 21, 28, 36, 45 } };
+};
+
+class NaiveNetworks : public Networks {
+public:
+    NaiveNetworks(const int legs, const int runs, const std::string& model_path);
+
+    std::vector<nn::KerasModel> kerasModels;
+    std::vector<std::vector<double>> metadatas;
+
+private:
+    std::vector<std::string> model_dir_models;
+};
+
+class FKSNetworks : public Networks {
+public:
+    FKSNetworks(const int legs, const int runs, const std::string& model_path);
+
+    std::vector<std::vector<nn::KerasModel>> kerasModels;
+    std::vector<std::vector<std::vector<double>>> metadatas;
+
+private:
+    std::vector<std::vector<std::string>> model_dir_models;
+};
 
 } // namespace nn
 

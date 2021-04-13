@@ -25,7 +25,7 @@ interface.o: interface.cpp interface.hpp Makefile
 	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS) $(DEFS)
 
 model_fns.o: model_fns.cpp model_fns.h
-	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS) $(DEFS)
+	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS)
 
 interface.so: interface.o model_fns.o
 	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LIBS)
