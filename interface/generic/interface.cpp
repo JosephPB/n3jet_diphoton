@@ -32,7 +32,7 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
     , delta(2e-2)
     , x(1e-2)
     , cut_dirs("cut_0.02/")
-    , model_base("amodel")
+    , model_base(NN_MODEL)
     , model_dirs()
     , pair_dirs()
 #ifdef NAIVE
