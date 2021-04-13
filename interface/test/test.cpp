@@ -12,9 +12,9 @@ int main()
     std::cout.setf(std::ios_base::scientific, std::ios_base::floatfield);
     std::cout.precision(16);
 
-    std::cout << std::endl;
-    std::cout << "n3jet: simple example of calling a pretrained neural network for inference in a C++ interface" << std::endl;
-    std::cout << std::endl;
+    std::cout << '\n';
+    std::cout << "n3jet: simple example of calling a pretrained neural network for inference in a C++ interface" << '\n';
+    std::cout << '\n';
 
     const int legs = 5;
     const int pspoints = 2;
@@ -52,7 +52,6 @@ int main()
     std::string cut_dirs = "/cut_0.02/";
 
     int python_cut_near[2] = { 0, 1 };
-    //double python_check[2] = {0.01885435257459624, 0.04757045055113991};
     double python_outputs[2] = { 2.2266408e-07, 1.430258598666967e-06 };
 
     std::vector<std::vector<std::vector<double>>> metadatas(training_reruns, std::vector<std::vector<double>>(pairs + 1, std::vector<double>(10)));
@@ -69,9 +68,6 @@ int main()
                 metadatas[i][j][k] = metadata[k];
             };
             model_dir_models[i][j] = model_base + model_dir + std::to_string(i) + pair_dirs[j] + "model.nnet";
-#ifdef DEBUG
-            std::cout << "Loading from: " << model_dir_models[i][j] << std::endl;
-#endif
             kerasModels[i][j].load_weights(model_dir_models[i][j]);
         };
 
@@ -82,26 +78,19 @@ int main()
             metadatas[i][pairs][k] = metadata[k];
         };
         model_dir_models[i][pairs] = model_base + model_dir + std::to_string(i) + cut_dirs + "model.nnet";
-#ifdef DEBUG
-        std::cout << "Loading from: " << model_dir_models[i][pairs] << std::endl;
-#endif
         kerasModels[i][pairs].load_weights(model_dir_models[i][pairs]);
     }
 
     for (int i = 0; i < pspoints; i++) {
-        std::cout << "==================== Test point " << i + 1 << " ====================" << std::endl;
+        std::cout << "==================== Test point " << i + 1 << " ====================" << '\n';
 
         // standardise momenta
-        //double moms[training_reruns][pairs+1][legs*4];
         std::vector<std::vector<std::vector<double>>> moms(training_reruns, std::vector<std::vector<double>>(pairs + 1, std::vector<double>(legs * 4)));
 
         // flatten momenta
         for (int p = 0; p < legs; p++) {
             for (int mu = 0; mu < 4; mu++) {
                 // standardise input
-#ifdef DEBUG
-                std::cout << Momenta[i][p][mu] << " ";
-#endif
                 for (int k = 0; k < training_reruns; k++) {
                     for (int j = 0; j < pairs; j++) {
                         moms[k][j][p * 4 + mu] = nn::standardise(Momenta[i][p][mu], metadatas[k][j][mu], metadatas[k][j][4 + mu]);
@@ -109,73 +98,35 @@ int main()
                     moms[k][pairs][p * 4 + mu] = nn::standardise(Momenta[i][p][mu], metadatas[k][pairs][mu], metadatas[k][pairs][4 + mu]);
                 }
             }
-#ifdef DEBUG
-            std::cout << std::endl;
-#endif
         }
-#ifdef DEBUG
-        std::cout << std::endl;
-#endif
-#ifdef DEBUG
-        std::cout << "Checking how near we are" << std::endl;
-#endif
+
         //cut/near check
         double s_com = Momenta[i][0][0] * Momenta[i][1][0] - (Momenta[i][0][1] * Momenta[i][1][1] + Momenta[i][0][2] * Momenta[i][1][2] + Momenta[i][0][3] * Momenta[i][1][3]);
         int cut_near = 0;
         for (int j = 0; j < legs - 1; j++) {
             for (int k = j + 1; k < legs; k++) {
                 double prod = Momenta[i][j][0] * Momenta[i][k][0] - (Momenta[i][j][1] * Momenta[i][k][1] + Momenta[i][j][2] * Momenta[i][k][2] + Momenta[i][j][3] * Momenta[i][k][3]);
-                double distance = prod / s_com;
-#ifdef DEBUG
-                std::cout << "Distance is: " << distance << std::endl;
-#endif
-                if (distance < delta) {
+                double dist = prod / s_com;
+                if (dist < delta) {
                     cut_near += 1;
                 }
             }
         }
 
-#ifdef DEBUG
-        //std::cout << "Python min distance is:   " << python_check[i]  << std::endl;
-        std::cout << "Python cut/near check is: " << python_cut_near[i] << std::endl;
-        std::cout << "C++    cut/near check is: " << cut_near << std::endl;
-        std::cout << "Note: here checking if cut/near >0 or not, not the actual value" << std::endl;
-#endif
-
         // inference
-
         double results_sum = 0;
         for (int j = 0; j < training_reruns; j++) {
             if (cut_near >= 1) {
                 // infer over all pairs
-                double results_pairs = 0;
                 for (int k = 0; k < pairs; k++) {
-                    //std::vector<double> input_vec(std::begin(moms[j][k]), std::end(moms[j][k]));
                     std::vector<double> result = kerasModels[j][k].compute_output(moms[j][k]);
-#ifdef DEBUG
-                    std::cout << "Before destandardisation = " << result[0] << std::endl;
-#endif
                     double output = nn::destandardise(result[0], metadatas[j][k][8], metadatas[j][k][9]);
-#ifdef DEBUG
-                    std::cout << "After destandardisation = " << output << std::endl;
-                    //if (output < 0){
-                    //  std::cout << "Output is less than zero" << std::endl;
-                    //}
-#endif
-                    results_pairs += output;
+                    results_sum += output;
                 }
-                results_sum += results_pairs;
             } else {
-                //std::vector<double> input_vec(std::begin(moms[j][pairs]), std::end(moms[j][pairs]));
                 std::vector<double> result = kerasModels[j][pairs].compute_output(moms[j][pairs]);
-#ifdef DEBUG
-                std::cout << "Before destandardisation = " << result[0] << std::endl;
-#endif
 
                 double output = nn::destandardise(result[0], metadatas[j][pairs][8], metadatas[j][pairs][9]);
-#ifdef DEBUG
-                std::cout << "After destandardisation = " << output << std::endl;
-#endif
 
                 results_sum += output;
             }
@@ -183,13 +134,7 @@ int main()
 
         double average_output = results_sum / training_reruns;
 
-        //#ifdef DEBUG
-        //if (average_output < 0){
-        //  std::cout << "Average output is less than zero" << std::endl;
-        //}
-        //#endif
-
-        std::cout << "Python Loop( 0) = " << python_outputs[i] << std::endl;
-        std::cout << "C++    Loop( 0) = " << average_output << std::endl;
+        std::cout << "Python Loop( 0) = " << python_outputs[i] << '\n';
+        std::cout << "C++    Loop( 0) = " << average_output << '\n';
     }
 }

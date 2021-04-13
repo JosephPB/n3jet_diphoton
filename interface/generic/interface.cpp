@@ -153,9 +153,8 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector& point)
 #ifdef TIMING
     TP nnt1 { std::chrono::high_resolution_clock::now() };
 #endif
+    double results_sum { 0. };
 #ifdef NAIVE
-    std::array<double, training_reruns> results;
-
     // moms is an vector of training_reruns results, each of which is an vector of flattened momenta
     // std::array<std::array<double, NN2A::legs * NN2A::d>, training_reruns> moms;
     std::vector<std::vector<double>> moms(training_reruns, std::vector<double>(NN2A::legs * NN2A::d));
@@ -171,16 +170,11 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector& point)
     }
 
     // inference
-    double results_sum { 0. };
     for (int j { 0 }; j < training_reruns; ++j) {
         const double result { kerasModels[j].compute_output(moms[j])[0] };
         results_sum += nn::destandardise(result, metadatas[j][8], metadatas[j][9]);
     }
-
-    const double mean { results_sum / training_reruns };
 #else
-    std::array<double, training_reruns> results;
-
     // moms is an vector of training_reruns results, each of which is an vector of FKS pairs results, each of which is an vector of flattened momenta
     std::vector<std::vector<std::vector<double>>> moms(training_reruns, std::vector<std::vector<double>>(pairs + 1, std::vector<double>(NN2A::legs * NN2A::d)));
 
@@ -219,22 +213,20 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector& point)
         if (cut_near >= 1) {
             // the point is near an IR singularity
             // infer over all FKS pairs
-            results[j] = 0;
             for (int k { 0 }; k < pairs; ++k) {
                 const double result { kerasModels[j][k].compute_output(moms[j][k])[0] };
                 const double result_pair { nn::destandardise(result, metadatas[j][k][8], metadatas[j][k][9]) };
-                results[j] += result_pair;
+                results_sum += result_pair;
             }
         } else {
             // the point is in a non-divergent region
             // use the 'cut' network which is the final entry in the pair network
             const double result { kerasModels[j][pairs].compute_output(moms[j][pairs])[0] };
-            results[j] = nn::destandardise(result, metadatas[j][pairs][8], metadatas[j][pairs][9]);
+            results_sum += nn::destandardise(result, metadatas[j][pairs][8], metadatas[j][pairs][9]);
         }
     }
-
-    const double mean { std::accumulate(results.cbegin(), results.cend(), 0.) / training_reruns };
 #endif
+    const double mean { results_sum / training_reruns };
 #ifdef TIMING
     TP nnt2 { std::chrono::high_resolution_clock::now() };
     const long int nndur { std::chrono::duration_cast<std::chrono::nanoseconds>(nnt2 - nnt1).count() };
