@@ -266,9 +266,9 @@ std::vector<double> nn::LayerDense::compute_output(std::vector<double> test_inpu
 #endif
     std::vector<double> out(output_weights);
     double weighted_term = 0;
-    for (size_t i { 0 }; i < output_weights; ++i) {
+    for (std::size_t i { 0 }; i < output_weights; ++i) {
         weighted_term = 0;
-        for (size_t j { 0 }; j < input_node_count; ++j) {
+        for (std::size_t j { 0 }; j < input_node_count; ++j) {
             weighted_term += (test_input[j] * layer_weights[j][i]);
         }
         out[i] = weighted_term + bias[i];
@@ -284,42 +284,42 @@ std::vector<double> nn::LayerActivation::compute_output(std::vector<double> test
     if (activation_type == "linear") {
         return test_input;
     } else if (activation_type == "relu") {
-        for (unsigned int i { 0 }; i < test_input.size(); ++i) {
+        for (std::size_t i { 0 }; i < test_input.size(); ++i) {
             if (test_input[i] < 0) {
                 test_input[i] = 0;
             }
         }
     } else if (activation_type == "softmax") {
         double sum = 0.0;
-        for (unsigned int k { 0 }; k < test_input.size(); ++k) {
+        for (std::size_t k { 0 }; k < test_input.size(); ++k) {
             test_input[k] = std::exp(test_input[k]);
             sum += test_input[k];
         }
 
-        for (unsigned int k { 0 }; k < test_input.size(); ++k) {
+        for (std::size_t k { 0 }; k < test_input.size(); ++k) {
             test_input[k] /= sum;
         }
     } else if (activation_type == "sigmoid") {
         double denominator = 0.0;
-        for (unsigned int k { 0 }; k < test_input.size(); ++k) {
+        for (std::size_t k { 0 }; k < test_input.size(); ++k) {
             denominator = 1 + std::exp(-(test_input[k]));
             test_input[k] = 1 / denominator;
         }
     } else if (activation_type == "softplus") {
-        for (unsigned int k { 0 }; k < test_input.size(); ++k) {
+        for (std::size_t k { 0 }; k < test_input.size(); ++k) {
             // log1p = natural logarithm (to base e) of 1 plus the given number (ln(1+x))
             test_input[k] = std::log1p(std::exp(test_input[k]));
         }
     }
     /*
 	else if(activation_type == "softsign") {
-		for (unsigned int k { 0 }; k < test_input.size(); ++k) {
+		for (std::size_t k { 0 }; k < test_input.size(); ++k) {
 			test_input[k] = test_input[k]/(1+abs(test_input[k]));
 		}
 	}
 	*/
     else if (activation_type == "tanh") {
-        for (unsigned int k { 0 }; k < test_input.size(); ++k) {
+        for (std::size_t k { 0 }; k < test_input.size(); ++k) {
             test_input[k] = std::tanh(test_input[k]);
         }
     } else {
