@@ -1,9 +1,5 @@
 #pragma once
 
-#include <array>
-#include <chrono>
-#include <complex>
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -14,8 +10,6 @@
 #include "PHASIC++/Process/Tree_ME2_Base.H"
 
 #include "model_fns.h"
-
-// Define LEGS with compiler flags
 
 namespace NN2A {
 
@@ -59,38 +53,17 @@ private:
 
     static constexpr int n { 5 }; // momenta fifth entry is mass
 
-    // binomial_coefficient
-    // static constexpr std::array<int, 11> n_choose_2 { { 0, 0, 1, 3, 6, 10, 15, 21, 28, 36, 45 } };
-
     const double zero, m_alpha, m_alphas, m_mur, delta, x;
 
 #ifdef RUNS
     static constexpr int training_reruns { RUNS };
-// #else
-//     static constexpr int training_reruns { 0 };
 #endif
-
-    // const std::string cut_dirs;
-    // const std::string model_base;
-
-    // std::array<std::string, training_reruns> model_dirs;
-
-    // n.b. there is an additional FKS pair for the cut network (for non-divergent regions)
-    // static constexpr int pairs { n_choose_2[legs] - 1 };
-
-    // std::array<std::string, pairs> pair_dirs;
 
 #if (defined(NN) || defined(BOTH))
 #ifdef NAIVE
     nn::NaiveNetworks networks;
-    // std::vector<std::vector<double>> metadatas;
-    // std::array<std::string, training_reruns> model_dir_models;
-    // std::vector<nn::KerasModel> kerasModels;
 #else
     nn::FKSNetworks networks;
-    // std::vector<std::vector<std::vector<double>>> metadatas;
-    // std::array<std::array<std::string, pairs + 1>, training_reruns> model_dir_models;
-    // std::vector<std::vector<nn::KerasModel>> kerasModels;
 #endif
 #endif
 

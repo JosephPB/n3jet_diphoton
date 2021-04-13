@@ -1,13 +1,7 @@
-#include <algorithm>
-#include <array>
 #include <cassert>
 #include <chrono>
-#include <cmath>
-#include <complex>
 #include <cstddef>
-#include <ctime>
 #include <iostream>
-#include <numeric>
 #include <string>
 #include <vector>
 
@@ -34,19 +28,6 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
 #if (defined(NN) || defined(BOTH))
     , networks(NN2A::legs, training_reruns, NN_MODEL)
 #endif
-    // , cut_dirs("cut_0.02/")
-    // , model_base(NN_MODEL)
-    // , model_dirs()
-    // , pair_dirs()
-#ifdef NAIVE
-    // , networks.metadatas(training_reruns, std::vector<double>(10))
-    // , model_dir_models()
-    // , kerasModels(training_reruns)
-#else
-    // , networks.metadatas(training_reruns, std::vector<std::vector<double>>(pairs + 1, std::vector<double>(10)))
-    // , model_dir_models()
-    // , kerasModels(training_reruns, std::vector<nn::KerasModel>(pairs + 1))
-#endif
 #if (RUNS == 1)
     , resfile("res-" + std::to_string(A))
 #else
@@ -54,44 +35,6 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
 #endif
     , results_buffer()
 {
-    // std::generate(model_dirs.begin(), model_dirs.end(), [n = 0]() mutable { return std::to_string(n++) + "/"; });
-    // std::generate(pair_dirs.begin(), pair_dirs.end(), [n = 0]() mutable { return "pair_0.02_" + std::to_string(n++) + "/"; });
-
-#if defined(NN) || defined(BOTH)
-#ifdef NAIVE
-    // for (int i { 0 }; i < training_reruns; ++i) {
-    //     // Naive networks
-    //     std::string metadata_file { model_base + model_dirs[i] + "dataset_metadata.dat" };
-    //     std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
-    //     for (int k { 0 }; k < 10; ++k) {
-    //         networks.metadatas[i][k] = metadata[k];
-    //     };
-    //     model_dir_models[i] = model_base + model_dirs[i] + "model.nnet";
-    //     kerasModels[i].load_weights(model_dir_models[i]);
-    // }
-#else
-    // for (int i { 0 }; i < training_reruns; ++i) {
-    //     // Near networks
-    //     for (int j { 0 }; j < pairs; ++j) {
-    //         std::string metadata_file { model_base + model_dirs[i] + pair_dirs[j] + "dataset_metadata.dat" };
-    //         std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
-    //         for (int k { 0 }; k < 10; ++k) {
-    //             networks.metadatas[i][j][k] = metadata[k];
-    //         };
-    //         model_dir_models[i][j] = model_base + model_dirs[i] + pair_dirs[j] + "model.nnet";
-    //         kerasModels[i][j].load_weights(model_dir_models[i][j]);
-    //     };
-    //     // Cut networks
-    //     std::string metadata_file { model_base + model_dirs[i] + cut_dirs + "dataset_metadata.dat" };
-    //     std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
-    //     for (int k { 0 }; k < 10; ++k) {
-    //         networks.metadatas[i][pairs][k] = metadata[k];
-    //     };
-    //     model_dir_models[i][pairs] = model_base + model_dirs[i] + cut_dirs + "model.nnet";
-    //     kerasModels[i][pairs].load_weights(model_dir_models[i][pairs]);
-    // }
-#endif
-#endif
 #if defined(NJET) || defined(BOTH)
     const std::string f { "OLE_contract_" + std::to_string(NN2A::legs - 2) + "g2A.lh" };
     const char* contract { f.c_str() };

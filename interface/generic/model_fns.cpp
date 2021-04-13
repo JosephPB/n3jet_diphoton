@@ -338,6 +338,7 @@ void nn::LayerActivation::load_weights(std::ifstream& fin)
 }
 
 nn::Networks::Networks(const int legs, const int runs, const std::string& model_path)
+    // n.b. there is an additional FKS pair for the cut network (for non-divergent regions)
     : pairs(n_choose_2[legs] - 1)
     , cut_dirs("cut_0.02/")
     , model_base(model_path)
@@ -359,9 +360,6 @@ nn::NaiveNetworks::NaiveNetworks(const int legs, const int runs, const std::stri
         const std::string metadata_file { model_base + model_dirs[i] + "dataset_metadata.dat" };
         const std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
         std::copy(metadata.cbegin(), metadata.cend(), metadatas[i].begin());
-        // for (int k { 0 }; k < 10; ++k) {
-        //     metadatas[i][k] = metadata[k];
-        // };
         model_dir_models[i] = model_base + model_dirs[i] + "model.nnet";
         kerasModels[i].load_weights(model_dir_models[i]);
     }
@@ -379,9 +377,6 @@ nn::FKSNetworks::FKSNetworks(const int legs, const int runs, const std::string& 
             const std::string metadata_file { model_base + model_dirs[i] + pair_dirs[j] + "dataset_metadata.dat" };
             const std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
             std::copy(metadata.cbegin(), metadata.cend(), metadatas[i][j].begin());
-            // for (int k { 0 }; k < 10; ++k) {
-            //     metadatas[i][j][k] = metadata[k];
-            // };
             model_dir_models[i][j] = model_base + model_dirs[i] + pair_dirs[j] + "model.nnet";
             kerasModels[i][j].load_weights(model_dir_models[i][j]);
         };
@@ -389,9 +384,6 @@ nn::FKSNetworks::FKSNetworks(const int legs, const int runs, const std::string& 
         const std::string metadata_file { model_base + model_dirs[i] + cut_dirs + "dataset_metadata.dat" };
         const std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
         std::copy(metadata.cbegin(), metadata.cend(), metadatas[i][pairs].begin());
-        // for (int k { 0 }; k < 10; ++k) {
-        //     metadatas[i][pairs][k] = metadata[k];
-        // };
         model_dir_models[i][pairs] = model_base + model_dirs[i] + cut_dirs + "model.nnet";
         kerasModels[i][pairs].load_weights(model_dir_models[i][pairs]);
     }
