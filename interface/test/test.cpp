@@ -1,4 +1,3 @@
-#include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -12,9 +11,9 @@ int main()
     std::cout.setf(std::ios_base::scientific, std::ios_base::floatfield);
     std::cout.precision(16);
 
-    std::cout << '\n';
-    std::cout << "n3jet: simple example of calling a pretrained neural network for inference in a C++ interface" << '\n';
-    std::cout << '\n';
+    std::cout << '\n'
+              << "n3jet: simple example of calling a pretrained neural network for inference in a C++ interface" << '\n'
+              << '\n';
 
     const int legs = 5;
     const int pspoints = 2;
@@ -37,51 +36,11 @@ int main()
             { 22.921351844871374, -3.704054206648225, 20.604297452778603, 9.334413709924226 } }
     };
 
-    std::string model_base = "../../models/3g2a/RAMBO/";
-    std::string model_dir = { "events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet_test/" };
-    std::string pair_dirs[pairs] = { "/pair_0.02_0/",
-        "/pair_0.02_1/",
-        "/pair_0.02_2/",
-        "/pair_0.02_3/",
-        "/pair_0.02_4/",
-        "/pair_0.02_5/",
-        "/pair_0.02_6/",
-        "/pair_0.02_7/",
-        "/pair_0.02_8/" };
+    nn::FKSNetworks networks(legs, training_reruns, "../../models/3g2a/RAMBO/events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet_test/");
 
-    std::string cut_dirs = "/cut_0.02/";
-
-    int python_cut_near[2] = { 0, 1 };
     double python_outputs[2] = { 2.2266408e-07, 1.430258598666967e-06 };
 
-    std::vector<std::vector<std::vector<double>>> metadatas(training_reruns, std::vector<std::vector<double>>(pairs + 1, std::vector<double>(10)));
-    std::string model_dir_models[training_reruns][pairs + 1];
-    std::vector<std::vector<nn::KerasModel>> kerasModels(training_reruns, std::vector<nn::KerasModel>(pairs + 1));
-
-    for (int i = 0; i < training_reruns; i++) {
-
-        // Near networks
-        for (int j = 0; j < pairs; j++) {
-            std::string metadata_file = model_base + model_dir + std::to_string(i) + pair_dirs[j] + "dataset_metadata.dat";
-            std::vector<double> metadata = nn::read_metadata_from_file(metadata_file);
-            for (int k = 0; k < 10; k++) {
-                metadatas[i][j][k] = metadata[k];
-            };
-            model_dir_models[i][j] = model_base + model_dir + std::to_string(i) + pair_dirs[j] + "model.nnet";
-            kerasModels[i][j].load_weights(model_dir_models[i][j]);
-        };
-
-        // Cut networks
-        std::string metadata_file = model_base + model_dir + std::to_string(i) + cut_dirs + "dataset_metadata.dat";
-        std::vector<double> metadata = nn::read_metadata_from_file(metadata_file);
-        for (int k = 0; k < 10; k++) {
-            metadatas[i][pairs][k] = metadata[k];
-        };
-        model_dir_models[i][pairs] = model_base + model_dir + std::to_string(i) + cut_dirs + "model.nnet";
-        kerasModels[i][pairs].load_weights(model_dir_models[i][pairs]);
-    }
-
-    for (int i = 0; i < pspoints; i++) {
+    for (int i { 0 }; i < pspoints; ++i) {
         std::cout << "==================== Test point " << i + 1 << " ====================" << '\n';
 
         // standardise momenta
@@ -93,9 +52,9 @@ int main()
                 // standardise input
                 for (int k = 0; k < training_reruns; k++) {
                     for (int j = 0; j < pairs; j++) {
-                        moms[k][j][p * 4 + mu] = nn::standardise(Momenta[i][p][mu], metadatas[k][j][mu], metadatas[k][j][4 + mu]);
+                        moms[k][j][p * 4 + mu] = nn::standardise(Momenta[i][p][mu], networks.metadatas[k][j][mu], networks.metadatas[k][j][4 + mu]);
                     }
-                    moms[k][pairs][p * 4 + mu] = nn::standardise(Momenta[i][p][mu], metadatas[k][pairs][mu], metadatas[k][pairs][4 + mu]);
+                    moms[k][pairs][p * 4 + mu] = nn::standardise(Momenta[i][p][mu], networks.metadatas[k][pairs][mu], networks.metadatas[k][pairs][4 + mu]);
                 }
             }
         }
@@ -119,14 +78,14 @@ int main()
             if (cut_near >= 1) {
                 // infer over all pairs
                 for (int k = 0; k < pairs; k++) {
-                    std::vector<double> result = kerasModels[j][k].compute_output(moms[j][k]);
-                    double output = nn::destandardise(result[0], metadatas[j][k][8], metadatas[j][k][9]);
+                    std::vector<double> result = networks.kerasModels[j][k].compute_output(moms[j][k]);
+                    double output = nn::destandardise(result[0], networks.metadatas[j][k][8], networks.metadatas[j][k][9]);
                     results_sum += output;
                 }
             } else {
-                std::vector<double> result = kerasModels[j][pairs].compute_output(moms[j][pairs]);
+                std::vector<double> result = networks.kerasModels[j][pairs].compute_output(moms[j][pairs]);
 
-                double output = nn::destandardise(result[0], metadatas[j][pairs][8], metadatas[j][pairs][9]);
+                double output = nn::destandardise(result[0], networks.metadatas[j][pairs][8], networks.metadatas[j][pairs][9]);
 
                 results_sum += output;
             }
