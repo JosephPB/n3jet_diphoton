@@ -4,7 +4,7 @@ CXX?=g++
 CXXFLAGS=-g -O2 -pedantic -Wall -Wextra -fPIC -DPIC -std=c++17
 CPPFLAGS=$(shell pkg-config njet2 --cflags) -I$(shell Sherpa-config --incdir)
 LDFLAGS=$(shell pkg-config njet2 --libs) $(shell Sherpa-config --ldflags)
-LDFLAGS+=-lqd
+LDFLAGS+=-lqd -lnjet2an0q3g2A
 DEFS=-DLEGS=5 # choose 5 or 6 for 3g2a or 4g2a
 # DEFS+=-DRUNS=20 # choose number of NN runs to average over
 #DEFS+=-DA=0 # the index of the NN run
