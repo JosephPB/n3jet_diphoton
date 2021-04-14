@@ -99,8 +99,7 @@ protected:
 
 private:
   // binomial coefficients
-  static constexpr std::array<int, 11> n_choose_2{
-      {0, 0, 1, 3, 6, 10, 15, 21, 28, 36, 45}};
+  const std::array<int, 11> n_choose_2;
 };
 
 class NaiveNetworks : public Networks {
