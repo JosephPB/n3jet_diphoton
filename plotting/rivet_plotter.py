@@ -163,7 +163,9 @@ class RivetPlotter:
     
     def plot(self, xlabel, ylabel):
         
-        scales[0], scales[1], njet_data, nn_data = self.extract_data()
+        njet_scale, nn_scale, njet_data, nn_data = self.extract_data()
+        assert len(dphi_jj_njet_data) == len(dphi_jj_nn_data)
+        
         njet_bins, njet_vals, njet_errs = self.parse_data_step(njet_data)
         nn_bins, nn_vals, nn_errs = self.parse_data_step(nn_data)
         fig = self.plot_distirbution(
