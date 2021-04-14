@@ -160,3 +160,28 @@ class RivetPlotter:
         ax2.tick_params(axis='y', labelsize=15, direction = 'in', right = True, which='both')
         
         return fig
+    
+    def plot(self, xlabel, ylabel):
+        
+        scales[0], scales[1], njet_data, nn_data = self.extract_data()
+        njet_bins, njet_vals, njet_errs = self.parse_data_step(njet_data)
+        nn_bins, nn_vals, nn_errs = self.parse_data_step(nn_data)
+        fig = self.plot_distirbution(
+            njet_bins = njet_bins,
+            nn_bins = nn_bins,
+            njet_vals = njet_vals,
+            nn_vals = nn_vals,
+            njet_errs = njet_errs,
+            nn_errs = nn_errs,
+            ylabel = ylabel,
+            xlabel = xlabel
+        )
+        
+        return fig
+        
+        
+        
+        
+        
+        
+        
