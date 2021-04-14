@@ -26,7 +26,7 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
     , delta(2e-2)
     , x(1e-2)
 #if (defined(NN) || defined(BOTH))
-    , networks(NN2A::legs, training_reruns, NN_MODEL)
+    , networks(NN2A::legs, training_reruns, NN_MODEL, delta, "cut_0.02/")
 #endif
 #if (RUNS == 1)
     , resfile("res-" + std::to_string(A))
@@ -161,8 +161,7 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector& point)
             // infer over all FKS pairs
             for (int k { 0 }; k < pairs; ++k) {
                 const double result { networks.kerasModels[j][k].compute_output(moms[j][k])[0] };
-                const double result_pair { nn::destandardise(result, networks.metadatas[j][k][8], networks.metadatas[j][k][9]) };
-                results_sum += result_pair;
+                results_sum += nn::destandardise(result, networks.metadatas[j][k][8], networks.metadatas[j][k][9]);
             }
         } else {
             // the point is in a non-divergent region
