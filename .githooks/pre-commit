@@ -1,3 +1,7 @@
 #!/usr/bin/sh
 
 echo "Running pre-commit"
+
+black .
+
+echo "Pre-commit done"
