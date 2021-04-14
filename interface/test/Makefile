@@ -12,7 +12,7 @@ all: test
 test: test.o model_fns.o
 	${CXX} -o $@ $^ ${LDFLAGS}
 
-model_fns.o: ${SRC_DIR}/model_fns.cpp ${SRC_DIR}/model_fns.h
+model_fns.o: ${SRC_DIR}/model_fns.cpp ${SRC_DIR}/model_fns.hpp
 	${CXX} ${CXXFLAGS} -o $@ -c $< ${CPPFLAGS}
 
 clean:

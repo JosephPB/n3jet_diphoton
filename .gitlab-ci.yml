@@ -71,4 +71,4 @@ cpp:
         - clang-format --version
 
     script:
-        - clang-format --dry-run $(find . -name "*.cpp" -o -name "*.h")
+        - clang-format --dry-run $(find . -name "*.cpp" -o -name "*.hpp")
