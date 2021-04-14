@@ -373,6 +373,32 @@ nn::NaiveNetworks::NaiveNetworks(const int legs, const int runs, const std::stri
     }
 }
 
+double nn::NaiveNetworks::compute(const std::vector<std::vector<double>>& point)
+{
+    // moms is an vector of runs results, each of which is an vector of flattened momenta
+    // std::array<std::array<double, NN2A::legs * NN2A::d>, runs> moms;
+    std::vector<std::vector<double>> moms(runs, std::vector<double>(legs * d));
+
+    // flatten momenta
+    for (int p { 0 }; p < legs; ++p) {
+        for (int mu { 0 }; mu < d; ++mu) {
+            // standardise input
+            for (int k { 0 }; k < runs; ++k) {
+                moms[k][p * d + mu] = nn::standardise(point[p][mu], metadatas[k][mu], metadatas[k][d + mu]);
+            }
+        }
+    }
+
+    // inference
+    double results_sum { 0. };
+    for (int j { 0 }; j < runs; ++j) {
+        const double result { kerasModels[j].compute_output(moms[j])[0] };
+        results_sum += nn::destandardise(result, metadatas[j][8], metadatas[j][9]);
+    }
+
+    return results_sum / runs;
+}
+
 nn::FKSNetworks::FKSNetworks(const int legs, const int runs, const std::string& model_path, const double delta_, const std::string& cut_dirs_)
     : Networks(legs, runs, model_path, delta_, cut_dirs_)
     , kerasModels(runs, std::vector<nn::KerasModel>(pairs + 1))
@@ -397,11 +423,11 @@ nn::FKSNetworks::FKSNetworks(const int legs, const int runs, const std::string& 
 
 double nn::FKSNetworks::compute(const std::vector<std::vector<double>>& point)
 {
-    // moms is an vector of training_reruns results, each of which is an vector of FKS pairs results, each of which is an vector of flattened momenta
+    // moms is an vector of runs results, each of which is an vector of FKS pairs results, each of which is an vector of flattened momenta
     std::vector<std::vector<std::vector<double>>> moms(runs, std::vector<std::vector<double>>(pairs + 1, std::vector<double>(legs * d)));
 
     // NN compute_output accepts vectors - could edit model_fns
-    // std::array<std::array<std::array<double, NN2A::legs * NN2A::d>, pairs + 1>, training_reruns> moms;
+    // std::array<std::array<std::array<double, NN2A::legs * NN2A::d>, pairs + 1>, runs> moms;
 
     // flatten momenta
     for (int p { 0 }; p < legs; ++p) {

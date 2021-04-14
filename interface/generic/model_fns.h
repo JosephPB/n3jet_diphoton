@@ -107,6 +107,8 @@ class NaiveNetworks : public Networks {
 public:
     NaiveNetworks(const int legs, const int runs, const std::string& model_path, double delta_, const std::string& cut_dirs_);
 
+    double compute(const std::vector<std::vector<double>>& point);
+
     std::vector<nn::KerasModel> kerasModels;
     std::vector<std::vector<double>> metadatas;
 
