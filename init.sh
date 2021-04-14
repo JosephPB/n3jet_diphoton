@@ -12,7 +12,8 @@ if ! type pre-commit; then
 fi
 
 if ! type pre-commit > /dev/null; then
-    echo "I tried to install pre-commit but I can't find it. It's up to you now to install it or add it to your path!"
+    echo "I tried to install pre-commit but now I can't find it."
+    echo "It's up to you now to install it or add it to your path!"
 fi
 
 # echo "Checking that clang-format is installed..."
