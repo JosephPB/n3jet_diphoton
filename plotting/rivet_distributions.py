@@ -2,6 +2,7 @@ import argparse
 import matplotlib
 matplotlib.use('Agg')
 
+from n3jet.utils.general_utils import bool_convert
 from rivet_plotter import RivetPlotter
 
 def parse():
@@ -30,15 +31,24 @@ def parse():
         default="./paper_plots/"
     )
     
+    parser.add_argument(
+        "--rescaling",
+        dest="rescaling",
+        help="Turn Rivet ScaledBy feature on/off",
+        type=str,
+        default="False"
+    )
+    
     args = parser.parse_args()
     
     return args
 
 class RivetDistributions:
     
-    def __init__(self, rivet_dir, save_dir="./paper_plots/", dpi=150):
+    def __init__(self, rivet_dir, save_dir="./paper_plots/", rescaling=False, dpi=150):
         self.rivet_dir = rivet_dir
         self.save_dir = save_dir
+        self.rescaling = rescaling
         self.dpi = dpi
         
     def plot_phi_jj(self):
@@ -47,7 +57,8 @@ class RivetDistributions:
         dphi_jj_plotter = RivetPlotter(dphi_jj_file)
         dphi_jj_fig = dphi_jj_plotter.plot(
             xlabel = '$\Delta\phi_{jj}$ [rad]',
-            ylabel = 'd$\sigma/$d$\Delta\phi_{jj}$ [fb rad$^{-1}$]'
+            ylabel = 'd$\sigma/$d$\Delta\phi_{jj}$ [fb rad$^{-1}$]',
+            rescaling = self.rescaling,
         )
         dphi_jj_fig.savefig(self.save_dir + 'dphi_jj.png', dpi=self.dpi, bbox_inches='tight')
         
@@ -58,7 +69,8 @@ class RivetDistributions:
         dr_jy_fig = dr_jy_plotter.plot(
             xlabel = '$R_{j\gamma}$',
             ylabel = 'd$\sigma/$d$R_{j\gamma}$ [fb]',
-            xlim = (0.2,5)
+            xlim = (0.2,5),
+            rescaling = self.rescaling,
         )
         dr_jy_fig.savefig(self.save_dir + 'dr_jy.png', dpi=self.dpi, bbox_inches='tight')
       
@@ -68,7 +80,8 @@ class RivetDistributions:
         deta_yy_plotter = RivetPlotter(deta_yy_file)
         deta_yy_fig = deta_yy_plotter.plot(
             xlabel = '$\eta_{\gamma\gamma}$',
-            ylabel = 'd$\sigma/$d$\eta_{\gamma\gamma}$ [fb]'
+            ylabel = 'd$\sigma/$d$\eta_{\gamma\gamma}$ [fb]',
+            rescaling = self.rescaling,
         )
         deta_yy_fig.savefig(self.save_dir + 'deta_yy.png', dpi=self.dpi, bbox_inches='tight')
         
@@ -78,7 +91,8 @@ class RivetDistributions:
         dm_yy_plotter = RivetPlotter(dm_yy_file)
         dm_yy_fig = dm_yy_plotter.plot(
             xlabel = '$m_{\gamma\gamma}$ [GeV]',
-            ylabel = 'd$\sigma/$d$m_{\gamma\gamma}$ [fb GeV$^{-1}$]'
+            ylabel = 'd$\sigma/$d$m_{\gamma\gamma}$ [fb GeV$^{-1}$]',
+            rescaling = self.rescaling,
         )
         dm_yy_fig.savefig(self.save_dir + 'dm_yy.png', dpi=self.dpi, bbox_inches='tight')
         
@@ -88,7 +102,8 @@ class RivetDistributions:
         dpt_j1_plotter = RivetPlotter(dpt_j1_file)
         dpt_j1_fig = dpt_j1_plotter.plot(
             xlabel = '$p_{T}$ [GeV]',
-            ylabel = 'd$\sigma/$d$p_{T}$ [fb GeV$^{-1}$]'
+            ylabel = 'd$\sigma/$d$p_{T}$ [fb GeV$^{-1}$]',
+            rescaling = self.rescaling,
         )
         dpt_j1_fig.savefig(self.save_dir + 'dpt_j1.png', dpi=self.dpi, bbox_inches='tight')
     
@@ -98,7 +113,8 @@ class RivetDistributions:
         dpt_j2_plotter = RivetPlotter(dpt_j2_file)
         dpt_j2_fig = dpt_j2_plotter.plot(
             xlabel = '$p_{T}$ [GeV]',
-            ylabel = 'd$\sigma/$d$p_{T}$ [fb GeV$^{-1}$]'
+            ylabel = 'd$\sigma/$d$p_{T}$ [fb GeV$^{-1}$]',
+            rescaling = self.rescaling,
         )
         dpt_j2_fig.savefig(self.save_dir + 'dpt_j2.png', dpi=self.dpi, bbox_inches='tight')
         
@@ -115,7 +131,11 @@ if __name__ == "__main__":
 
     args = parse()
     
-    rivet_distributions = RivetDistributions(args.rivet_dir, args.save_dir)
+    rivet_distributions = RivetDistributions(
+        rivet_dir = args.rivet_dir, 
+        save_dir = args.save_dir,
+        rescaling = bool_convert(args.rescaling)
+    )
     rivet_distributions.plot_all()
     
     
