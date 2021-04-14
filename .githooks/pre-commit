@@ -1,0 +1,14 @@
+#!/usr/bin/sh
+
+echo "Running pre-commit..."
+
+echo "Autoformatting Python files..."
+black .
+
+echo "Autoformatting C++ files..."
+clang-format -i $(find . -name "*.cpp" -o -name "*.h")
+
+echo "Linting Python files..."
+./.githooks/flake8-lint
+
+echo "Pre-commit done!"
