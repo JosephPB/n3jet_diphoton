@@ -22,13 +22,21 @@ def parse():
         type=str,
     )
     
+    parser.add_argument(
+        "--save_dir",
+        dest="save_dir",
+        help="Location of where to save the png files",
+        type=str,
+        default="./paper_plots/"
+    )
+    
     args = parser.parse_args()
     
     return args
 
 class RivetDistributions:
     
-    def __init__(self, rivet_dir, save_dir="./paper_plots/", dpi=150): ## FIX THIS
+    def __init__(self, rivet_dir, save_dir="./paper_plots/", dpi=150):
         self.rivet_dir = rivet_dir
         self.save_dir = save_dir
         self.dpi = dpi
@@ -107,7 +115,7 @@ if __name__ == "__main__":
 
     args = parse()
     
-    rivet_distributions = RivetDistributions(args.rivet_dir)
+    rivet_distributions = RivetDistributions(args.rivet_dir, args.save_dir)
     rivet_distributions.plot_all()
     
     
