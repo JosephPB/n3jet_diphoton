@@ -105,7 +105,8 @@ class RivetPlotter:
         njet_errs,
         nn_errs,
         ylabel,
-        xlabel
+        xlabel,
+        xlim = None
     ):
         """
         Plot two histograms with ratio plot below
@@ -130,7 +131,10 @@ class RivetPlotter:
         ax1.tick_params(axis='x', labelsize=15, direction='in', top=True)
         ax1.tick_params(axis='y', labelsize=15, direction='in', right=True, which='both')
         
-        ax1.set_xlim((0,njet_bins[-1]))
+        if xlim is not None:
+            ax1.set_xlim(xlim)
+        else:
+            ax1.set_xlim((0,njet_bins[-1]))
         
         ax1.set_ylabel(r'{}'.format(ylabel), fontsize=17, labelpad=10)
         
@@ -151,7 +155,10 @@ class RivetPlotter:
             step='post', color='blue', alpha=0.5
         )
         
-        ax2.set_xlim((0,njet_bins[-1]))
+        if xlim is not None:
+            ax2.set_xlim(xlim)
+        else:
+            ax2.set_xlim((0,njet_bins[-1]))
         ax2.set_ylim((0.4,1.6))
         
         ax2.set_ylabel(r'Ratio', fontsize=17, labelpad=10)
@@ -161,10 +168,10 @@ class RivetPlotter:
         
         return fig
     
-    def plot(self, xlabel, ylabel):
+    def plot(self, xlabel, ylabel, xlim=None):
         
         njet_scale, nn_scale, njet_data, nn_data = self.extract_data()
-        assert len(dphi_jj_njet_data) == len(dphi_jj_nn_data)
+        assert len(njet_data) == len(nn_data)
         
         njet_bins, njet_vals, njet_errs = self.parse_data_step(njet_data)
         nn_bins, nn_vals, nn_errs = self.parse_data_step(nn_data)
@@ -175,8 +182,9 @@ class RivetPlotter:
             nn_vals = nn_vals,
             njet_errs = njet_errs,
             nn_errs = nn_errs,
+            xlabel = xlabel,
             ylabel = ylabel,
-            xlabel = xlabel
+            xlim = xlim
         )
         
         return fig
