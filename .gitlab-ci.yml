@@ -1,4 +1,7 @@
 ---
+stages:
+    - lint
+
 python:
     # Based off:
     # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Python.gitlab-ci.yml
@@ -21,6 +24,8 @@ python:
         paths:
             - .cache/pip
             - venv/
+
+    stage: lint
 
     before_script:
         - python -V # Print out python version for debugging
@@ -68,6 +73,8 @@ python:
 cpp:
     # https://gitlab.com/eidoom/clang-format-container
     image: eidoom/clang-format
+
+    stage: lint
 
     before_script:
         - clang-format --version
