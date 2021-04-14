@@ -1,6 +1,6 @@
 # n3jet_diphoton
 
-Test
+[![build status](https://gitlab.example.com/JosephPB/n3jet_diphoton/badges/master/pipeline.svg?ignore_skipped=true)](https://gitlab.com/JosephPB/n3jet_diphoton/-/pipelines)
 
 ## Continuous Integration
 [`pre-commit`](https://pre-commit.com/) (the program) is used to manage local continuous integration, namely the `git` hook pre-commit.
