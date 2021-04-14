@@ -178,17 +178,17 @@ class RivetPlotter:
         return fig
 
     def plot(self, xlabel, ylabel, xlim=None, rescaling=False):
-        
+
         njet_scale, nn_scale, njet_data, nn_data = self.extract_data()
         assert len(njet_data) == len(nn_data)
 
         njet_bins, njet_vals, njet_errs = self.parse_data_step(njet_data)
         nn_bins, nn_vals, nn_errs = self.parse_data_step(nn_data)
-        
+
         if not rescaling:
-            njet_vals = njet_vals/njet_scale
-            nn_vals = nn_vals/nn_scale
-        
+            njet_vals = njet_vals / njet_scale
+            nn_vals = nn_vals / nn_scale
+
         fig = self.plot_distirbution(
             njet_bins=njet_bins,
             nn_bins=nn_bins,
