@@ -17,4 +17,10 @@ if ! type clang-format; then
     python3 -m pip install --user clang-format
 fi
 
+echo "Checking that flake8 is installed..."
+if ! type flake8; then
+    echo "Installing flake8..."
+    python3 -m pip install --user flake8
+fi
+
 echo "Successfully completed initialisation!"

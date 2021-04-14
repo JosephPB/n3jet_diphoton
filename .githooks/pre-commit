@@ -8,4 +8,7 @@ black .
 echo "Autoformatting C++ files..."
 clang-format -i $(find . -name "*.cpp" -o -name "*.h")
 
+echo "Linting Python files..."
+./.githooks/flake8-lint
+
 echo "Pre-commit done!"
