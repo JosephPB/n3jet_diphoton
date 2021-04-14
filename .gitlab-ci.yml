@@ -28,8 +28,9 @@ before_script:
 
 lint:
   script:
-    - pip install --upgrade black
+    - pip install --upgrade black flake8
     - black --exclude venv/ --check .
+    - flake8 --exclude venv/ .
     # - clang-format -n $(find . -name "*.cpp" -o -name "*.h")
 
 # # TODO
