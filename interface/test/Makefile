@@ -7,6 +7,8 @@ LDFLAGS=
 
 .PHONY: clean all
 
+all: test
+
 test: test.o model_fns.o
 	${CXX} -o $@ $^ ${LDFLAGS}
 
