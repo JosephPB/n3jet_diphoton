@@ -59,8 +59,9 @@ int main()
             }
         }
 
-        //cut/near check
         double s_com = Momenta[i][0][0] * Momenta[i][1][0] - (Momenta[i][0][1] * Momenta[i][1][1] + Momenta[i][0][2] * Momenta[i][1][2] + Momenta[i][0][3] * Momenta[i][1][3]);
+
+        // cut/near check
         int cut_near = 0;
         for (int j = 0; j < legs - 1; j++) {
             for (int k = j + 1; k < legs; k++) {
