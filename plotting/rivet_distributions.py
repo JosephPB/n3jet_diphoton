@@ -36,7 +36,7 @@ def parse():
         dest="rescaling",
         help="Turn Rivet ScaledBy feature on/off",
         type=str,
-        default="False"
+        default="False",
     )
     
     args = parser.parse_args()
