@@ -1,5 +1,6 @@
 # n3jet_diphoton
 
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![build status](https://gitlab.com/JosephPB/n3jet_diphoton/badges/master/pipeline.svg?ignore_skipped=true)](https://gitlab.com/JosephPB/n3jet_diphoton/-/pipelines)
 
 ## Continuous Integration
