@@ -59,9 +59,9 @@ class RivetPlotter:
                         nn_data.append(line.split("\t"))
                     else:
                         raise ValueError(
-                            "data_extracting is now at {} but should only be 0 or 1".format(
-                                data_extracting
-                            )
+                            (
+                                "data_extracting is now at {} but should only be 0 or 1"
+                            ).format(data_extracting)
                         )
 
         return scales[0], scales[1], njet_data, nn_data
@@ -81,7 +81,8 @@ class RivetPlotter:
 
         Returns
         -------
-        bins: array of bin limits in np.histogram format (i.e. including lower and upper bound)
+        bins: array of bin limits in np.histogram format (i.e. including lower and upper
+              bound)
         vals: bin values with 0'th element duplicated
         errs: bin +/- errors with 0'th element duplicated
         """

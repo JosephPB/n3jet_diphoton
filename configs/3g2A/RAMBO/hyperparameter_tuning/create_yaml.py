@@ -37,30 +37,29 @@ for layers in model_layers:
                     base_copy["training"]["activation"] = "relu"
                 else:
                     raise ValueError(
-                        "process should either be standardise or normalise, you put {}".format(
-                            process
-                        )
+                        (
+                            "process should either be standardise or normalise, you "
+                            "put {}"
+                        ).format(process)
                     )
 
                 base_copy["training"]["loss"] = loss
                 base_copy["training"]["layers"] = layers
 
-                base_copy["training"][
-                    "mom_file"
-                ] = "/mt/batch/jbullock/Sherpa_NJet/runs/diphoton/3g2A/RAMBO/parallel_fixed/integration_grid/NJet_NJet_unit_grid_5_seed/momenta_events_{}_new_sherpa_cuts_PDF.npy".format(
-                    size
-                )
-                base_copy["training"][
-                    "nj_file"
-                ] = "/mt/batch/jbullock/Sherpa_NJet/runs/diphoton/3g2A/RAMBO/parallel_fixed/integration_grid/NJet_NJet_unit_grid_5_seed/events_{}_new_sherpa_cuts_PDF_loop.npy".format(
-                    size
-                )
+                base_copy["training"]["mom_file"] = (
+                    "/mt/batch/jbullock/Sherpa_NJet/runs/diphoton/3g2A/RAMBO/"
+                    "parallel_fixed/integration_grid/NJet_NJet_unit_grid_5_seed/"
+                    "momenta_events_{}_new_sherpa_cuts_PDF.npy"
+                ).format(size)
+                base_copy["training"]["nj_file"] = (
+                    "/mt/batch/jbullock/Sherpa_NJet/runs/diphoton/3g2A/RAMBO/"
+                    "parallel_fixed/integration_grid/NJet_NJet_unit_grid_5_seed/"
+                    "events_{}_new_sherpa_cuts_PDF_loop.npy"
+                ).format(size)
 
-                base_copy["model_base_dir"] = base[
-                    "model_base_dir"
-                ] + "events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet_{}/".format(
-                    counter
-                )
+                base_copy["model_base_dir"] = base["model_base_dir"] + (
+                    "events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet_{}/"
+                ).format(counter)
 
                 with open(save_file + "_{}.yaml".format(counter), "w") as f:
                     yaml.dump(base_copy, f)
