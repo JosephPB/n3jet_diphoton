@@ -14,4 +14,4 @@ This can all be initialised by running `./init.sh`.
 You only need to do this once (after you clone the repo).
 
 On the GitLab remote, there is also linting.
-This is configured in [.gitlab-ci.yml].
+This is configured in [.gitlab-ci.yml](.gitlab-ci.yml).
