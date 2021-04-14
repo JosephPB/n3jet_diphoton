@@ -36,7 +36,7 @@ int main()
             { 22.921351844871374, -3.704054206648225, 20.604297452778603, 9.334413709924226 } }
     };
 
-    nn::FKSNetworks networks(legs, training_reruns, "../../models/3g2a/RAMBO/events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet_test/");
+    nn::FKSNetworks networks(legs, training_reruns, "../../models/3g2a/RAMBO/events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet_test/", 2e-2, "cut_0.02/");
 
     double python_outputs[2] = { 2.2266408e-07, 1.430258598666967e-06 };
 

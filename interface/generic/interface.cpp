@@ -26,7 +26,7 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
     , delta(2e-2)
     , x(1e-2)
 #if (defined(NN) || defined(BOTH))
-    , networks(NN2A::legs, training_reruns, NN_MODEL)
+    , networks(NN2A::legs, training_reruns, NN_MODEL, delta, "cut_0.02/")
 #endif
 #if (RUNS == 1)
     , resfile("res-" + std::to_string(A))

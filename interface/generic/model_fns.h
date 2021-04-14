@@ -82,15 +82,21 @@ private:
 
 class Networks {
 public:
-    Networks(int legs, int runs, const std::string& model_path);
+    Networks(int legs_, int runs_, const std::string& model_path, double delta_, const std::string& cut_dirs_);
 
 protected:
+    static constexpr int d { 4 };
+    const int legs;
+    const int runs;
     const int pairs;
+    const double delta;
     const std::string cut_dirs;
     const std::string model_base;
 
     std::vector<std::string> model_dirs;
     std::vector<std::string> pair_dirs;
+
+    double dot(const std::vector<std::vector<double>>& point, int k, int j) const;
 
 private:
     // binomial coefficients
@@ -99,7 +105,7 @@ private:
 
 class NaiveNetworks : public Networks {
 public:
-    NaiveNetworks(const int legs, const int runs, const std::string& model_path);
+    NaiveNetworks(const int legs, const int runs, const std::string& model_path, double delta_, const std::string& cut_dirs_);
 
     std::vector<nn::KerasModel> kerasModels;
     std::vector<std::vector<double>> metadatas;
@@ -110,7 +116,9 @@ private:
 
 class FKSNetworks : public Networks {
 public:
-    FKSNetworks(const int legs, const int runs, const std::string& model_path);
+    FKSNetworks(const int legs, const int runs, const std::string& model_path, double delta_, const std::string& cut_dirs_);
+
+    double compute(const std::vector<std::vector<double>>& point);
 
     std::vector<std::vector<nn::KerasModel>> kerasModels;
     std::vector<std::vector<std::vector<double>>> metadatas;

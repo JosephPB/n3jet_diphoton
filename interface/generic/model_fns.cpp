@@ -337,10 +337,13 @@ void nn::LayerActivation::load_weights(std::ifstream& fin)
     fin >> activation_type;
 }
 
-nn::Networks::Networks(const int legs, const int runs, const std::string& model_path)
+nn::Networks::Networks(const int legs_, const int runs_, const std::string& model_path, const double delta_, const std::string& cut_dirs_)
     // n.b. there is an additional FKS pair for the cut network (for non-divergent regions)
-    : pairs(n_choose_2[legs] - 1)
-    , cut_dirs("cut_0.02/")
+    : legs(legs_)
+    , runs(runs_)
+    , pairs(n_choose_2[legs] - 1)
+    , delta(delta_)
+    , cut_dirs(cut_dirs_)
     , model_base(model_path)
     , model_dirs(runs)
     , pair_dirs(pairs)
@@ -349,8 +352,13 @@ nn::Networks::Networks(const int legs, const int runs, const std::string& model_
     std::generate(pair_dirs.begin(), pair_dirs.end(), [n = 0]() mutable { return "pair_0.02_" + std::to_string(n++) + "/"; });
 }
 
-nn::NaiveNetworks::NaiveNetworks(const int legs, const int runs, const std::string& model_path)
-    : Networks(legs, runs, model_path)
+double nn::Networks::dot(const std::vector<std::vector<double>>& point, const int k, const int j) const
+{
+    return point[j][0] * point[k][0] - (point[j][1] * point[k][1] + point[j][2] * point[k][2] + point[j][3] * point[k][3]);
+}
+
+nn::NaiveNetworks::NaiveNetworks(const int legs, const int runs, const std::string& model_path, const double delta_, const std::string& cut_dirs_)
+    : Networks(legs, runs, model_path, delta_, cut_dirs_)
     , kerasModels(runs)
     , metadatas(runs, std::vector<double>(10))
     , model_dir_models(runs)
@@ -365,8 +373,8 @@ nn::NaiveNetworks::NaiveNetworks(const int legs, const int runs, const std::stri
     }
 }
 
-nn::FKSNetworks::FKSNetworks(const int legs, const int runs, const std::string& model_path)
-    : Networks(legs, runs, model_path)
+nn::FKSNetworks::FKSNetworks(const int legs, const int runs, const std::string& model_path, const double delta_, const std::string& cut_dirs_)
+    : Networks(legs, runs, model_path, delta_, cut_dirs_)
     , kerasModels(runs, std::vector<nn::KerasModel>(pairs + 1))
     , metadatas(runs, std::vector<std::vector<double>>(pairs + 1, std::vector<double>(10)))
     , model_dir_models(runs, std::vector<std::string>(pairs + 1))
@@ -374,17 +382,68 @@ nn::FKSNetworks::FKSNetworks(const int legs, const int runs, const std::string& 
     for (int i { 0 }; i < runs; ++i) {
         // Near networks
         for (int j { 0 }; j < pairs; ++j) {
-            const std::string metadata_file { model_base + model_dirs[i] + pair_dirs[j] + "dataset_metadata.dat" };
-            const std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
+            const std::vector<double> metadata { nn::read_metadata_from_file(model_base + model_dirs[i] + pair_dirs[j] + "dataset_metadata.dat") };
             std::copy(metadata.cbegin(), metadata.cend(), metadatas[i][j].begin());
             model_dir_models[i][j] = model_base + model_dirs[i] + pair_dirs[j] + "model.nnet";
             kerasModels[i][j].load_weights(model_dir_models[i][j]);
         };
         // Cut networks
-        const std::string metadata_file { model_base + model_dirs[i] + cut_dirs + "dataset_metadata.dat" };
-        const std::vector<double> metadata { nn::read_metadata_from_file(metadata_file) };
+        const std::vector<double> metadata { nn::read_metadata_from_file(model_base + model_dirs[i] + cut_dirs + "dataset_metadata.dat") };
         std::copy(metadata.cbegin(), metadata.cend(), metadatas[i][pairs].begin());
         model_dir_models[i][pairs] = model_base + model_dirs[i] + cut_dirs + "model.nnet";
         kerasModels[i][pairs].load_weights(model_dir_models[i][pairs]);
     }
+}
+
+double nn::FKSNetworks::compute(const std::vector<std::vector<double>>& point)
+{
+    // moms is an vector of training_reruns results, each of which is an vector of FKS pairs results, each of which is an vector of flattened momenta
+    std::vector<std::vector<std::vector<double>>> moms(runs, std::vector<std::vector<double>>(pairs + 1, std::vector<double>(legs * d)));
+
+    // NN compute_output accepts vectors - could edit model_fns
+    // std::array<std::array<std::array<double, NN2A::legs * NN2A::d>, pairs + 1>, training_reruns> moms;
+
+    // flatten momenta
+    for (int p { 0 }; p < legs; ++p) {
+        for (int mu { 0 }; mu < d; ++mu) {
+            // standardise input
+            for (int k { 0 }; k < runs; ++k) {
+                for (int j { 0 }; j <= pairs; ++j) {
+                    moms[k][j][p * d + mu] = nn::standardise(point[p][mu], metadatas[k][j][mu], metadatas[k][j][d + mu]);
+                }
+            }
+        }
+    }
+
+    const double s_com { dot(point, 0, 1) };
+
+    // cut/near check
+    int cut_near { 0 };
+    for (int j { 0 }; j < legs - 1; ++j) {
+        for (int k { j + 1 }; k < legs; ++k) {
+            if (dot(point, j, k) / s_com < delta) {
+                cut_near += 1;
+            }
+        }
+    }
+
+    // inference
+    double results_sum { 0. };
+    for (int j { 0 }; j < runs; ++j) {
+        if (cut_near > 0) {
+            // the point is near an IR singularity
+            // infer over all FKS pairs
+            for (int k { 0 }; k < pairs; ++k) {
+                const double result { kerasModels[j][k].compute_output(moms[j][k])[0] };
+                results_sum += nn::destandardise(result, metadatas[j][k][8], metadatas[j][k][9]);
+            }
+        } else {
+            // the point is in a non-divergent region
+            // use the 'cut' network which is the final entry in the pair network
+            const double result { kerasModels[j][pairs].compute_output(moms[j][pairs])[0] };
+            results_sum += nn::destandardise(result, metadatas[j][pairs][8], metadatas[j][pairs][9]);
+        }
+    }
+
+    return results_sum / runs;
 }
