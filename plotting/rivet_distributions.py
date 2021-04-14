@@ -65,8 +65,8 @@ class RivetDistributions:
     def plot_m_yy(self):
 
         dm_yy_file = self.rivet_dir + 'mass.dat'
-        dm_yy_plotter = RivetPlotter(m_gg_file)
-        dm_yy_fig = m_yy_plotter.plot(
+        dm_yy_plotter = RivetPlotter(dm_yy_file)
+        dm_yy_fig = dm_yy_plotter.plot(
             xlabel = '$m_{\gamma\gamma}$ [GeV]',
             ylabel = 'd$\sigma/$d$m_{\gamma\gamma}$ [fb GeV$^{-1}$]'
         )
@@ -76,7 +76,7 @@ class RivetDistributions:
         
         dpt_j1_file = self.rivet_dir + 'j1pt.dat'
         dpt_j1_plotter = RivetPlotter(dpt_j1_file)
-        deta_j1_fig = dpt_j1_plotter.plot(
+        dpt_j1_fig = dpt_j1_plotter.plot(
             xlabel = '$p_{T}$ [GeV]',
             ylabel = 'd$\sigma/$d$p_{T}$ [fb GeV$^{-1}$]'
         )
