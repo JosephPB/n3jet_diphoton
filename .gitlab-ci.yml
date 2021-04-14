@@ -1,65 +1,77 @@
 ---
-# Based off:
-# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Python.gitlab-ci.yml
+python:
+    # Based off:
+    # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Python.gitlab-ci.yml
 
-# Official language image. Look for the different tagged releases at:
-# https://hub.docker.com/r/library/python/tags/
-image: python:slim
+    # Official language image. Look for the different tagged releases at:
+    # https://hub.docker.com/r/library/python/tags/
+    image: python:slim
 
-# Change pip's cache directory to be inside the project directory since we can
-# only cache local items.
-variables:
-    PIP_CACHE_DIR: $CI_PROJECT_DIR/.cache/pip
+    # Change pip's cache directory to be inside the project directory since we can
+    # only cache local items.
+    variables:
+        PIP_CACHE_DIR: $CI_PROJECT_DIR/.cache/pip
 
-# Pip's cache doesn't store the python packages
-# https://pip.pypa.io/en/stable/reference/pip_install/#caching
-#
-# If you want to also cache the installed packages, you have to install
-# them in a virtualenv and cache it as well.
-cache:
-    paths:
-        - .cache/pip
-        - venv/
+    # Pip's cache doesn't store the python packages
+    # https://pip.pypa.io/en/stable/reference/pip_install/#caching
+    #
+    # If you want to also cache the installed packages, you have to install
+    # them in a virtualenv and cache it as well.
+    cache:
+        paths:
+            - .cache/pip
+            - venv/
 
-before_script:
-    - python -V # Print out python version for debugging
-    - pip install --upgrade virtualenv
-    - virtualenv venv
-    - source venv/bin/activate
+    before_script:
+        - python -V # Print out python version for debugging
+        - pip install --upgrade virtualenv
+        - virtualenv venv
+        - source venv/bin/activate
 
-lint:
-    script:
-        - pip install --upgrade black flake8
-        - flake8 --exclude venv/ .
-        - black --exclude venv/ --check .
-    # - clang-format -n $(find . -name "*.cpp" -o -name "*.h")
+    lint:
+        script:
+            - pip install --upgrade black flake8
+            - flake8 --exclude venv/ .
+            - black --exclude venv/ --check .
+        # - clang-format -n $(find . -name "*.cpp" -o -name "*.h")
 
-# # TODO
-# test:
-#   script:
-#     - python setup.py test
-#     - pip install tox flake8  # you can also use tox
-#     - tox -e py36,flake8
+    # # TODO
+    # test:
+    #   script:
+    #     - python setup.py test
+    #     - pip install tox flake8  # you can also use tox
+    #     - tox -e py36,flake8
 
-# # TODO
-# run:
-#   script:
-#     - python setup.py bdist_wheel
-#     # an alternative approach is to install and run:
-#     - pip install dist/*
-#     # run the command here
-#   artifacts:
-#     paths:
-#       - dist/*.whl
+    # # TODO
+    # run:
+    #   script:
+    #     - python setup.py bdist_wheel
+    #     # an alternative approach is to install and run:
+    #     - pip install dist/*
+    #     # run the command here
+    #   artifacts:
+    #     paths:
+    #       - dist/*.whl
 
-# # TODO
-# pages:
-#   script:
-#     - pip install sphinx sphinx-rtd-theme
-#     - cd doc ; make html
-#     - mv build/html/ ../public/
-#   artifacts:
-#     paths:
-#       - public
-#   rules:
-#     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    # # TODO
+    # pages:
+    #   script:
+    #     - pip install sphinx sphinx-rtd-theme
+    #     - cd doc ; make html
+    #     - mv build/html/ ../public/
+    #   artifacts:
+    #     paths:
+    #       - public
+    #   rules:
+    #     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+cpp:
+    # https://gitlab.com/eidoom/clang-format-container
+    image: eidoom/clang-format
+
+    before_script:
+        - clang-format --version
+
+    lint:
+        script:
+            - clang-format --dry-run $(find . -name "*.cpp" -o -name "*.h")
