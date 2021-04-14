@@ -1,3 +1,4 @@
+#include <array>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -38,14 +39,14 @@ int main()
         },
     } };
 
-    double python_outputs[2] = { 2.2266408e-07, 1.430258598666967e-06 };
+    std::array<double, 2> python_outputs { { 2.2266408e-07, 1.430258598666967e-06 } };
 
     nn::FKSNetworks networks(legs, training_reruns, "../../models/3g2a/RAMBO/events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet_test/", delta, "cut_0.02/");
 
     for (int i { 0 }; i < pspoints; ++i) {
         std::cout << "==================== Test point " << i + 1 << " ====================" << '\n';
 
-        double average_output = networks.compute(momenta[i]);
+        double average_output { networks.compute(momenta[i]) };
 
         std::cout << "Python Loop( 0) = " << python_outputs[i] << '\n';
         std::cout << "C++    Loop( 0) = " << average_output << '\n';
