@@ -29,7 +29,7 @@ before_script:
 lint:
   script:
     - pip install --upgrade black clang-format
-    - black --check .
+    - black --exclude venv/ --check .
     - clang-format -n $(find . -name "*.cpp" -o -name "*.h")
 
 # # TODO
