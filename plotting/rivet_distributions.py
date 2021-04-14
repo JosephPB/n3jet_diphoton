@@ -1,4 +1,6 @@
 import argparse
+import matplotlib
+matplotlib.use('Agg')
 
 from rivet_plotter import RivetPlotter
 
@@ -26,7 +28,7 @@ def parse():
 
 class RivetDistributions:
     
-    def __init__(self, rivet_dir, save_dir="./paper_plots", dpi=150):
+    def __init__(self, rivet_dir, save_dir="./paper_plots/", dpi=150): ## FIX THIS
         self.rivet_dir = rivet_dir
         self.save_dir = save_dir
         self.dpi = dpi
@@ -80,7 +82,7 @@ class RivetDistributions:
             xlabel = '$p_{T}$ [GeV]',
             ylabel = 'd$\sigma/$d$p_{T}$ [fb GeV$^{-1}$]'
         )
-        dpt_j1_fig.savefig(save_dir + 'dpt_j1.png', self.dpi=self.dpi, bbox_inches='tight')
+        dpt_j1_fig.savefig(self.save_dir + 'dpt_j1.png', dpi=self.dpi, bbox_inches='tight')
     
     def plot_pt_j2(self):
         
