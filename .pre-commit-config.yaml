@@ -11,6 +11,12 @@ repos:
       hooks:
           - id: flake8
 
+    - repo: https://github.com/adrienverge/yamllint.git
+      rev: v1.26.1
+      hooks:
+          - id: yamllint
+            args: [-c=./.yamllint.yaml, --strict]
+
     - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
       rev: 0.1.0
       hooks:

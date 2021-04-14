@@ -1,0 +1,15 @@
+---
+
+extends: default
+
+rules:
+  # Since we have long paths, it's easier to ignore line length limits
+    line-length: disable
+
+  # The comment settings are for compatibility with yamlfmt
+  # Although I prefer the yamllint defaults, I don't know how to change these settings for yamlfmt
+    comments:
+        require-starting-space: true
+        min-spaces-from-content: 1
+
+    comments-indentation: disable
