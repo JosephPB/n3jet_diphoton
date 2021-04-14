@@ -1,7 +1,11 @@
 #!/usr/bin/sh
 
-echo "Running pre-commit"
+echo "Running pre-commit..."
 
+echo "Autoformatting Python files..."
 black .
 
-echo "Pre-commit done"
+echo "Autoformatting C++ files..."
+clang-format -i $(find . -name "*.cpp" -o -name "*.h")
+
+echo "Pre-commit done!"
