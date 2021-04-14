@@ -1,7 +1,4 @@
 ---
-stages:
-    - lint
-
 python:
     # Based off:
     # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Python.gitlab-ci.yml
@@ -25,20 +22,16 @@ python:
             - .cache/pip
             - venv/
 
-    stage: lint
-
     before_script:
         - python -V # Print out python version for debugging
         - pip install --upgrade virtualenv
         - virtualenv venv
         - source venv/bin/activate
 
-    lint:
-        script:
-            - pip install --upgrade black flake8
-            - flake8 --exclude venv/ .
-            - black --exclude venv/ --check .
-        # - clang-format -n $(find . -name "*.cpp" -o -name "*.h")
+    script:
+        - pip install --upgrade black flake8
+        - flake8 --exclude venv/ .
+        - black --exclude venv/ --check .
 
     # # TODO
     # test:
@@ -74,11 +67,8 @@ cpp:
     # https://gitlab.com/eidoom/clang-format-container
     image: eidoom/clang-format
 
-    stage: lint
-
     before_script:
         - clang-format --version
 
-    lint:
-        script:
-            - clang-format --dry-run $(find . -name "*.cpp" -o -name "*.h")
+    script:
+        - clang-format --dry-run $(find . -name "*.cpp" -o -name "*.h")
