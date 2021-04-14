@@ -53,7 +53,7 @@ public:
 private:
   using TP = const std::chrono::high_resolution_clock::time_point;
 
-  static constexpr int n{5}; // momenta fifth entry is mass
+  static constexpr int n{5}; // BLHA momentum fifth entry is mass
 
   const double zero, m_alpha, m_alphas, m_mur, delta, x;
 
@@ -72,8 +72,6 @@ private:
   const std::string resfile;
 
   std::vector<std::vector<double>> results_buffer;
-
-  double dot(const ATOOLS::Vec4D_Vector &point, int k, int j) const;
 };
 
 class Interface : public PHASIC::ME_Generator_Base {

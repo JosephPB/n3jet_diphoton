@@ -20,19 +20,15 @@
 
 NN2A::SquaredMatrixElement::SquaredMatrixElement()
     : zero(0.), m_alpha(1. / 137.035999084), m_alphas(0.118), m_mur(91.188),
-      delta(2e-2), x(1e-2)
+      delta(2e-2), x(1e-2),
 #if (defined(NN) || defined(BOTH))
-      ,
-      networks(NN2A::legs, training_reruns, NN_MODEL, delta, "cut_0.02/")
+      networks(NN2A::legs, training_reruns, NN_MODEL, delta, "cut_0.02/"),
 #endif
 #if (RUNS == 1)
-      ,
-      resfile("res-" + std::to_string(A))
+      resfile("res-" + std::to_string(A)),
 #else
-      ,
-      resfile("res")
+      resfile("res"),
 #endif
-      ,
       results_buffer() {
 #if defined(NJET) || defined(BOTH)
   const std::string f{"OLE_contract_" + std::to_string(NN2A::legs - 2) + "g2A.lh"};
@@ -79,15 +75,6 @@ void NN2A::SquaredMatrixElement::PrintSummary() const {
              << "  ----------------------------------------" << '\n';
 }
 
-double NN2A::SquaredMatrixElement::dot(const ATOOLS::Vec4D_Vector &point, int k,
-                                       int j) const {
-  return point[j][0] * point[k][0] -
-         (point[j][1] * point[k][1] + point[j][2] * point[k][2] +
-          point[j][3] * point[k][3]);
-}
-
-// double NN2A::SquaredMatrixElement::Calculate(const double point[NN2A::legs][NN2A::d])
-// const
 double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector &point) {
 #ifdef UNIT
   return 1.;
@@ -97,95 +84,13 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector &point) 
 #ifdef TIMING
   TP nnt1{std::chrono::high_resolution_clock::now()};
 #endif
-  double results_sum{0.};
-#ifdef NAIVE
-  // moms is an vector of training_reruns results, each of which is an vector of
-  // flattened momenta std::array<std::array<double, NN2A::legs * NN2A::d>,
-  // training_reruns> moms;
-  std::vector<std::vector<double>> moms(training_reruns,
-                                        std::vector<double>(NN2A::legs * NN2A::d));
-
-  // flatten momenta
-  for (int p{0}; p < NN2A::legs; ++p) {
-    for (int mu{0}; mu < NN2A::d; ++mu) {
-      // standardise input
-      for (int k{0}; k < training_reruns; ++k) {
-        moms[k][p * NN2A::d + mu] =
-            nn::standardise(point[p][mu], networks.metadatas[k][mu],
-                            networks.metadatas[k][NN2A::d + mu]);
+  std::vector<std::vector<double>> momenta(legs, std::vector<double>(d));
+  for (int i{0}; i < legs; ++i) {
+      for (int j{0}; j < d; ++j) {
+        momenta[i][j] = point[i][j];
       }
-    }
   }
-
-  // inference
-  for (int j{0}; j < training_reruns; ++j) {
-    const double result{networks.kerasModels[j].compute_output(moms[j])[0]};
-    results_sum +=
-        nn::destandardise(result, networks.metadatas[j][8], networks.metadatas[j][9]);
-  }
-#else
-  // moms is an vector of training_reruns results, each of which is an vector of FKS
-  // pairs results, each of which is an vector of flattened momenta
-  std::vector<std::vector<std::vector<double>>> moms(
-      training_reruns, std::vector<std::vector<double>>(
-                           pairs + 1, std::vector<double>(NN2A::legs * NN2A::d)));
-
-  // NN compute_output accepts vectors - could edit model_fns
-  // std::array<std::array<std::array<double, NN2A::legs * NN2A::d>, pairs + 1>,
-  // training_reruns> moms;
-
-  // flatten momenta
-  for (int p{0}; p < NN2A::legs; ++p) {
-    for (int mu{0}; mu < NN2A::d; ++mu) {
-      // standardise input
-      for (int k{0}; k < training_reruns; ++k) {
-        for (int j{0}; j <= pairs; ++j) {
-          moms[k][j][p * NN2A::d + mu] =
-              nn::standardise(point[p][mu], networks.metadatas[k][j][mu],
-                              networks.metadatas[k][j][NN2A::d + mu]);
-        }
-        moms[k][pairs][p * NN2A::d + mu] =
-            nn::standardise(point[p][mu], networks.metadatas[k][pairs][mu],
-                            networks.metadatas[k][pairs][NN2A::d + mu]);
-      }
-    }
-  }
-
-  const double s_com{dot(point, 0, 1)};
-
-  // cut/near check
-  int cut_near{0};
-  for (int j{0}; j < NN2A::legs - 1; ++j) {
-    for (int k{j + 1}; k < NN2A::legs; ++k) {
-      const double prod{dot(point, j, k)};
-      const double dist{prod / s_com};
-      if (dist < delta) {
-        cut_near += 1;
-      }
-    }
-  }
-
-  // inference
-  for (int j{0}; j < training_reruns; ++j) {
-    if (cut_near >= 1) {
-      // the point is near an IR singularity
-      // infer over all FKS pairs
-      for (int k{0}; k < pairs; ++k) {
-        const double result{networks.kerasModels[j][k].compute_output(moms[j][k])[0]};
-        results_sum += nn::destandardise(result, networks.metadatas[j][k][8],
-                                         networks.metadatas[j][k][9]);
-      }
-    } else {
-      // the point is in a non-divergent region
-      // use the 'cut' network which is the final entry in the pair network
-      const double result{
-          networks.kerasModels[j][pairs].compute_output(moms[j][pairs])[0]};
-      results_sum += nn::destandardise(result, networks.metadatas[j][pairs][8],
-                                       networks.metadatas[j][pairs][9]);
-    }
-  }
-#endif
-  const double mean{results_sum / training_reruns};
+  const double mean{networks.compute(momenta)};
 #ifdef TIMING
   TP nnt2{std::chrono::high_resolution_clock::now()};
   const long int nndur{
@@ -197,9 +102,9 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector &point) 
 #ifdef TIMING
   TP njett1{std::chrono::high_resolution_clock::now()};
 #endif
-  double LHMomenta[NN2A::legs * n];
-  for (std::size_t p{0}; p < NN2A::legs; ++p) {
-    for (std::size_t mu{0}; mu < NN2A::d; ++mu) {
+  double LHMomenta[legs * n];
+  for (int p{0}; p < legs; ++p) {
+    for (int mu{0}; mu < d; ++mu) {
       LHMomenta[mu + p * n] = point[p][mu];
     }
     // Set masses
@@ -230,28 +135,17 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector &point) 
 #ifdef REC
   {
     std::vector<double> results_vector;
-    for (int l{0}; l < NN2A::legs; ++l) {
-      for (int mu{0}; mu < NN2A::d; ++mu) {
+    for (int l{0}; l < legs; ++l) {
+      for (int mu{0}; mu < d; ++mu) {
         results_vector.push_back(point[l][mu]);
       }
     }
-    // std::ofstream o(resfile, std::ios::app);
-    // o.setf(std::ios_base::scientific);
-    // o.precision(16);
-    // for (int l { 0 }; l < NN2A::legs; ++l) {
-    //     for (int mu { 0 }; mu < NN2A::d; ++mu) {
-    //         o << point[l][mu] << " ";
-    //     }
-    // }
-
 #if defined(NN) || defined(BOTH)
     results_vector.push_back(mean);
-    // o << mean << " ";
 #endif
 
 #if defined(NJET) || defined(BOTH)
     results_vector.push_back(njet_ans);
-    // o << njet_ans << " ";
 #endif
 
 #if (defined(NN) || defined(BOTH)) && defined(TIMING)
@@ -263,7 +157,6 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector &point) 
 #endif
 
     results_buffer.push_back(results_vector);
-    // o << '\n';
   }
 #endif
 
