@@ -9,7 +9,7 @@
 #include "njet.h"
 #endif
 
-#include "model_fns.h"
+#include "model_fns.hpp"
 
 #include "interface.hpp"
 

@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "model_fns.h"
+#include "model_fns.hpp"
 
 int main() {
   std::cout.setf(std::ios_base::scientific, std::ios_base::floatfield);

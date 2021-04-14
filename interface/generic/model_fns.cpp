@@ -1,4 +1,4 @@
-#include "model_fns.h"
+#include "model_fns.hpp"
 
 #include <algorithm>
 #include <cmath>
