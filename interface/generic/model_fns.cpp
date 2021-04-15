@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <numeric>
 #include <string>
 #include <vector>
 
@@ -49,8 +50,8 @@ double nn::destandardise(double value, double mean, double stnd) {
 
 nn::LayerDense::LayerDense(std::ifstream &fin) {
   fin >> input_node_count >> output_weights;
-  layer_weights = std::vector<std::vector<double>>(output_weights,
-                                                   std::vector<double>(input_node_count));
+  layer_weights = std::vector<std::vector<double>>(
+      output_weights, std::vector<double>(input_node_count));
   double tmp_double;
   char tmp_char;
   // read weights for all the input nodes
@@ -75,11 +76,8 @@ nn::LayerDense::LayerDense(std::ifstream &fin) {
 std::vector<double> nn::LayerDense::compute_output(std::vector<double> test_input) {
   std::vector<double> out(output_weights);
   for (int i{0}; i < output_weights; ++i) {
-    double weighted_term{0};
-    for (int j{0}; j < input_node_count; ++j) {
-      weighted_term += (test_input[j] * layer_weights[i][j]);
-    }
-    out[i] = weighted_term + bias[i];
+    out[i] = std::inner_product(test_input.begin(), test_input.end(),
+                                layer_weights[i].begin(), bias[i]);
   }
   return out;
 }
