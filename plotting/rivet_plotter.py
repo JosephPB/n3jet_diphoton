@@ -177,7 +177,7 @@ class RivetPlotter:
 
         return fig
 
-    def plot(self, xlabel, ylabel, xlim=None, rescaling=False):
+    def plot(self, xlabel, ylabel, xlim=None, rescaling="On"):
 
         njet_scale, nn_scale, njet_data, nn_data = self.extract_data()
         assert len(njet_data) == len(nn_data)
@@ -185,9 +185,16 @@ class RivetPlotter:
         njet_bins, njet_vals, njet_errs = self.parse_data_step(njet_data)
         nn_bins, nn_vals, nn_errs = self.parse_data_step(nn_data)
 
-        if not rescaling:
+        if rescaling == "On":
+            pass
+        elif rescaling == "Off":
             njet_vals = njet_vals / njet_scale
             nn_vals = nn_vals / nn_scale
+        elif rescaling == "XS":
+            njet_vals = (njet_vals / njet_scale) * np.sum(njet_vals)
+            nn_vals = (nn_vals / nn_scale) * np.sum(nn_vals)
+        else:
+            raise ValueError("rescaling only takes values of: On/XS/Off but you have passed {}".format(rescaling))
 
         fig = self.plot_distirbution(
             njet_bins=njet_bins,
