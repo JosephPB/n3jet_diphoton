@@ -5,6 +5,8 @@
 
 #include "model_fns.hpp"
 
+// template nn::Network<double>::~Network();
+
 double d(double a, double b) { return 2 * std::abs((a - b) / (a + b)); }
 
 int main() {
@@ -48,7 +50,7 @@ int main() {
 
   std::array<double, 2> python_outputs{{2.2266408e-07, 1.430258598666967e-06}};
 
-  nn::FKSEnsemble networks(
+  nn::FKSEnsemble<double> networks(
       legs, training_reruns,
       "../../models/3g2a/RAMBO/"
       "events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet_test/",

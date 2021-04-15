@@ -63,9 +63,9 @@ private:
 
 #if (defined(NN) || defined(BOTH))
 #ifdef NAIVE
-  nn::NaiveEnsemble networks;
+  nn::NaiveEnsemble<double> networks;
 #else
-  nn::FKSEnsemble networks;
+  nn::FKSEnsemble<double> networks;
 #endif
 #endif
 

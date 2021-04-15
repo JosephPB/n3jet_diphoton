@@ -9,14 +9,11 @@ LDFLAGS=
 
 all: test
 
-test: test.o model_fns.o
+test: test.o
 	${CXX} -o $@ $^ ${LDFLAGS}
 
-test.o: test.cpp
+test.o: test.cpp ${SRC_DIR}/model_fns.hpp
 	${CXX} ${CXXFLAGS} -o $@ -c $< ${CPPFLAGS}
-
-model_fns.o: ${SRC_DIR}/model_fns.cpp ${SRC_DIR}/model_fns.hpp
-	${CXX} ${CXXFLAGS} -o $@ -c $< ${CPPFLAGS} -g -pg
 
 clean:
 	-rm *.o test

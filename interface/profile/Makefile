@@ -13,13 +13,10 @@ PRF_LNK=-pg
 
 all: time
 
-time: time.o model_fns.o
+time: time.o
 	${CXX} -o $@ $^ ${LDFLAGS} ${PRF_LNK}
 
-time.o: ${TME_DIR}/time.cpp
-	${CXX} ${CXXFLAGS} -o $@ -c $< ${CPPFLAGS} ${PRF_CPL}
-
-model_fns.o: ${MDL_DIR}/model_fns.cpp ${MDL_DIR}/model_fns.hpp
+time.o: ${TME_DIR}/time.cpp ${MDL_DIR}/model_fns.hpp
 	${CXX} ${CXXFLAGS} -o $@ -c $< ${CPPFLAGS} ${PRF_CPL}
 
 clean:

@@ -21,13 +21,10 @@ DEFS+=-DNN_MODEL="\"../../models/3g2a/RAMBO/events_100k_fks_all_legs_all_pairs_n
 
 all: interface.so
 
-interface.o: interface.cpp interface.hpp Makefile
+interface.o: interface.cpp interface.hpp model_fns.hpp
 	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS) $(DEFS)
 
-model_fns.o: model_fns.cpp model_fns.hpp
-	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS)
-
-interface.so: interface.o model_fns.o
+interface.so: interface.o
 	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LIBS)
 
 clean:

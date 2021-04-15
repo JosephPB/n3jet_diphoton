@@ -9,13 +9,10 @@ LDFLAGS=
 
 all: time
 
-time: time.o model_fns.o
+time: time.o
 	${CXX} -o $@ $^ ${LDFLAGS}
 
-time.o: time.cpp
-	${CXX} ${CXXFLAGS} -o $@ -c $< ${CPPFLAGS}
-
-model_fns.o: ${SRC_DIR}/model_fns.cpp ${SRC_DIR}/model_fns.hpp
+time.o: time.cpp ${SRC_DIR}/model_fns.hpp
 	${CXX} ${CXXFLAGS} -o $@ -c $< ${CPPFLAGS}
 
 clean:
