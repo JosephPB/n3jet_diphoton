@@ -9,42 +9,6 @@
 #include <string>
 #include <vector>
 
-// utility functions
-// ~~~~~~~~~~~~~~~~~
-
-std::vector<double> nn::read_metadata_from_file(const std::string &fname) {
-  std::ifstream fin(fname.c_str());
-  int n_x_mean{4};
-  int n_x_std{4};
-  int n_y_mean{1};
-  int n_y_std{1};
-
-  std::vector<double> metadata(10);
-
-  for (int i{0}; i < n_x_mean; ++i) {
-    fin >> metadata[i];
-  }
-  for (int i{0}; i < n_x_std; ++i) {
-    fin >> metadata[n_x_mean + i];
-  }
-  for (int i{0}; i < n_y_mean; ++i) {
-    fin >> metadata[n_x_mean + n_x_std + i];
-  }
-  for (int i{0}; i < n_y_std; ++i) {
-    fin >> metadata[n_x_mean + n_x_std + n_y_mean + i];
-  }
-
-  return metadata;
-}
-
-double nn::standardise(double value, double mean, double stnd) {
-  return (value - mean) / stnd;
-}
-
-double nn::destandardise(double value, double mean, double stnd) {
-  return value * stnd + mean;
-}
-
 // Layers
 // ~~~~~~
 
@@ -217,6 +181,39 @@ double nn::Ensemble::dot(const std::vector<std::vector<double>> &point, const in
           point[j][3] * point[k][3]);
 }
 
+double nn::Ensemble::standardise(double value, double mean, double stnd) {
+  return (value - mean) / stnd;
+}
+
+double nn::Ensemble::destandardise(double value, double mean, double stnd) {
+  return value * stnd + mean;
+}
+
+std::vector<double> nn::Ensemble::read_metadata_from_file(const std::string &fname) {
+  std::ifstream fin(fname.c_str());
+  int n_x_mean{4};
+  int n_x_std{4};
+  int n_y_mean{1};
+  int n_y_std{1};
+
+  std::vector<double> metadata(10);
+
+  for (int i{0}; i < n_x_mean; ++i) {
+    fin >> metadata[i];
+  }
+  for (int i{0}; i < n_x_std; ++i) {
+    fin >> metadata[n_x_mean + i];
+  }
+  for (int i{0}; i < n_y_mean; ++i) {
+    fin >> metadata[n_x_mean + n_x_std + i];
+  }
+  for (int i{0}; i < n_y_std; ++i) {
+    fin >> metadata[n_x_mean + n_x_std + n_y_mean + i];
+  }
+
+  return metadata;
+}
+
 nn::NaiveEnsemble::NaiveEnsemble(const int legs, const int runs,
                                  const std::string &model_path, const double delta_,
                                  const std::string &cut_dirs_)
@@ -226,7 +223,7 @@ nn::NaiveEnsemble::NaiveEnsemble(const int legs, const int runs,
     // Naive networks
     const std::string metadata_file{model_base + model_dirs[i] +
                                     "dataset_metadata.dat"};
-    const std::vector<double> metadata{nn::read_metadata_from_file(metadata_file)};
+    const std::vector<double> metadata{read_metadata_from_file(metadata_file)};
     std::copy(metadata.cbegin(), metadata.cend(), metadatas[i].begin());
     model_dir_models[i] = model_base + model_dirs[i] + "model.nnet";
     kerasModels[i].load_weights(model_dir_models[i]);
@@ -244,7 +241,7 @@ double nn::NaiveEnsemble::compute(const std::vector<std::vector<double>> &point)
       // standardise input
       for (int k{0}; k < runs; ++k) {
         moms[k][p * d + mu] =
-            nn::standardise(point[p][mu], metadatas[k][mu], metadatas[k][d + mu]);
+            standardise(point[p][mu], metadatas[k][mu], metadatas[k][d + mu]);
       }
     }
   }
@@ -252,8 +249,8 @@ double nn::NaiveEnsemble::compute(const std::vector<std::vector<double>> &point)
   // inference
   double results_sum{0.};
   for (int j{0}; j < runs; ++j) {
-    results_sum += nn::destandardise(kerasModels[j].compute_output(moms[j]),
-                                     metadatas[j][8], metadatas[j][9]);
+    results_sum += destandardise(kerasModels[j].compute_output(moms[j]),
+                                 metadatas[j][8], metadatas[j][9]);
   }
 
   return results_sum / runs;
@@ -270,14 +267,14 @@ nn::FKSEnsemble::FKSEnsemble(const int legs, const int runs,
   for (int i{0}; i < runs; ++i) {
     // Near networks
     for (int j{0}; j < pairs; ++j) {
-      const std::vector<double> metadata{nn::read_metadata_from_file(
+      const std::vector<double> metadata{read_metadata_from_file(
           model_base + model_dirs[i] + pair_dirs[j] + "dataset_metadata.dat")};
       std::copy(metadata.cbegin(), metadata.cend(), metadatas[i][j].begin());
       model_dir_models[i][j] = model_base + model_dirs[i] + pair_dirs[j] + "model.nnet";
       kerasModels[i][j].load_weights(model_dir_models[i][j]);
     };
     // Cut networks
-    const std::vector<double> metadata{nn::read_metadata_from_file(
+    const std::vector<double> metadata{read_metadata_from_file(
         model_base + model_dirs[i] + cut_dirs + "dataset_metadata.dat")};
     std::copy(metadata.cbegin(), metadata.cend(), metadatas[i][pairs].begin());
     model_dir_models[i][pairs] = model_base + model_dirs[i] + cut_dirs + "model.nnet";
@@ -301,8 +298,8 @@ double nn::FKSEnsemble::compute(const std::vector<std::vector<double>> &point) {
       // standardise input
       for (int k{0}; k < runs; ++k) {
         for (int j{0}; j <= pairs; ++j) {
-          moms[k][j][p * d + mu] = nn::standardise(point[p][mu], metadatas[k][j][mu],
-                                                   metadatas[k][j][d + mu]);
+          moms[k][j][p * d + mu] =
+              standardise(point[p][mu], metadatas[k][j][mu], metadatas[k][j][d + mu]);
         }
       }
     }
@@ -327,15 +324,14 @@ double nn::FKSEnsemble::compute(const std::vector<std::vector<double>> &point) {
       // the point is near an IR singularity
       // infer over all FKS pairs
       for (int k{0}; k < pairs; ++k) {
-        results_sum += nn::destandardise(kerasModels[j][k].compute_output(moms[j][k]),
-                                         metadatas[j][k][8], metadatas[j][k][9]);
+        results_sum += destandardise(kerasModels[j][k].compute_output(moms[j][k]),
+                                     metadatas[j][k][8], metadatas[j][k][9]);
       }
     } else {
       // the point is in a non-divergent region
       // use the 'cut' network which is the final entry in the pair network
-      results_sum +=
-          nn::destandardise(kerasModels[j][pairs].compute_output(moms[j][pairs]),
-                            metadatas[j][pairs][8], metadatas[j][pairs][9]);
+      results_sum += destandardise(kerasModels[j][pairs].compute_output(moms[j][pairs]),
+                                   metadatas[j][pairs][8], metadatas[j][pairs][9]);
     }
   }
 

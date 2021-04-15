@@ -8,10 +8,6 @@
 
 namespace nn {
 
-std::vector<double> read_metadata_from_file(const std::string &fname);
-double standardise(double value, double mean, double stnd);
-double destandardise(double value, double mean, double stnd);
-
 enum ActivationType { Tanh, ReLU, Linear };
 
 struct Layer {
@@ -71,6 +67,9 @@ protected:
   std::vector<std::string> pair_dirs;
 
   double dot(const std::vector<std::vector<double>> &point, int k, int j) const;
+  double standardise(double value, double mean, double stnd);
+  double destandardise(double value, double mean, double stnd);
+  std::vector<double> read_metadata_from_file(const std::string &fname);
 };
 
 class NaiveEnsemble : public Ensemble {
