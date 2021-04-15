@@ -3,6 +3,8 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![build status](https://gitlab.com/JosephPB/n3jet_diphoton/badges/main/pipeline.svg?ignore_skipped=true)](https://gitlab.com/JosephPB/n3jet_diphoton/-/pipelines)
 
+[Mirrored on GitHub](https://github.com/JosephPB/n3jet_diphoton)
+
 ## Continuous Integration
 [`pre-commit`](https://pre-commit.com/) (the program) is used to manage local continuous integration, namely the `git` hook pre-commit.
 It is integrated with
