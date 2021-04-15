@@ -10,3 +10,5 @@ Results.db*
 *.o
 callgrind.out.*
 vgcore.*
+time
+test
