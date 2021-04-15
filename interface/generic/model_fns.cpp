@@ -245,13 +245,13 @@ std::vector<double> nn::LayerDense::compute_output(std::vector<double> test_inpu
 
 std::vector<double>
 nn::LayerActivation::compute_output(std::vector<double> test_input) {
-  if (activation_type == "tanh") {
+  switch (activation_type) {
+  case Tanh:
     std::transform(test_input.cbegin(), test_input.cend(), test_input.begin(),
                    [](double a) -> double { return std::tanh(a); });
-  } else if (activation_type != "linear") {
-    std::cout << "Activation " << activation_type << " not defined!" << '\n'
-              << "Please add its implementation before use." << '\n';
-    std::exit(EXIT_FAILURE);
+    break;
+  case Linear:
+    break;
   }
   return test_input;
 }
@@ -260,7 +260,18 @@ void nn::LayerActivation::load_weights(std::ifstream &fin) {
 #ifdef DEBUG
   std::cout << "Loading weights for Activation layer" << '\n';
 #endif
-  fin >> activation_type;
+  std::string tmp_type;
+  fin >> tmp_type;
+
+  if (tmp_type == "tanh") {
+    activation_type = Tanh;
+  } else if (tmp_type == "linear") {
+    activation_type = Linear;
+  } else {
+    std::cout << "Activation " << activation_type << " not defined!" << '\n'
+              << "Please add its implementation before use." << '\n';
+    std::exit(EXIT_FAILURE);
+  }
 }
 
 nn::Networks::Networks(const int legs_, const int runs_, const std::string &model_path,

@@ -42,9 +42,11 @@ public:
   std::vector<double> compute_output(std::vector<double> test_input);
 };
 
+enum ActivationType { Tanh, Linear };
+
 class LayerActivation : public Layer {
 public:
-  std::string activation_type;
+  ActivationType activation_type;
 
   LayerActivation() : Layer("Activation"){};
   void load_weights(std::ifstream &fin);

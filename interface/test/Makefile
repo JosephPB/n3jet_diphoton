@@ -1,7 +1,7 @@
 SRC_DIR=../generic
 
 CXX?=g++
-CXXFLAGS=-O2 -pedantic -Wall -Wextra -std=c++17
+CXXFLAGS=-O2 -pedantic -Wall -Wextra -std=c++17 -g
 CPPFLAGS=-I${SRC_DIR}
 LDFLAGS=
 

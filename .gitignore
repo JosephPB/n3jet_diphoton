@@ -8,3 +8,5 @@ Results.db*
 *.yoda
 *.so
 *.o
+callgrind.out.*
+vgcore.*
