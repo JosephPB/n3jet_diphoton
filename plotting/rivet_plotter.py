@@ -191,8 +191,8 @@ class RivetPlotter:
             njet_vals = njet_vals / njet_scale
             nn_vals = nn_vals / nn_scale
         elif rescaling == "XS":
-            njet_vals = (njet_vals / njet_scale) * np.sum(njet_vals)
-            nn_vals = (nn_vals / nn_scale) * np.sum(nn_vals)
+            njet_vals = njet_vals / np.sum(njet_vals)
+            nn_vals = nn_vals / np.sum(nn_vals)
         else:
             raise ValueError("rescaling only takes values of: On/XS/Off but you have passed {}".format(rescaling))
 
