@@ -64,24 +64,17 @@ private:
 
 template <typename T> class Ensemble {
 public:
-  Ensemble(int legs_, int runs_, const std::string &model_path, T delta_,
+  Ensemble(int legs_, int runs_, const std::string &model_path,
            const std::string &cut_dirs_);
-
-private:
-  // binomial coefficients
-  const std::array<int, 11> n_choose_2;
 
 protected:
   static constexpr int d{4};
   const int legs;
   const int runs;
-  const int pairs;
-  const T delta;
   const std::string cut_dirs;
   const std::string model_base;
 
   std::vector<std::string> model_dirs;
-  std::vector<std::string> pair_dirs;
 
   T dot(const std::vector<std::vector<T>> &point, int k, int j) const;
   T standardise(T value, T mean, T stnd);
@@ -91,7 +84,7 @@ protected:
 
 template <typename T> class NaiveEnsemble : protected Ensemble<T> {
 public:
-  NaiveEnsemble(const int legs, const int runs, const std::string &model_path, T delta_,
+  NaiveEnsemble(const int legs, const int runs, const std::string &model_path,
                 const std::string &cut_dirs_);
 
   T compute(const std::vector<std::vector<T>> &point);
@@ -107,7 +100,6 @@ private:
   using Ensemble<T>::runs;
   using Ensemble<T>::model_base;
   using Ensemble<T>::model_dirs;
-  using Ensemble<T>::pair_dirs;
   using Ensemble<T>::dot;
   using Ensemble<T>::standardise;
   using Ensemble<T>::destandardise;
@@ -115,6 +107,24 @@ private:
 };
 
 template <typename T> class FKSEnsemble : protected Ensemble<T> {
+private:
+  const std::array<int, 11> n_choose_2;
+  const int pairs;
+  const T delta;
+  std::vector<std::string> pair_dirs;
+  std::vector<std::vector<std::string>> model_dir_models;
+
+  using Ensemble<T>::d;
+  using Ensemble<T>::legs;
+  using Ensemble<T>::runs;
+  using Ensemble<T>::model_base;
+  using Ensemble<T>::model_dirs;
+  using Ensemble<T>::cut_dirs;
+  using Ensemble<T>::dot;
+  using Ensemble<T>::standardise;
+  using Ensemble<T>::destandardise;
+  using Ensemble<T>::read_metadata_from_file;
+
 public:
   FKSEnsemble(const int legs, const int runs, const std::string &model_path, T delta_,
               const std::string &cut_dirs_);
@@ -123,23 +133,6 @@ public:
 
   std::vector<std::vector<nn::Network<T>>> kerasModels;
   std::vector<std::vector<std::vector<T>>> metadatas;
-
-private:
-  std::vector<std::vector<std::string>> model_dir_models;
-
-  using Ensemble<T>::d;
-  using Ensemble<T>::legs;
-  using Ensemble<T>::runs;
-  using Ensemble<T>::pairs;
-  using Ensemble<T>::delta;
-  using Ensemble<T>::model_base;
-  using Ensemble<T>::model_dirs;
-  using Ensemble<T>::cut_dirs;
-  using Ensemble<T>::pair_dirs;
-  using Ensemble<T>::dot;
-  using Ensemble<T>::standardise;
-  using Ensemble<T>::destandardise;
-  using Ensemble<T>::read_metadata_from_file;
 };
 
 } // namespace nn
@@ -303,17 +296,13 @@ template <typename T> T nn::Network<T>::compute_output(std::vector<T> test_input
 
 template <typename T>
 nn::Ensemble<T>::Ensemble(const int legs_, const int runs_,
-                          const std::string &model_path, const T delta_,
-                          const std::string &cut_dirs_)
+                          const std::string &model_path, const std::string &cut_dirs_)
     // n.b. there is an additional FKS pair for the cut network (for non-divergent
     // regions)
-    : n_choose_2({{0, 0, 1, 3, 6, 10, 15, 21, 28, 36, 45}}), legs(legs_), runs(runs_),
-      pairs(n_choose_2[legs] - 1), delta(delta_), cut_dirs(cut_dirs_),
-      model_base(model_path), model_dirs(runs), pair_dirs(pairs) {
+    : legs(legs_), runs(runs_), cut_dirs(cut_dirs_), model_base(model_path),
+      model_dirs(runs) {
   std::generate(model_dirs.begin(), model_dirs.end(),
                 [n = 0]() mutable { return std::to_string(n++) + "/"; });
-  std::generate(pair_dirs.begin(), pair_dirs.end(),
-                [n = 0]() mutable { return "pair_0.02_" + std::to_string(n++) + "/"; });
 }
 
 template <typename T>
@@ -360,9 +349,9 @@ std::vector<T> nn::Ensemble<T>::read_metadata_from_file(const std::string &fname
 
 template <typename T>
 nn::NaiveEnsemble<T>::NaiveEnsemble(const int legs, const int runs,
-                                    const std::string &model_path, const T delta_,
+                                    const std::string &model_path,
                                     const std::string &cut_dirs_)
-    : Ensemble<T>(legs, runs, model_path, delta_, cut_dirs_), kerasModels(runs),
+    : Ensemble<T>(legs, runs, model_path, cut_dirs_), kerasModels(runs),
       metadatas(runs, std::vector<T>(10)), model_dir_models(runs) {
   for (int i{0}; i < runs; ++i) {
     // Naive networks
@@ -406,10 +395,15 @@ template <typename T>
 nn::FKSEnsemble<T>::FKSEnsemble(const int legs, const int runs,
                                 const std::string &model_path, const T delta_,
                                 const std::string &cut_dirs_)
-    : Ensemble<T>(legs, runs, model_path, delta_, cut_dirs_),
+    : Ensemble<T>(legs, runs, model_path, cut_dirs_),
+      n_choose_2({{0, 0, 1, 3, 6, 10, 15, 21, 28, 36, 45}}),
+      pairs(n_choose_2[legs] - 1), delta(delta_), pair_dirs(pairs),
+      model_dir_models(runs, std::vector<std::string>(pairs + 1)),
       kerasModels(runs, std::vector<nn::Network<T>>(pairs + 1)),
-      metadatas(runs, std::vector<std::vector<T>>(pairs + 1, std::vector<T>(10))),
-      model_dir_models(runs, std::vector<std::string>(pairs + 1)) {
+      metadatas(runs, std::vector<std::vector<T>>(pairs + 1, std::vector<T>(10))) {
+  std::generate(pair_dirs.begin(), pair_dirs.end(),
+                [n = 0]() mutable { return "pair_0.02_" + std::to_string(n++) + "/"; });
+
   for (int i{0}; i < runs; ++i) {
     // Near networks
     for (int j{0}; j < pairs; ++j) {

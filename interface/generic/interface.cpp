@@ -22,7 +22,11 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
     : zero(0.), m_alpha(1. / 137.035999084), m_alphas(0.118), m_mur(91.188),
       delta(2e-2), x(1e-2),
 #if (defined(NN) || defined(BOTH))
+#ifdef NAIVE
+      networks(NN2A::legs, training_reruns, NN_MODEL, "cut_0.02/"),
+#else
       networks(NN2A::legs, training_reruns, NN_MODEL, delta, "cut_0.02/"),
+#endif
 #endif
 #if (RUNS == 1)
       resfile("res-" + std::to_string(A)),
@@ -86,9 +90,9 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector &point) 
 #endif
   std::vector<std::vector<double>> momenta(legs, std::vector<double>(d));
   for (int i{0}; i < legs; ++i) {
-      for (int j{0}; j < d; ++j) {
-        momenta[i][j] = point[i][j];
-      }
+    for (int j{0}; j < d; ++j) {
+      momenta[i][j] = point[i][j];
+    }
   }
   const double mean{networks.compute(momenta)};
 #ifdef TIMING
