@@ -12,58 +12,41 @@ std::vector<double> read_metadata_from_file(const std::string &fname);
 double standardise(double value, double mean, double stnd);
 double destandardise(double value, double mean, double stnd);
 
-// layer class - base class for other layer classes
-class Layer {
-public:
-  std::string layer_name;
+enum ActivationType { Tanh, Linear };
 
-  //  constructor sets parameter std::string to member variable  i.e. -> layer_name
-  Layer(std::string name) : layer_name(name){};
+struct Layer {
   virtual ~Layer(){};
 
-  // virtual methods are expected to be redefined in derived class
-  // virtual methods for derived classes can to be accessed
-  // using pointer/reference to the base class
   virtual void load_weights(std::ifstream &input_fname) = 0;
   virtual std::vector<double> compute_output(std::vector<double> test_input) = 0;
-
-  std::string get_layer_name() { return layer_name; } // returns layer name
 };
 
-class LayerDense : public Layer {
-public:
+struct LayerDense : public Layer {
   int input_node_count;
   int output_weights;
   std::vector<std::vector<double>> layer_weights;
   std::vector<double> bias;
 
-  LayerDense() : Layer("Dense"){};
   void load_weights(std::ifstream &fin);
   std::vector<double> compute_output(std::vector<double> test_input);
 };
 
-enum ActivationType { Tanh, Linear };
-
-class LayerActivation : public Layer {
-public:
+struct LayerActivation : public Layer {
   ActivationType activation_type;
 
-  LayerActivation() : Layer("Activation"){};
   void load_weights(std::ifstream &fin);
   std::vector<double> compute_output(std::vector<double> test_input);
 };
 
-// keras model class
 class KerasModel {
 public:
-  KerasModel(){}; // constructor declaration
-  ~KerasModel();  // destructor declaration
+  ~KerasModel();
   void load_weights(std::string &input_fname);
   std::vector<double> compute_output(std::vector<double> test_input);
 
 private:
   int layers_count;
-  std::vector<Layer *> layers; // container with layers
+  std::vector<Layer *> layers;
 };
 
 class Networks {
