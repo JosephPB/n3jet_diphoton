@@ -149,7 +149,7 @@ void nn::KerasModel::load_weights(std::string &input_fname) {
 #ifdef DEBUG
     std::cout << "Iterating over layers..." << '\n';
 #endif
-    for (unsigned int layer_index = 0; layer_index < layers_count; ++layer_index) {
+    for (int layer_index{0}; layer_index < layers_count; ++layer_index) {
       fin >> tmp_str >> layer_id >> layer_type;
 #ifdef DEBUG
       std::cout << tmp_str << layer_id << layer_type << '\n';
@@ -190,7 +190,7 @@ std::vector<double> nn::KerasModel::compute_output(std::vector<double> test_inpu
   std::cout << "Layer count: " << layers_count << '\n';
 #endif
   std::vector<double> response;
-  for (unsigned int i{0}; i < layers_count; ++i) {
+  for (int i{0}; i < layers_count; ++i) {
 #ifdef DEBUG
     std::cout << "Processing layer to compute output " << layers[i]->layer_name << '\n';
 #endif
@@ -219,13 +219,13 @@ void nn::LayerDense::load_weights(std::ifstream &fin) {
   std::cout << "Now read weights of all input modes..." << '\n';
 #endif
   char tmp_char = ' ';
-  for (unsigned int i{0}; i < input_node_count; ++i) {
+  for (int i{0}; i < input_node_count; ++i) {
     fin >> tmp_char; // for '['
 #ifdef DEBUG
     std::cout << "Input node " << i << '\n';
 #endif
     std::vector<double> tmp_weights;
-    for (unsigned int j{0}; j < output_weights; ++j) {
+    for (int j{0}; j < output_weights; ++j) {
       fin >> tmp_double;
 #ifdef DEBUG
       std::cout << tmp_double << '\n';
@@ -240,7 +240,7 @@ void nn::LayerDense::load_weights(std::ifstream &fin) {
   std::cout << "Saving biases..." << '\n';
 #endif
   fin >> tmp_char; // for '['
-  for (unsigned int output_node_index = 0; output_node_index < output_weights;
+  for (int output_node_index = 0; output_node_index < output_weights;
        output_node_index++) {
     fin >> tmp_double;
 #ifdef DEBUG
@@ -259,9 +259,9 @@ std::vector<double> nn::LayerDense::compute_output(std::vector<double> test_inpu
   std::cout << "bias size " << bias.size() << '\n';
 #endif
   std::vector<double> out(output_weights);
-  for (std::size_t i{0}; i < output_weights; ++i) {
+  for (int i{0}; i < output_weights; ++i) {
     double weighted_term{0};
-    for (std::size_t j{0}; j < input_node_count; ++j) {
+    for (int j{0}; j < input_node_count; ++j) {
       weighted_term += (test_input[j] * layer_weights[j][i]);
     }
     out[i] = weighted_term + bias[i];

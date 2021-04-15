@@ -19,10 +19,10 @@ int pair_check(double p1[], double p2[], double delta, double s_com);
 // stds[4]); double untransform(double value, double mean, double scale); double
 // transform(double value, double mean, double scale);
 
-// layer class - base class for other layr classes
+// layer class - base class for other layer classes
 class Layer {
 public:
-  unsigned int layer_id;
+  // int layer_id;
   std::string layer_name;
 
   //  constructor sets parameter std::string to member variable  i.e. -> layer_name
@@ -40,8 +40,8 @@ public:
 
 class LayerDense : public Layer {
 public:
-  unsigned int input_node_count;
-  unsigned int output_weights;
+  int input_node_count;
+  int output_weights;
   std::vector<std::vector<double>> layer_weights;
   std::vector<double> bias;
 
@@ -62,16 +62,13 @@ public:
 // keras model class
 class KerasModel {
 public:
-  unsigned int input_node_count();
-  unsigned int output_node_count();
-
   KerasModel(){}; // constructor declaration
   ~KerasModel();  // destructor declaration
   void load_weights(std::string &input_fname);
   std::vector<double> compute_output(std::vector<double> test_input);
 
 private:
-  unsigned int layers_count;
+  int layers_count;
   std::vector<Layer *> layers; // container with layers
 };
 
