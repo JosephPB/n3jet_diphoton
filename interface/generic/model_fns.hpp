@@ -12,7 +12,7 @@ std::vector<double> read_metadata_from_file(const std::string &fname);
 double standardise(double value, double mean, double stnd);
 double destandardise(double value, double mean, double stnd);
 
-enum ActivationType { Tanh, Linear };
+enum ActivationType { Tanh, ReLU, Linear };
 
 struct Layer {
   virtual ~Layer(){};

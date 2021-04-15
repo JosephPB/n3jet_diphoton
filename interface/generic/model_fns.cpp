@@ -127,16 +127,6 @@ std::vector<double> nn::LayerDense::compute_output(std::vector<double> test_inpu
   return out;
 }
 
-// std::vector<double>
-// nn::LayerActivation::compute_output(std::vector<double> test_input) {
-//   if (activation_type == "linear") {
-//     return test_input;
-//   } else if (activation_type == "relu") {
-//     for (std::size_t i{0}; i < test_input.size(); ++i) {
-//       if (test_input[i] < 0) {
-//         test_input[i] = 0;
-//       }
-//     }
 //   // } else if (activation_type == "softmax") {
 //   //   double sum = 0.0;
 //   //   for (std::size_t k{0}; k < test_input.size(); ++k) {
@@ -162,15 +152,6 @@ std::vector<double> nn::LayerDense::compute_output(std::vector<double> test_inpu
 //   //   for (std::size_t k{0}; k < test_input.size(); ++k) {
 //   //     test_input[k] = test_input[k] / (1 + abs(test_input[k]));
 //   //   }
-//   } else if (activation_type == "tanh") {
-//     for (std::size_t k{0}; k < test_input.size(); ++k) {
-//       test_input[k] = std::tanh(test_input[k]);
-//     }
-//   } else {
-//     missing_activation_impl(activation_type);
-//   }
-//   return test_input;
-// }
 
 std::vector<double>
 nn::LayerActivation::compute_output(std::vector<double> test_input) {
@@ -178,6 +159,13 @@ nn::LayerActivation::compute_output(std::vector<double> test_input) {
   case Tanh:
     std::transform(test_input.cbegin(), test_input.cend(), test_input.begin(),
                    [](double a) -> double { return std::tanh(a); });
+    break;
+  case ReLU:
+    for (double &d : test_input) {
+      if (d < 0) {
+        d = 0;
+      }
+    }
     break;
   case Linear:
     break;
