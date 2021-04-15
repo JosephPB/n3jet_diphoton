@@ -50,6 +50,8 @@ class RivetDistributions:
         self.rescaling = rescaling
         self.dpi = dpi
 
+    ## Angluar plots
+
     def plot_phi_jj(self):
 
         dphi_jj_file = self.rivet_dir + "dphijj.dat"
@@ -91,6 +93,8 @@ class RivetDistributions:
             self.save_dir + "dr_jy.png", dpi=self.dpi, bbox_inches="tight"
         )
 
+    ## Di-photon plots
+
     def plot_eta_yy(self):
 
         deta_yy_file = self.rivet_dir + "etayy.dat"
@@ -130,6 +134,8 @@ class RivetDistributions:
         dm_yy_fig.savefig(
             self.save_dir + "dm_yy.png", dpi=self.dpi, bbox_inches="tight"
         )
+
+    ## p_T plots
 
     def plot_pt_j1(self):
 
