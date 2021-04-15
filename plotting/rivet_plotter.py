@@ -94,10 +94,10 @@ class RivetPlotter:
 
         bins = np.append(xlow, xhigh[-1])
         vals = np.append(vals[0], vals)
-        errs = np.append(errs[0], errs) / vals
+        errs = np.append(errs[0], errs)
         return bins, vals, errs
 
-    def plot_distirbution(
+    def plot_distribution(
         self,
         njet_bins,
         nn_bins,
@@ -147,16 +147,16 @@ class RivetPlotter:
         ax2.step(njet_bins, nn_vals / njet_vals, color="blue")
         ax2.fill_between(
             njet_bins[:-1],
-            (np.ones(len(njet_vals)) - njet_errs)[1:],
-            (np.ones(len(njet_vals)) + njet_errs)[1:],
+            (np.ones(len(njet_vals)) - (njet_errs/njet_vals))[1:],
+            (np.ones(len(njet_vals)) + (njet_errs/njet_vals))[1:],
             step="post",
             color="red",
             alpha=0.5,
         )
         ax2.fill_between(
             nn_bins[:-1],
-            ((nn_vals / njet_vals) - nn_errs)[1:],
-            ((nn_vals / njet_vals) + nn_errs)[1:],
+            ((nn_vals / njet_vals) - (nn_errs/njet_vals))[1:],
+            ((nn_vals / njet_vals) + (nn_errs/njet_vals))[1:],
             step="post",
             color="blue",
             alpha=0.5,
@@ -185,28 +185,38 @@ class RivetPlotter:
         njet_bins, njet_vals, njet_errs = self.parse_data_step(njet_data)
         nn_bins, nn_vals, nn_errs = self.parse_data_step(nn_data)
 
-        if rescaling == "On":
-            pass
+        if rescaling == "On":      
+            njet_vals_pass=njet_vals
+            nn_vals_pass=nn_vals
+            njet_errs_pass=njet_errs
+            nn_errs_pass=nn_errs
+
         elif rescaling == "Off":
-            njet_vals = njet_vals / njet_scale
-            nn_vals = nn_vals / nn_scale
+                njet_vals_pass=njet_vals/njet_scale
+                nn_vals_pass=nn_vals/nn_scale
+                njet_errs_pass=njet_errs/njet_scale
+                nn_errs_pass=nn_errs/njet_scale
+
         elif rescaling == "XS":
-            njet_vals = njet_vals / np.sum(njet_vals)
-            nn_vals = nn_vals / np.sum(nn_vals)
+                njet_vals_pass=njet_vals/np.sum(njet_vals)
+                nn_vals_pass=nn_vals/np.sum(nn_vals)
+                njet_errs_pass=njet_errs/np.sum(njet_vals)
+                nn_errs_pass=nn_errs/np.sum(njet_vals)
+                
         else:
             raise ValueError(
-                "rescaling takes values of: On/XS/Off but you have passed {}".format(
+                "rescaling takes values: On/XS/Off but you have passed {}".format(
                     rescaling
                 )
             )
-
-        fig = self.plot_distirbution(
+            
+        fig = self.plot_distribution(
             njet_bins=njet_bins,
             nn_bins=nn_bins,
-            njet_vals=njet_vals,
-            nn_vals=nn_vals,
-            njet_errs=njet_errs,
-            nn_errs=nn_errs,
+            njet_vals=njet_vals_pass,
+            nn_vals=nn_vals_pass,
+            njet_errs=njet_errs_pass,
+            nn_errs=nn_errs_pass,
             xlabel=xlabel,
             ylabel=ylabel,
             xlim=xlim,
