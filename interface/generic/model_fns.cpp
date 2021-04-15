@@ -11,9 +11,9 @@
 // error for missing implementation of activation function
 // you can add your activation implementation in compute_output if required
 void nn::missing_activation_impl(const std::string &activation) {
-  std::cout << "Activation " << activation << " not defined!" << '\n';
-  std::cout << "Please add its implementation before use." << '\n';
-  exit(1);
+  std::cout << "Activation " << activation << " not defined!" << '\n'
+            << "Please add its implementation before use." << '\n';
+  std::exit(EXIT_FAILURE);
 }
 
 std::vector<double> nn::read_input_from_file(const std::string &fname) {
@@ -44,23 +44,23 @@ std::vector<double> nn::read_input_from_file(const std::string &fname) {
 
 std::vector<double> nn::read_metadata_from_file(const std::string &fname) {
   std::ifstream fin(fname.c_str());
-  int n_x_mean = 4;
-  int n_x_std = 4;
-  int n_y_mean = 1;
-  int n_y_std = 1;
+  int n_x_mean{4};
+  int n_x_std{4};
+  int n_y_mean{1};
+  int n_y_std{1};
 
   std::vector<double> metadata(10);
 
-  for (int i = 0; i < n_x_mean; i++) {
+  for (int i{0}; i < n_x_mean; ++i) {
     fin >> metadata[i];
   }
-  for (int i = 0; i < n_x_std; i++) {
+  for (int i{0}; i < n_x_std; ++i) {
     fin >> metadata[n_x_mean + i];
   }
-  for (int i = 0; i < n_y_mean; i++) {
+  for (int i{0}; i < n_y_mean; ++i) {
     fin >> metadata[n_x_mean + n_x_std + i];
   }
-  for (int i = 0; i < n_y_std; i++) {
+  for (int i{0}; i < n_y_std; ++i) {
     fin >> metadata[n_x_mean + n_x_std + n_y_mean + i];
   }
 
@@ -95,24 +95,11 @@ nn::read_multi_input_from_file(const std::string &fname) {
 }
 
 double nn::standardise(double value, double mean, double stnd) {
-  double new_value{(value - mean) / stnd};
-  return new_value;
+  return (value - mean) / stnd;
 }
 
 double nn::destandardise(double value, double mean, double stnd) {
-  double new_value{value * stnd + mean};
-  return new_value;
-}
-
-int nn::pair_check(double p1[], double p2[], double delta, double s_com) {
-  double prod = p1[0] * p2[0] - (p1[1] * p2[1] + p1[2] * p2[2] + p1[3] * p2[3]);
-  double distance = prod / s_com;
-
-  if (distance < delta) {
-    return distance;
-  } else {
-    return distance;
-  }
+  return value * stnd + mean;
 }
 
 // KerasModel destructor
@@ -137,7 +124,7 @@ void nn::KerasModel::load_weights(std::string &input_fname) {
 
   std::string tmp_str = "";
   std::string layer_type = "";
-  int layer_id = 0;
+  int layer_id{0};
   if (fin.is_open()) {
     // get layers count in layers_count var
     fin >> tmp_str >> layers_count;
@@ -218,7 +205,7 @@ void nn::LayerDense::load_weights(std::ifstream &fin) {
 #ifdef DEBUG
   std::cout << "Now read weights of all input modes..." << '\n';
 #endif
-  char tmp_char = ' ';
+  char tmp_char{' '};
   for (int i{0}; i < input_node_count; ++i) {
     fin >> tmp_char; // for '['
 #ifdef DEBUG
@@ -240,7 +227,7 @@ void nn::LayerDense::load_weights(std::ifstream &fin) {
   std::cout << "Saving biases..." << '\n';
 #endif
   fin >> tmp_char; // for '['
-  for (int output_node_index = 0; output_node_index < output_weights;
+  for (int output_node_index{0}; output_node_index < output_weights;
        output_node_index++) {
     fin >> tmp_double;
 #ifdef DEBUG
@@ -373,7 +360,7 @@ nn::NaiveNetworks::NaiveNetworks(const int legs, const int runs,
 
 double nn::NaiveNetworks::compute(const std::vector<std::vector<double>> &point) {
   // moms is an vector of runs results, each of which is an vector of flattened momenta
-  // std::array<std::array<double, NN2A::legs * NN2A::d>, runs> moms;
+  // std::array<std::array<double, legs * d>, runs> moms;
   std::vector<std::vector<double>> moms(runs, std::vector<double>(legs * d));
 
   // flatten momenta
