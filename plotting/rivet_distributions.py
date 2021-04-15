@@ -1,9 +1,9 @@
 import argparse
 import matplotlib
 
-from rivet_plotter import RivetPlotter
-
 matplotlib.use("Agg")
+
+from rivet_plotter import RivetPlotter
 
 
 def parse():
