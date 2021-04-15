@@ -49,18 +49,18 @@ double nn::destandardise(double value, double mean, double stnd) {
 
 nn::LayerDense::LayerDense(std::ifstream &fin) {
   fin >> input_node_count >> output_weights;
+  layer_weights = std::vector<std::vector<double>>(output_weights,
+                                                   std::vector<double>(input_node_count));
   double tmp_double;
   char tmp_char;
   // read weights for all the input nodes
   for (int i{0}; i < input_node_count; ++i) {
     fin >> tmp_char; // for '['
-    std::vector<double> tmp_weights;
     for (int j{0}; j < output_weights; ++j) {
       fin >> tmp_double;
-      tmp_weights.push_back(tmp_double);
+      layer_weights[j][i] = tmp_double;
     }
     fin >> tmp_char; // for ']'
-    layer_weights.push_back(tmp_weights);
   }
   // read and save bias values
   fin >> tmp_char; // for '['
@@ -77,7 +77,7 @@ std::vector<double> nn::LayerDense::compute_output(std::vector<double> test_inpu
   for (int i{0}; i < output_weights; ++i) {
     double weighted_term{0};
     for (int j{0}; j < input_node_count; ++j) {
-      weighted_term += (test_input[j] * layer_weights[j][i]);
+      weighted_term += (test_input[j] * layer_weights[i][j]);
     }
     out[i] = weighted_term + bias[i];
   }
