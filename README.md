@@ -19,6 +19,7 @@ Checks and formatters can be manually invoked with `pre-commit run --all-files`.
 
 This can all be initialised by running `./init.sh`.
 You only need to do this once (after you clone the repo).
+If the script has a problem with installing `pre-commit`, just [install it manually](https://pre-commit.com/index.html#installation).
 
 On the GitLab remote, there is also linting.
 This is configured in [.gitlab-ci.yml](.gitlab-ci.yml).

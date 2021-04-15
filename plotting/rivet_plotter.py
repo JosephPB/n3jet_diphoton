@@ -194,7 +194,11 @@ class RivetPlotter:
             njet_vals = njet_vals / np.sum(njet_vals)
             nn_vals = nn_vals / np.sum(nn_vals)
         else:
-            raise ValueError("rescaling only takes values of: On/XS/Off but you have passed {}".format(rescaling))
+            raise ValueError(
+                "rescaling takes values of: On/XS/Off but you have passed {}".format(
+                    rescaling
+                )
+            )
 
         fig = self.plot_distirbution(
             njet_bins=njet_bins,

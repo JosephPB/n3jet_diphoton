@@ -1,24 +1,25 @@
-#include <array>
-#include <cmath>
+#include <chrono>
 #include <iostream>
 #include <vector>
 
 #include "model_fns.hpp"
 
-double d(double a, double b) { return 2 * std::abs((a - b) / (a + b)); }
-
 int main() {
   std::cout.setf(std::ios_base::scientific, std::ios_base::floatfield);
   std::cout.precision(16);
 
+  const int num{100};
+  const int pspoints{2};
+
   std::cout << '\n'
-            << "n3jet: test pretrained neural network C++ inference result against "
-               "reference Python implementation, showing relative difference d"
+            << "n3jet: benchmark pretrained neural network C++ inference timing" << '\n'
+            << "       showing mean of " << num << " runs for " << pspoints << " points"
             << '\n'
             << '\n';
 
+  using TP = const std::chrono::high_resolution_clock::time_point;
+
   const int legs{5};
-  const int pspoints{2};
   const int training_reruns{20};
   const double delta{0.02};
 
@@ -46,8 +47,6 @@ int main() {
       },
   }};
 
-  std::array<double, 2> python_outputs{{2.2266408e-07, 1.430258598666967e-06}};
-
   nn::FKSNetworks networks(
       legs, training_reruns,
       "../../models/3g2a/RAMBO/"
@@ -55,13 +54,14 @@ int main() {
       delta, "cut_0.02/");
 
   for (int i{0}; i < pspoints; ++i) {
-    std::cout << "==================== Test point " << i + 1
-              << " ====================" << '\n';
+    TP nnt1{std::chrono::high_resolution_clock::now()};
+    for (int j{0}; j < num; ++j) {
+      networks.compute(momenta[i]);
+    };
+    TP nnt2{std::chrono::high_resolution_clock::now()};
+    const long int nndur{
+        std::chrono::duration_cast<std::chrono::microseconds>(nnt2 - nnt1).count()};
 
-    double average_output{networks.compute(momenta[i])};
-
-    std::cout << "Python Loop( 0) = " << python_outputs[i] << '\n'
-              << "C++    Loop( 0) = " << average_output << '\n'
-              << "d(C++, Python)  = " << d(average_output, python_outputs[i]) << '\n';
+    std::cout << i << " " << nndur / num << "us" << '\n';
   }
 }
