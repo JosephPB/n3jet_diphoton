@@ -47,7 +47,7 @@ int main() {
       },
   }};
 
-  nn::FKSNetworks networks(
+  nn::FKSEnsemble networks(
       legs, training_reruns,
       "../../models/3g2a/RAMBO/"
       "events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet_test/",

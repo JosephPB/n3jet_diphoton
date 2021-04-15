@@ -146,13 +146,13 @@ nn::LayerActivation::compute_output(std::vector<double> test_input) {
 // Network
 // ~~~~~~~
 
-nn::KerasModel::~KerasModel() {
+nn::Network::~Network() {
   for (Layer *layer : layers) {
     delete layer;
   }
 }
 
-void nn::KerasModel::load_weights(std::string &input_fname) {
+void nn::Network::load_weights(std::string &input_fname) {
   std::ifstream fin(input_fname.c_str(), std::ifstream::in);
 
   if (!fin.good()) {
@@ -187,7 +187,7 @@ void nn::KerasModel::load_weights(std::string &input_fname) {
   fin.close();
 }
 
-double nn::KerasModel::compute_output(std::vector<double> test_input) {
+double nn::Network::compute_output(std::vector<double> test_input) {
   for (Layer *layer : layers) {
     test_input = layer->compute_output(test_input);
   }
@@ -197,7 +197,7 @@ double nn::KerasModel::compute_output(std::vector<double> test_input) {
 // Ensemble
 // ~~~~~~~~
 
-nn::Networks::Networks(const int legs_, const int runs_, const std::string &model_path,
+nn::Ensemble::Ensemble(const int legs_, const int runs_, const std::string &model_path,
                        const double delta_, const std::string &cut_dirs_)
     // n.b. there is an additional FKS pair for the cut network (for non-divergent
     // regions)
@@ -210,17 +210,17 @@ nn::Networks::Networks(const int legs_, const int runs_, const std::string &mode
                 [n = 0]() mutable { return "pair_0.02_" + std::to_string(n++) + "/"; });
 }
 
-double nn::Networks::dot(const std::vector<std::vector<double>> &point, const int k,
+double nn::Ensemble::dot(const std::vector<std::vector<double>> &point, const int k,
                          const int j) const {
   return point[j][0] * point[k][0] -
          (point[j][1] * point[k][1] + point[j][2] * point[k][2] +
           point[j][3] * point[k][3]);
 }
 
-nn::NaiveNetworks::NaiveNetworks(const int legs, const int runs,
+nn::NaiveEnsemble::NaiveEnsemble(const int legs, const int runs,
                                  const std::string &model_path, const double delta_,
                                  const std::string &cut_dirs_)
-    : Networks(legs, runs, model_path, delta_, cut_dirs_), kerasModels(runs),
+    : Ensemble(legs, runs, model_path, delta_, cut_dirs_), kerasModels(runs),
       metadatas(runs, std::vector<double>(10)), model_dir_models(runs) {
   for (int i{0}; i < runs; ++i) {
     // Naive networks
@@ -233,7 +233,7 @@ nn::NaiveNetworks::NaiveNetworks(const int legs, const int runs,
   }
 }
 
-double nn::NaiveNetworks::compute(const std::vector<std::vector<double>> &point) {
+double nn::NaiveEnsemble::compute(const std::vector<std::vector<double>> &point) {
   // moms is an vector of runs results, each of which is an vector of flattened momenta
   // std::array<std::array<double, legs * d>, runs> moms;
   std::vector<std::vector<double>> moms(runs, std::vector<double>(legs * d));
@@ -259,11 +259,11 @@ double nn::NaiveNetworks::compute(const std::vector<std::vector<double>> &point)
   return results_sum / runs;
 }
 
-nn::FKSNetworks::FKSNetworks(const int legs, const int runs,
+nn::FKSEnsemble::FKSEnsemble(const int legs, const int runs,
                              const std::string &model_path, const double delta_,
                              const std::string &cut_dirs_)
-    : Networks(legs, runs, model_path, delta_, cut_dirs_),
-      kerasModels(runs, std::vector<nn::KerasModel>(pairs + 1)),
+    : Ensemble(legs, runs, model_path, delta_, cut_dirs_),
+      kerasModels(runs, std::vector<nn::Network>(pairs + 1)),
       metadatas(runs,
                 std::vector<std::vector<double>>(pairs + 1, std::vector<double>(10))),
       model_dir_models(runs, std::vector<std::string>(pairs + 1)) {
@@ -285,7 +285,7 @@ nn::FKSNetworks::FKSNetworks(const int legs, const int runs,
   }
 }
 
-double nn::FKSNetworks::compute(const std::vector<std::vector<double>> &point) {
+double nn::FKSEnsemble::compute(const std::vector<std::vector<double>> &point) {
   // moms is an vector of runs results, each of which is an vector of FKS pairs results,
   // each of which is an vector of flattened momenta
   std::vector<std::vector<std::vector<double>>> moms(

@@ -38,9 +38,9 @@ struct LayerActivation : public Layer {
   std::vector<double> compute_output(std::vector<double> test_input);
 };
 
-class KerasModel {
+class Network {
 public:
-  ~KerasModel();
+  ~Network();
   void load_weights(std::string &input_fname);
   double compute_output(std::vector<double> test_input);
 
@@ -49,9 +49,9 @@ private:
   std::vector<Layer *> layers;
 };
 
-class Networks {
+class Ensemble {
 public:
-  Networks(int legs_, int runs_, const std::string &model_path, double delta_,
+  Ensemble(int legs_, int runs_, const std::string &model_path, double delta_,
            const std::string &cut_dirs_);
 
 private:
@@ -73,28 +73,28 @@ protected:
   double dot(const std::vector<std::vector<double>> &point, int k, int j) const;
 };
 
-class NaiveNetworks : public Networks {
+class NaiveEnsemble : public Ensemble {
 public:
-  NaiveNetworks(const int legs, const int runs, const std::string &model_path,
+  NaiveEnsemble(const int legs, const int runs, const std::string &model_path,
                 double delta_, const std::string &cut_dirs_);
 
   double compute(const std::vector<std::vector<double>> &point);
 
-  std::vector<nn::KerasModel> kerasModels;
+  std::vector<nn::Network> kerasModels;
   std::vector<std::vector<double>> metadatas;
 
 private:
   std::vector<std::string> model_dir_models;
 };
 
-class FKSNetworks : public Networks {
+class FKSEnsemble : public Ensemble {
 public:
-  FKSNetworks(const int legs, const int runs, const std::string &model_path,
+  FKSEnsemble(const int legs, const int runs, const std::string &model_path,
               double delta_, const std::string &cut_dirs_);
 
   double compute(const std::vector<std::vector<double>> &point);
 
-  std::vector<std::vector<nn::KerasModel>> kerasModels;
+  std::vector<std::vector<nn::Network>> kerasModels;
   std::vector<std::vector<std::vector<double>>> metadatas;
 
 private:

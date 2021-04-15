@@ -70,7 +70,7 @@ void run(const int start, const int end) {
   amp_ana->setNf(Nf);
   amp_ana->setNc(Nc);
 
-  nn::FKSNetworks ensemble(
+  nn::FKSEnsemble ensemble(
       legs, 20,
       "../../models/3g2a/RAMBO/"
       "events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet_test/",

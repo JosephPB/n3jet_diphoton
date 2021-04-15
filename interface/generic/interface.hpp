@@ -65,7 +65,7 @@ private:
 #ifdef NAIVE
   nn::NaiveNetworks networks;
 #else
-  nn::FKSNetworks networks;
+  nn::FKSEnsemble networks;
 #endif
 #endif
 
