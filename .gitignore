@@ -10,6 +10,6 @@ Results.db*
 *.o
 callgrind.out.*
 vgcore.*
-interface/test/test
+*/*/test
 interface/*/time
 *.out
