@@ -55,13 +55,13 @@ void nn::KerasModel::load_weights(std::string &input_fname) {
     std::exit(EXIT_FAILURE);
   }
 
-  std::string tmp_str{""};
-  std::string tmp_layer_type{""};
-  int tmp_layer_id{0};
+  std::string tmp_str;
+  std::string tmp_layer_type;
+  int tmp_layer_id;
   if (fin.is_open()) {
     // get layers count in layers_count var
     fin >> tmp_str >> layers_count;
-    // Now iterate over  each layer
+    // Now iterate over each layer
     for (int layer_index{0}; layer_index < layers_count; ++layer_index) {
       fin >> tmp_str >> tmp_layer_id >> tmp_layer_type;
       // pointer to layer
@@ -70,10 +70,11 @@ void nn::KerasModel::load_weights(std::string &input_fname) {
         layer = new LayerDense();
       } else if (tmp_layer_type == "Activation") {
         layer = new LayerActivation();
-      }
-      // if none of above case is true, means layer not-defined
-      if (layer == 0L) {
-        return;
+      } else {
+        std::cerr << "Error: Layer type " << tmp_layer_type << " is not defined!"
+                  << '\n'
+                  << "Please add its implementation before use." << '\n';
+        std::exit(EXIT_FAILURE);
       }
       layer->load_weights(fin);
       layers.push_back(layer);
@@ -92,8 +93,8 @@ std::vector<double> nn::KerasModel::compute_output(std::vector<double> test_inpu
 void nn::LayerDense::load_weights(std::ifstream &fin) {
   fin >> input_node_count >> output_weights;
   double tmp_double;
-  // read weights for all the input nodes
   char tmp_char;
+  // read weights for all the input nodes
   for (int i{0}; i < input_node_count; ++i) {
     fin >> tmp_char; // for '['
     std::vector<double> tmp_weights;
@@ -193,7 +194,7 @@ void nn::LayerActivation::load_weights(std::ifstream &fin) {
   } else if (tmp_type == "linear") {
     activation_type = Linear;
   } else {
-    std::cout << "Activation " << activation_type << " not defined!" << '\n'
+    std::cerr << "Error: Activation type " << activation_type << " not defined!" << '\n'
               << "Please add its implementation before use." << '\n';
     std::exit(EXIT_FAILURE);
   }
