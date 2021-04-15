@@ -24,7 +24,7 @@ enum ActivationType { Tanh, ReLU, Linear };
 template <typename T> struct Layer {
   virtual ~Layer(){};
 
-  virtual std::vector<T> compute_output(std::vector<T> test_input) = 0;
+  virtual void compute_output(std::vector<T>& test_input) = 0;
 };
 
 template <typename T> struct LayerDense : public Layer<T> {
@@ -35,14 +35,14 @@ template <typename T> struct LayerDense : public Layer<T> {
   std::vector<std::vector<T>> layer_weights;
   std::vector<T> bias;
 
-  virtual std::vector<T> compute_output(std::vector<T> test_input) override;
+  virtual void compute_output(std::vector<T>& test_input) override;
 };
 
 template <typename T> struct LayerActivation : public Layer<T> {
   LayerActivation(std::ifstream &fin);
 
   ActivationType activation_type;
-  virtual std::vector<T> compute_output(std::vector<T> test_input) override;
+  virtual void compute_output(std::vector<T>& test_input) override;
 };
 
 // Network
@@ -170,13 +170,13 @@ template <typename T> nn::LayerDense<T>::LayerDense(std::ifstream &fin) {
 }
 
 template <typename T>
-std::vector<T> nn::LayerDense<T>::compute_output(std::vector<T> test_input) {
+void nn::LayerDense<T>::compute_output(std::vector<T>& test_input) {
   std::vector<T> out(output_weights);
   for (int i{0}; i < output_weights; ++i) {
     out[i] = std::inner_product(test_input.begin(), test_input.end(),
                                 layer_weights[i].begin(), bias[i]);
   }
-  return out;
+  test_input = out;
 }
 
 template <typename T> nn::LayerActivation<T>::LayerActivation(std::ifstream &fin) {
@@ -195,7 +195,7 @@ template <typename T> nn::LayerActivation<T>::LayerActivation(std::ifstream &fin
 }
 
 template <typename T>
-std::vector<T> nn::LayerActivation<T>::compute_output(std::vector<T> test_input) {
+void nn::LayerActivation<T>::compute_output(std::vector<T>& test_input) {
   switch (activation_type) {
   case Tanh:
     std::transform(test_input.cbegin(), test_input.cend(), test_input.begin(),
@@ -211,7 +211,6 @@ std::vector<T> nn::LayerActivation<T>::compute_output(std::vector<T> test_input)
   case Linear:
     break;
   }
-  return test_input;
 }
 
 // } else if (activation_type == "softmax") {
@@ -286,7 +285,7 @@ template <typename T> void nn::Network<T>::load_weights(std::string &input_fname
 
 template <typename T> T nn::Network<T>::compute_output(std::vector<T> test_input) {
   for (Layer<T> *layer : layers) {
-    test_input = layer->compute_output(test_input);
+    layer->compute_output(test_input);
   }
   return test_input[0];
 }
