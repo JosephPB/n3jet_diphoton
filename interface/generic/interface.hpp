@@ -63,7 +63,7 @@ private:
 
 #if (defined(NN) || defined(BOTH))
 #ifdef NAIVE
-  nn::NaiveNetworks networks;
+  nn::NaiveEnsemble networks;
 #else
   nn::FKSEnsemble networks;
 #endif
