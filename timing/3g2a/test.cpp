@@ -108,12 +108,12 @@ void run(const int start, const int end) {
     const double err_ana{std::abs(amp_ana->virtsq_error().get0().real() / val_ana)};
 
     t0 = std::chrono::high_resolution_clock::now();
-    ensemble.compute(moms_alt);
+    ensemble.compute_error(moms_alt);
     t1 = std::chrono::high_resolution_clock::now();
     const long dur_nn{
         std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()};
-    const double val_nn{amp_ana->virtsq_value().get0().real()};
-    const double err_nn{0.};
+    const double val_nn{ensemble.mean};
+    const double err_nn{ensemble.std_dev};
 
     const double tr_num{static_cast<double>(dur_num) / dur_ana};
     const double tr_ana{1};

@@ -1,5 +1,6 @@
 #include <array>
 #include <cmath>
+#include <iomanip>
 #include <iostream>
 #include <vector>
 
@@ -62,8 +63,13 @@ int main() {
 
     double average_output{networks.compute(momenta[i])};
 
-    std::cout << "Python Loop( 0) = " << python_outputs[i] << '\n'
-              << "C++    Loop( 0) = " << average_output << '\n'
-              << "d(C++, Python)  = " << d(average_output, python_outputs[i]) << '\n';
+    networks.compute_error(momenta[i]);
+
+    std::cout << std::setw(17) << "Python = " << python_outputs[i] << '\n'
+              << std::setw(17) << "C++ = " << average_output << '\n'
+              << std::setw(17) << "C++ 2 = " << networks.mean << " +- "
+              << networks.std_dev << '\n'
+              << std::setw(17)
+              << "d(C++, Python) = " << d(average_output, python_outputs[i]) << '\n';
   }
 }

@@ -1,4 +1,5 @@
 #include <chrono>
+#include <iomanip>
 #include <iostream>
 #include <vector>
 
@@ -15,7 +16,9 @@ int main() {
             << "n3jet: benchmark pretrained neural network C++ inference timing" << '\n'
             << "       showing mean of " << num << " runs for " << pspoints << " points"
             << '\n'
-            << '\n';
+            << '\n'
+            << std::setw(3) << "pt" << std::setw(9) << "val" << std::setw(9)
+            << "val+err" << '\n';
 
   using TP = const std::chrono::high_resolution_clock::time_point;
 
@@ -62,6 +65,15 @@ int main() {
     const long int nndur{
         std::chrono::duration_cast<std::chrono::microseconds>(nnt2 - nnt1).count()};
 
-    std::cout << i << " " << nndur / num << "us" << '\n';
+    TP nnt3{std::chrono::high_resolution_clock::now()};
+    for (int j{0}; j < num; ++j) {
+      networks.compute_error(momenta[i]);
+    };
+    TP nnt4{std::chrono::high_resolution_clock::now()};
+    const long int nndur2{
+        std::chrono::duration_cast<std::chrono::microseconds>(nnt4 - nnt3).count()};
+
+    std::cout << std::setw(3) << i << std::setw(7) << nndur / num << "us"
+              << std::setw(7) << nndur2 / num << "us" << '\n';
   }
 }

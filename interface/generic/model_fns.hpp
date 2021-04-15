@@ -8,6 +8,8 @@
 #include <iostream>
 #include <numeric>
 #include <string>
+#include <tuple>
+#include <utility>
 #include <vector>
 
 // ====================================================================================
@@ -24,7 +26,7 @@ enum ActivationType { Tanh, ReLU, Linear };
 template <typename T> struct Layer {
   virtual ~Layer(){};
 
-  virtual void compute_output(std::vector<T>& test_input) = 0;
+  virtual void compute_output(std::vector<T> &test_input) = 0;
 };
 
 template <typename T> struct LayerDense : public Layer<T> {
@@ -35,14 +37,14 @@ template <typename T> struct LayerDense : public Layer<T> {
   std::vector<std::vector<T>> layer_weights;
   std::vector<T> bias;
 
-  virtual void compute_output(std::vector<T>& test_input) override;
+  virtual void compute_output(std::vector<T> &test_input) override;
 };
 
 template <typename T> struct LayerActivation : public Layer<T> {
   LayerActivation(std::ifstream &fin);
 
   ActivationType activation_type;
-  virtual void compute_output(std::vector<T>& test_input) override;
+  virtual void compute_output(std::vector<T> &test_input) override;
 };
 
 // Network
@@ -130,6 +132,10 @@ public:
               const std::string &cut_dirs_);
 
   T compute(const std::vector<std::vector<T>> &point);
+  void compute_error(const std::vector<std::vector<T>> &point);
+
+  T mean;
+  T std_dev;
 
   std::vector<std::vector<nn::Network<T>>> kerasModels;
   std::vector<std::vector<std::vector<T>>> metadatas;
@@ -170,7 +176,7 @@ template <typename T> nn::LayerDense<T>::LayerDense(std::ifstream &fin) {
 }
 
 template <typename T>
-void nn::LayerDense<T>::compute_output(std::vector<T>& test_input) {
+void nn::LayerDense<T>::compute_output(std::vector<T> &test_input) {
   std::vector<T> out(output_weights);
   for (int i{0}; i < output_weights; ++i) {
     out[i] = std::inner_product(test_input.begin(), test_input.end(),
@@ -195,7 +201,7 @@ template <typename T> nn::LayerActivation<T>::LayerActivation(std::ifstream &fin
 }
 
 template <typename T>
-void nn::LayerActivation<T>::compute_output(std::vector<T>& test_input) {
+void nn::LayerActivation<T>::compute_output(std::vector<T> &test_input) {
   switch (activation_type) {
   case Tanh:
     std::transform(test_input.cbegin(), test_input.cend(), test_input.begin(),
@@ -476,4 +482,62 @@ T nn::FKSEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
   }
 
   return results_sum / runs;
+}
+
+template <typename T>
+void nn::FKSEnsemble<T>::compute_error(const std::vector<std::vector<T>> &point) {
+  // moms is an vector of runs results, each of which is an vector of FKS pairs results,
+  // each of which is an vector of flattened momenta
+  std::vector<std::vector<std::vector<T>>> moms(
+      runs, std::vector<std::vector<T>>(pairs + 1, std::vector<T>(legs * d)));
+
+  // NN compute_output accepts vectors - could edit model_fns
+  // std::array<std::array<std::array<T, NN2A::legs * NN2A::d>, pairs + 1>, runs>
+  // moms;
+
+  // flatten momenta
+  for (int p{0}; p < legs; ++p) {
+    for (int mu{0}; mu < d; ++mu) {
+      // standardise input
+      for (int k{0}; k < runs; ++k) {
+        for (int j{0}; j <= pairs; ++j) {
+          moms[k][j][p * d + mu] =
+              standardise(point[p][mu], metadatas[k][j][mu], metadatas[k][j][d + mu]);
+        }
+      }
+    }
+  }
+
+  const T s_com{dot(point, 0, 1)};
+
+  // cut/near check
+  int cut_near{0};
+  for (int j{0}; j < legs - 1; ++j) {
+    for (int k{j + 1}; k < legs; ++k) {
+      if (dot(point, j, k) / s_com < delta) {
+        cut_near += 1;
+      }
+    }
+  }
+
+  // inference
+  std::vector<T> results(runs);
+  for (int j{0}; j < runs; ++j) {
+    if (cut_near > 0) {
+      // the point is near an IR singularity
+      // infer over all FKS pairs
+      for (int k{0}; k < pairs; ++k) {
+        results[j] += destandardise(kerasModels[j][k].compute_output(moms[j][k]),
+                                    metadatas[j][k][8], metadatas[j][k][9]);
+      }
+    } else {
+      // the point is in a non-divergent region
+      // use the 'cut' network which is the final entry in the pair network
+      results[j] = destandardise(kerasModels[j][pairs].compute_output(moms[j][pairs]),
+                                 metadatas[j][pairs][8], metadatas[j][pairs][9]);
+    }
+  }
+
+  mean = std::accumulate(results.cbegin(), results.cend(), T()) / runs;
+  std_dev = 0.; // TODO
 }
