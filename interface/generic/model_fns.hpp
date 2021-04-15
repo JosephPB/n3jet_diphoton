@@ -42,7 +42,7 @@ class KerasModel {
 public:
   ~KerasModel();
   void load_weights(std::string &input_fname);
-  std::vector<double> compute_output(std::vector<double> test_input);
+  double compute_output(std::vector<double> test_input);
 
 private:
   int layers_count;

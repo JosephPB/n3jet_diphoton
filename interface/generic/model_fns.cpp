@@ -187,12 +187,15 @@ void nn::KerasModel::load_weights(std::string &input_fname) {
   fin.close();
 }
 
-std::vector<double> nn::KerasModel::compute_output(std::vector<double> test_input) {
+double nn::KerasModel::compute_output(std::vector<double> test_input) {
   for (Layer *layer : layers) {
     test_input = layer->compute_output(test_input);
   }
-  return test_input;
+  return test_input[0];
 }
+
+// Ensemble
+// ~~~~~~~~
 
 nn::Networks::Networks(const int legs_, const int runs_, const std::string &model_path,
                        const double delta_, const std::string &cut_dirs_)
@@ -213,9 +216,6 @@ double nn::Networks::dot(const std::vector<std::vector<double>> &point, const in
          (point[j][1] * point[k][1] + point[j][2] * point[k][2] +
           point[j][3] * point[k][3]);
 }
-
-// Ensemble
-// ~~~~~~~~
 
 nn::NaiveNetworks::NaiveNetworks(const int legs, const int runs,
                                  const std::string &model_path, const double delta_,
@@ -252,8 +252,8 @@ double nn::NaiveNetworks::compute(const std::vector<std::vector<double>> &point)
   // inference
   double results_sum{0.};
   for (int j{0}; j < runs; ++j) {
-    const double result{kerasModels[j].compute_output(moms[j])[0]};
-    results_sum += nn::destandardise(result, metadatas[j][8], metadatas[j][9]);
+    results_sum += nn::destandardise(kerasModels[j].compute_output(moms[j]),
+                                     metadatas[j][8], metadatas[j][9]);
   }
 
   return results_sum / runs;
@@ -327,16 +327,15 @@ double nn::FKSNetworks::compute(const std::vector<std::vector<double>> &point) {
       // the point is near an IR singularity
       // infer over all FKS pairs
       for (int k{0}; k < pairs; ++k) {
-        const double result{kerasModels[j][k].compute_output(moms[j][k])[0]};
-        results_sum +=
-            nn::destandardise(result, metadatas[j][k][8], metadatas[j][k][9]);
+        results_sum += nn::destandardise(kerasModels[j][k].compute_output(moms[j][k]),
+                                         metadatas[j][k][8], metadatas[j][k][9]);
       }
     } else {
       // the point is in a non-divergent region
       // use the 'cut' network which is the final entry in the pair network
-      const double result{kerasModels[j][pairs].compute_output(moms[j][pairs])[0]};
       results_sum +=
-          nn::destandardise(result, metadatas[j][pairs][8], metadatas[j][pairs][9]);
+          nn::destandardise(kerasModels[j][pairs].compute_output(moms[j][pairs]),
+                            metadatas[j][pairs][8], metadatas[j][pairs][9]);
     }
   }
 
