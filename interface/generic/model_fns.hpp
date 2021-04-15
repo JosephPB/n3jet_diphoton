@@ -35,14 +35,14 @@ template <typename T> struct LayerDense : public Layer<T> {
   std::vector<std::vector<T>> layer_weights;
   std::vector<T> bias;
 
-  std::vector<T> compute_output(std::vector<T> test_input);
+  virtual std::vector<T> compute_output(std::vector<T> test_input) override;
 };
 
 template <typename T> struct LayerActivation : public Layer<T> {
   LayerActivation(std::ifstream &fin);
 
   ActivationType activation_type;
-  std::vector<T> compute_output(std::vector<T> test_input);
+  virtual std::vector<T> compute_output(std::vector<T> test_input) override;
 };
 
 // Network
