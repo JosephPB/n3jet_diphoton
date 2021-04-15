@@ -83,6 +83,10 @@ public:
   Networks(int legs_, int runs_, const std::string &model_path, double delta_,
            const std::string &cut_dirs_);
 
+private:
+  // binomial coefficients
+  const std::array<int, 11> n_choose_2;
+
 protected:
   static constexpr int d{4};
   const int legs;
@@ -96,10 +100,6 @@ protected:
   std::vector<std::string> pair_dirs;
 
   double dot(const std::vector<std::vector<double>> &point, int k, int j) const;
-
-private:
-  // binomial coefficients
-  const std::array<int, 11> n_choose_2;
 };
 
 class NaiveNetworks : public Networks {

@@ -333,9 +333,9 @@ nn::Networks::Networks(const int legs_, const int runs_, const std::string &mode
                        const double delta_, const std::string &cut_dirs_)
     // n.b. there is an additional FKS pair for the cut network (for non-divergent
     // regions)
-    : legs(legs_), runs(runs_), pairs(n_choose_2[legs] - 1), delta(delta_),
-      cut_dirs(cut_dirs_), model_base(model_path), model_dirs(runs), pair_dirs(pairs),
-      n_choose_2({{0, 0, 1, 3, 6, 10, 15, 21, 28, 36, 45}}) {
+    : n_choose_2({{0, 0, 1, 3, 6, 10, 15, 21, 28, 36, 45}}), legs(legs_), runs(runs_), 
+      pairs(n_choose_2[legs] - 1), delta(delta_), cut_dirs(cut_dirs_), 
+      model_base(model_path), model_dirs(runs), pair_dirs(pairs) {
   std::generate(model_dirs.begin(), model_dirs.end(),
                 [n = 0]() mutable { return std::to_string(n++) + "/"; });
   std::generate(pair_dirs.begin(), pair_dirs.end(),
