@@ -1,4 +1,5 @@
 #include <array>
+#include <chrono>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -16,6 +17,8 @@ int main() {
                "inference in a C++ interface"
             << '\n'
             << '\n';
+
+  using TP = const std::chrono::high_resolution_clock::time_point;
 
   const int legs{5};
   const int pspoints{2};
@@ -58,9 +61,14 @@ int main() {
     std::cout << "==================== Test point " << i + 1
               << " ====================" << '\n';
 
+    TP nnt1{std::chrono::high_resolution_clock::now()};
     double average_output{networks.compute(momenta[i])};
+    TP nnt2{std::chrono::high_resolution_clock::now()};
+    const long int nndur{
+        std::chrono::duration_cast<std::chrono::microseconds>(nnt2 - nnt1).count()};
 
-    std::cout << "Python Loop( 0) = " << python_outputs[i] << '\n';
-    std::cout << "C++    Loop( 0) = " << average_output << '\n';
+    std::cout << "Python Loop( 0) = " << python_outputs[i] << '\n'
+              << "C++    Loop( 0) = " << average_output << '\n'
+              << "C++ time        = " << nndur << "us" << '\n';
   }
 }
