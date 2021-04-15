@@ -41,14 +41,12 @@ double nn::destandardise(double value, double mean, double stnd) {
   return value * stnd + mean;
 }
 
-// KerasModel destructor
 nn::KerasModel::~KerasModel() {
   for (std::size_t i{0}; i < layers.size(); ++i) {
-    delete layers[i]; // deallocate memory
+    delete layers[i];
   }
 }
 
-// load weights for all layers
 void nn::KerasModel::load_weights(std::string &input_fname) {
 #ifdef DEBUG
   std::cout << "###################################" << '\n';
@@ -62,35 +60,34 @@ void nn::KerasModel::load_weights(std::string &input_fname) {
   }
 
   std::string tmp_str{""};
-  std::string layer_type{""};
-  int layer_id{0};
+  std::string tmp_layer_type{""};
+  int tmp_layer_id{0};
   if (fin.is_open()) {
     // get layers count in layers_count var
     fin >> tmp_str >> layers_count;
 #ifdef DEBUG
     std::cout << "Getting layers and count: " << tmp_str << layers_count << '\n';
 #endif
-
     // Now iterate over  each layer
 #ifdef DEBUG
     std::cout << "Iterating over layers..." << '\n';
 #endif
     for (int layer_index{0}; layer_index < layers_count; ++layer_index) {
-      fin >> tmp_str >> layer_id >> layer_type;
+      fin >> tmp_str >> tmp_layer_id >> tmp_layer_type;
 #ifdef DEBUG
-      std::cout << tmp_str << layer_id << layer_type << '\n';
+      std::cout << tmp_str << tmp_layer_id << tmp_layer_type << '\n';
 #endif
       // pointer to layer
       Layer *layer = 0L;
-      if (layer_type == "Dense") {
+      if (tmp_layer_type == "Dense") {
         layer = new LayerDense();
-      } else if (layer_type == "Activation") {
+      } else if (tmp_layer_type == "Activation") {
         layer = new LayerActivation();
       }
       // if none of above case is true, means layer not-defined
       if (layer == 0L) {
 #ifdef DEBUG
-        std::cout << "Layer is empty, maybe layer " << layer_type
+        std::cout << "Layer is empty, maybe layer " << tmp_layer_type
                   << " is not defined? Cannot define network." << '\n';
 #endif
         return;
@@ -115,21 +112,18 @@ std::vector<double> nn::KerasModel::compute_output(std::vector<double> test_inpu
   std::cout << "for test input " << test_input[0] << ", " << test_input[1] << '\n';
   std::cout << "Layer count: " << layers_count << '\n';
 #endif
-  std::vector<double> response;
   for (int i{0}; i < layers_count; ++i) {
 #ifdef DEBUG
     std::cout << "Processing layer to compute output " << layers[i]->layer_name << '\n';
 #endif
-    response = layers[i]->compute_output(test_input);
-    test_input = response;
+    test_input = layers[i]->compute_output(test_input);
 #ifdef DEBUG
     std::cout << "Response size " << response.size() << '\n';
 #endif
   }
-  return response;
+  return test_input;
 }
 
-// load weights and bias from input file for Dense layer
 void nn::LayerDense::load_weights(std::ifstream &fin) {
 #ifdef DEBUG
   std::cout << "Loading weights for Dense layer" << '\n';
@@ -144,7 +138,7 @@ void nn::LayerDense::load_weights(std::ifstream &fin) {
 #ifdef DEBUG
   std::cout << "Now read weights of all input modes..." << '\n';
 #endif
-  char tmp_char{' '};
+  char tmp_char;
   for (int i{0}; i < input_node_count; ++i) {
     fin >> tmp_char; // for '['
 #ifdef DEBUG
