@@ -273,50 +273,57 @@ std::vector<double> nn::LayerDense::compute_output(std::vector<double> test_inpu
   return out;
 }
 
+// std::vector<double>
+// nn::LayerActivation::compute_output(std::vector<double> test_input) {
+//   if (activation_type == "linear") {
+//     return test_input;
+//   } else if (activation_type == "relu") {
+//     for (std::size_t i{0}; i < test_input.size(); ++i) {
+//       if (test_input[i] < 0) {
+//         test_input[i] = 0;
+//       }
+//     }
+//   // } else if (activation_type == "softmax") {
+//   //   double sum = 0.0;
+//   //   for (std::size_t k{0}; k < test_input.size(); ++k) {
+//   //     test_input[k] = std::exp(test_input[k]);
+//   //     sum += test_input[k];
+//   //   }
+//   //   for (std::size_t k{0}; k < test_input.size(); ++k) {
+//   //     test_input[k] /= sum;
+//   //   }
+//   // } else if (activation_type == "sigmoid") {
+//   //   double denominator = 0.0;
+//   //   for (std::size_t k{0}; k < test_input.size(); ++k) {
+//   //     denominator = 1 + std::exp(-(test_input[k]));
+//   //     test_input[k] = 1 / denominator;
+//   //   }
+//   // } else if (activation_type == "softplus") {
+//   //   for (std::size_t k{0}; k < test_input.size(); ++k) {
+//   //     // log1p = natural logarithm (to base e) of 1 plus the given number
+//   (ln(1+x))
+//   //     test_input[k] = std::log1p(std::exp(test_input[k]));
+//   //   }
+//   // } else if (activation_type == "softsign") {
+//   //   for (std::size_t k{0}; k < test_input.size(); ++k) {
+//   //     test_input[k] = test_input[k] / (1 + abs(test_input[k]));
+//   //   }
+//   } else if (activation_type == "tanh") {
+//     for (std::size_t k{0}; k < test_input.size(); ++k) {
+//       test_input[k] = std::tanh(test_input[k]);
+//     }
+//   } else {
+//     missing_activation_impl(activation_type);
+//   }
+//   return test_input;
+// }
+
 std::vector<double>
 nn::LayerActivation::compute_output(std::vector<double> test_input) {
-  if (activation_type == "linear") {
-    return test_input;
-  } else if (activation_type == "relu") {
-    for (std::size_t i{0}; i < test_input.size(); ++i) {
-      if (test_input[i] < 0) {
-        test_input[i] = 0;
-      }
-    }
-  } else if (activation_type == "softmax") {
-    double sum = 0.0;
-    for (std::size_t k{0}; k < test_input.size(); ++k) {
-      test_input[k] = std::exp(test_input[k]);
-      sum += test_input[k];
-    }
-
-    for (std::size_t k{0}; k < test_input.size(); ++k) {
-      test_input[k] /= sum;
-    }
-  } else if (activation_type == "sigmoid") {
-    double denominator = 0.0;
-    for (std::size_t k{0}; k < test_input.size(); ++k) {
-      denominator = 1 + std::exp(-(test_input[k]));
-      test_input[k] = 1 / denominator;
-    }
-  } else if (activation_type == "softplus") {
-    for (std::size_t k{0}; k < test_input.size(); ++k) {
-      // log1p = natural logarithm (to base e) of 1 plus the given number (ln(1+x))
-      test_input[k] = std::log1p(std::exp(test_input[k]));
-    }
-  }
-  /*
-      else if(activation_type == "softsign") {
-              for (std::size_t k { 0 }; k < test_input.size(); ++k) {
-                      test_input[k] = test_input[k]/(1+abs(test_input[k]));
-              }
-      }
-      */
-  else if (activation_type == "tanh") {
-    for (std::size_t k{0}; k < test_input.size(); ++k) {
-      test_input[k] = std::tanh(test_input[k]);
-    }
-  } else {
+  if (activation_type == "tanh") {
+    std::transform(test_input.cbegin(), test_input.cend(), test_input.begin(),
+                   [](double a) -> double { return std::tanh(a); });
+  } else if (activation_type != "linear") {
     missing_activation_impl(activation_type);
   }
   return test_input;
@@ -333,8 +340,8 @@ nn::Networks::Networks(const int legs_, const int runs_, const std::string &mode
                        const double delta_, const std::string &cut_dirs_)
     // n.b. there is an additional FKS pair for the cut network (for non-divergent
     // regions)
-    : n_choose_2({{0, 0, 1, 3, 6, 10, 15, 21, 28, 36, 45}}), legs(legs_), runs(runs_), 
-      pairs(n_choose_2[legs] - 1), delta(delta_), cut_dirs(cut_dirs_), 
+    : n_choose_2({{0, 0, 1, 3, 6, 10, 15, 21, 28, 36, 45}}), legs(legs_), runs(runs_),
+      pairs(n_choose_2[legs] - 1), delta(delta_), cut_dirs(cut_dirs_),
       model_base(model_path), model_dirs(runs), pair_dirs(pairs) {
   std::generate(model_dirs.begin(), model_dirs.end(),
                 [n = 0]() mutable { return std::to_string(n++) + "/"; });
