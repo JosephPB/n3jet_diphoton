@@ -8,40 +8,6 @@
 #include <string>
 #include <vector>
 
-// error for missing implementation of activation function
-// you can add your activation implementation in compute_output if required
-void nn::missing_activation_impl(const std::string &activation) {
-  std::cout << "Activation " << activation << " not defined!" << '\n'
-            << "Please add its implementation before use." << '\n';
-  std::exit(EXIT_FAILURE);
-}
-
-std::vector<double> nn::read_input_from_file(const std::string &fname) {
-#ifdef DEBUG
-  std::cout << "Reading input..." << '\n';
-#endif
-  std::ifstream fin(fname.c_str());
-
-  if (!fin.good()) {
-    std::cerr << "Error: no input file!\n";
-    std::exit(EXIT_FAILURE);
-  }
-
-  int n_features;
-  fin >> n_features;
-#ifdef DEBUG
-  std::cout << "n_features: " << n_features << '\n';
-#endif
-  std::vector<double> input_data(n_features);
-  for (int i{0}; i < n_features; ++i) {
-    fin >> input_data[i];
-#ifdef DEBUG
-    std::cout << "...reading: " << input_data[i] << '\n';
-#endif
-  }
-  return input_data;
-}
-
 std::vector<double> nn::read_metadata_from_file(const std::string &fname) {
   std::ifstream fin(fname.c_str());
   int n_x_mean{4};
@@ -67,33 +33,6 @@ std::vector<double> nn::read_metadata_from_file(const std::string &fname) {
   return metadata;
 }
 
-// Save s and t vals from file
-std::vector<std::vector<double>>
-nn::read_multi_input_from_file(const std::string &fname) {
-  std::cout << "Reading input..." << '\n';
-  std::ifstream fin(fname.c_str());
-
-  if (!fin.good()) {
-    std::cerr << "Error: no input file!\n";
-    std::exit(EXIT_FAILURE);
-  }
-
-  int n_features;
-  int N_samples;
-  fin >> N_samples;
-  fin >> n_features;
-  std::cout << "N_samples: " << N_samples << '\n';
-  std::cout << "n_features: " << n_features << '\n';
-  std::vector<std::vector<double>> input_data(N_samples,
-                                              std::vector<double>(n_features));
-  for (int i{0}; i < N_samples; ++i) {
-    for (int j{0}; j < n_features; ++j) {
-      fin >> input_data[i][j];
-    }
-  }
-  return input_data;
-}
-
 double nn::standardise(double value, double mean, double stnd) {
   return (value - mean) / stnd;
 }
@@ -104,7 +43,7 @@ double nn::destandardise(double value, double mean, double stnd) {
 
 // KerasModel destructor
 nn::KerasModel::~KerasModel() {
-  for (unsigned int i{0}; i < layers.size(); ++i) {
+  for (std::size_t i{0}; i < layers.size(); ++i) {
     delete layers[i]; // deallocate memory
   }
 }
@@ -122,8 +61,8 @@ void nn::KerasModel::load_weights(std::string &input_fname) {
     std::exit(EXIT_FAILURE);
   }
 
-  std::string tmp_str = "";
-  std::string layer_type = "";
+  std::string tmp_str{""};
+  std::string layer_type{""};
   int layer_id{0};
   if (fin.is_open()) {
     // get layers count in layers_count var
@@ -310,7 +249,9 @@ nn::LayerActivation::compute_output(std::vector<double> test_input) {
     std::transform(test_input.cbegin(), test_input.cend(), test_input.begin(),
                    [](double a) -> double { return std::tanh(a); });
   } else if (activation_type != "linear") {
-    missing_activation_impl(activation_type);
+    std::cout << "Activation " << activation_type << " not defined!" << '\n'
+              << "Please add its implementation before use." << '\n';
+    std::exit(EXIT_FAILURE);
   }
   return test_input;
 }

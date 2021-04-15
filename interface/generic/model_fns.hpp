@@ -8,9 +8,6 @@
 
 namespace nn {
 
-void missing_activation_impl(const std::string &activation);
-std::vector<double> read_input_from_file(const std::string &f_name);
-std::vector<std::vector<double>> read_multi_input_from_file(const std::string &f_name);
 std::vector<double> read_metadata_from_file(const std::string &fname);
 double standardise(double value, double mean, double stnd);
 double destandardise(double value, double mean, double stnd);
