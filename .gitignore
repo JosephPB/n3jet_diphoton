@@ -12,3 +12,4 @@ callgrind.out.*
 vgcore.*
 time
 test
+*.out
