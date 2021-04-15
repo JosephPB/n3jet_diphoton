@@ -7,3 +7,4 @@ Results.db*
 *.swp
 *.yoda
 *.so
+*.o
