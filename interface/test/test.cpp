@@ -8,6 +8,8 @@
 
 #include "model_fns.hpp"
 
+double d(double a, double b) { return 2 * std::abs((a - b) / (a + b)); }
+
 int main() {
   std::cout.setf(std::ios_base::scientific, std::ios_base::floatfield);
   std::cout.precision(16);
@@ -69,6 +71,7 @@ int main() {
 
     std::cout << "Python Loop( 0) = " << python_outputs[i] << '\n'
               << "C++    Loop( 0) = " << average_output << '\n'
+              << "d(C++, Python)  = " << d(average_output, python_outputs[i]) << '\n'
               << "C++ time        = " << nndur << "us" << '\n';
   }
 }

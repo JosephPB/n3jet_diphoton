@@ -259,9 +259,8 @@ std::vector<double> nn::LayerDense::compute_output(std::vector<double> test_inpu
   std::cout << "bias size " << bias.size() << '\n';
 #endif
   std::vector<double> out(output_weights);
-  double weighted_term = 0;
   for (std::size_t i{0}; i < output_weights; ++i) {
-    weighted_term = 0;
+    double weighted_term{0};
     for (std::size_t j{0}; j < input_node_count; ++j) {
       weighted_term += (test_input[j] * layer_weights[j][i]);
     }
