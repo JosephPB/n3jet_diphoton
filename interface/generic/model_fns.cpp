@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <numeric>
 #include <string>
 #include <vector>
 
@@ -44,28 +45,28 @@ double nn::destandardise(double value, double mean, double stnd) {
   return value * stnd + mean;
 }
 
-// Layer
-// ~~~~~
+// Layers
+// ~~~~~~
 
-void nn::LayerDense::load_weights(std::ifstream &fin) {
+nn::LayerDense::LayerDense(std::ifstream &fin) {
   fin >> input_node_count >> output_weights;
+  layer_weights = std::vector<std::vector<double>>(
+      output_weights, std::vector<double>(input_node_count));
+
   double tmp_double;
   char tmp_char;
-  // read weights for all the input nodes
+
   for (int i{0}; i < input_node_count; ++i) {
     fin >> tmp_char; // for '['
-    std::vector<double> tmp_weights;
     for (int j{0}; j < output_weights; ++j) {
       fin >> tmp_double;
-      tmp_weights.push_back(tmp_double);
+      layer_weights[j][i] = tmp_double;
     }
     fin >> tmp_char; // for ']'
-    layer_weights.push_back(tmp_weights);
   }
-  // read and save bias values
+
   fin >> tmp_char; // for '['
-  for (int output_node_index{0}; output_node_index < output_weights;
-       output_node_index++) {
+  for (int i{0}; i < output_weights; i++) {
     fin >> tmp_double;
     bias.push_back(tmp_double);
   }
@@ -75,40 +76,26 @@ void nn::LayerDense::load_weights(std::ifstream &fin) {
 std::vector<double> nn::LayerDense::compute_output(std::vector<double> test_input) {
   std::vector<double> out(output_weights);
   for (int i{0}; i < output_weights; ++i) {
-    double weighted_term{0};
-    for (int j{0}; j < input_node_count; ++j) {
-      weighted_term += (test_input[j] * layer_weights[j][i]);
-    }
-    out[i] = weighted_term + bias[i];
+    out[i] = std::inner_product(test_input.begin(), test_input.end(),
+                                layer_weights[i].begin(), bias[i]);
   }
   return out;
 }
 
-//   // } else if (activation_type == "softmax") {
-//   //   double sum = 0.0;
-//   //   for (std::size_t k{0}; k < test_input.size(); ++k) {
-//   //     test_input[k] = std::exp(test_input[k]);
-//   //     sum += test_input[k];
-//   //   }
-//   //   for (std::size_t k{0}; k < test_input.size(); ++k) {
-//   //     test_input[k] /= sum;
-//   //   }
-//   // } else if (activation_type == "sigmoid") {
-//   //   double denominator = 0.0;
-//   //   for (std::size_t k{0}; k < test_input.size(); ++k) {
-//   //     denominator = 1 + std::exp(-(test_input[k]));
-//   //     test_input[k] = 1 / denominator;
-//   //   }
-//   // } else if (activation_type == "softplus") {
-//   //   for (std::size_t k{0}; k < test_input.size(); ++k) {
-//   //     // log1p = natural logarithm (to base e) of 1 plus the given number
-//   (ln(1+x))
-//   //     test_input[k] = std::log1p(std::exp(test_input[k]));
-//   //   }
-//   // } else if (activation_type == "softsign") {
-//   //   for (std::size_t k{0}; k < test_input.size(); ++k) {
-//   //     test_input[k] = test_input[k] / (1 + abs(test_input[k]));
-//   //   }
+nn::LayerActivation::LayerActivation(std::ifstream &fin) {
+  std::string tmp_type;
+  fin >> tmp_type;
+
+  if (tmp_type == "tanh") {
+    activation_type = Tanh;
+  } else if (tmp_type == "linear") {
+    activation_type = Linear;
+  } else {
+    std::cerr << "Error: Activation type " << activation_type << " not defined!" << '\n'
+              << "Please add its implementation before use." << '\n';
+    std::exit(EXIT_FAILURE);
+  }
+}
 
 std::vector<double>
 nn::LayerActivation::compute_output(std::vector<double> test_input) {
@@ -130,27 +117,38 @@ nn::LayerActivation::compute_output(std::vector<double> test_input) {
   return test_input;
 }
 
-void nn::LayerActivation::load_weights(std::ifstream &fin) {
-  std::string tmp_type;
-  fin >> tmp_type;
-
-  if (tmp_type == "tanh") {
-    activation_type = Tanh;
-  } else if (tmp_type == "linear") {
-    activation_type = Linear;
-  } else {
-    std::cerr << "Error: Activation type " << activation_type << " not defined!" << '\n'
-              << "Please add its implementation before use." << '\n';
-    std::exit(EXIT_FAILURE);
-  }
-}
+// } else if (activation_type == "softmax") {
+//   double sum = 0.0;
+//   for (std::size_t k{0}; k < test_input.size(); ++k) {
+//     test_input[k] = std::exp(test_input[k]);
+//     sum += test_input[k];
+//   }
+//   for (std::size_t k{0}; k < test_input.size(); ++k) {
+//     test_input[k] /= sum;
+//   }
+// } else if (activation_type == "sigmoid") {
+//   double denominator = 0.0;
+//   for (std::size_t k{0}; k < test_input.size(); ++k) {
+//     denominator = 1 + std::exp(-(test_input[k]));
+//     test_input[k] = 1 / denominator;
+//   }
+// } else if (activation_type == "softplus") {
+//   for (std::size_t k{0}; k < test_input.size(); ++k) {
+//     // log1p = natural logarithm (to base e) of 1 plus the given number
+//     (ln(1+x))
+//     test_input[k] = std::log1p(std::exp(test_input[k]));
+//   }
+// } else if (activation_type == "softsign") {
+//   for (std::size_t k{0}; k < test_input.size(); ++k) {
+//     test_input[k] = test_input[k] / (1 + abs(test_input[k]));
+//   }
 
 // Network
 // ~~~~~~~
 
 nn::KerasModel::~KerasModel() {
-  for (std::size_t i{0}; i < layers.size(); ++i) {
-    delete layers[i];
+  for (Layer *layer : layers) {
+    delete layer;
   }
 }
 
@@ -169,21 +167,20 @@ void nn::KerasModel::load_weights(std::string &input_fname) {
     // get layers count in layers_count var
     fin >> tmp_str >> layers_count;
     // Now iterate over each layer
-    for (int layer_index{0}; layer_index < layers_count; ++layer_index) {
+    for (int i{0}; i < layers_count; ++i) {
       fin >> tmp_str >> tmp_layer_id >> tmp_layer_type;
       // pointer to layer
       Layer *layer = 0L;
       if (tmp_layer_type == "Dense") {
-        layer = new LayerDense();
+        layer = new LayerDense(fin);
       } else if (tmp_layer_type == "Activation") {
-        layer = new LayerActivation();
+        layer = new LayerActivation(fin);
       } else {
         std::cerr << "Error: Layer type " << tmp_layer_type << " is not defined!"
                   << '\n'
                   << "Please add its implementation before use." << '\n';
         std::exit(EXIT_FAILURE);
       }
-      layer->load_weights(fin);
       layers.push_back(layer);
     }
   }
@@ -191,8 +188,8 @@ void nn::KerasModel::load_weights(std::string &input_fname) {
 }
 
 std::vector<double> nn::KerasModel::compute_output(std::vector<double> test_input) {
-  for (int i{0}; i < layers_count; ++i) {
-    test_input = layers[i]->compute_output(test_input);
+  for (Layer *layer : layers) {
+    test_input = layer->compute_output(test_input);
   }
   return test_input;
 }
