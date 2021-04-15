@@ -64,8 +64,8 @@ class RivetDistributions:
             ylabel=r"$1/\sigma$ d$\sigma/$d$\Delta\phi_{jj}$ [rad$^{-1}$]"
         
         dphi_jj_fig = dphi_jj_plotter.plot(
-            xlabel=x_label,
-            ylabel=y_label,
+            xlabel=xlabel,
+            ylabel=ylabel,
             rescaling=self.rescaling,
         )
         dphi_jj_fig.savefig(
@@ -84,8 +84,8 @@ class RivetDistributions:
             ylabel=r"$1/\sigma$ d$\sigma/$d$R_{j\gamma}$"
 
         dr_jy_fig = dr_jy_plotter.plot(
-            xlabel=x_label,
-            ylabel=y_label,
+            xlabel=xlabel,
+            ylabel=ylabel,
             xlim=(0.2, 5),
             rescaling=self.rescaling,
         )
@@ -107,8 +107,8 @@ class RivetDistributions:
             ylabel=r"$1/\sigma$ d$\sigma/$d$\eta_{\gamma\gamma}$"
         
         deta_yy_fig = deta_yy_plotter.plot(
-            xlabel=x_label,
-            ylabel=y_label,
+            xlabel=xlabel,
+            ylabel=ylabel,
             rescaling=self.rescaling,
         )
         deta_yy_fig.savefig(
@@ -127,8 +127,8 @@ class RivetDistributions:
             ylabel=r"$1/\sigma$ d$\sigma/$d$\eta_{\gamma\gamma}$"
         
         dm_yy_fig = dm_yy_plotter.plot(
-            xlabel=x_label,
-            ylabel=y_label,
+            xlabel=xlabel,
+            ylabel=ylabel,
             rescaling=self.rescaling,
         )
         dm_yy_fig.savefig(
@@ -149,8 +149,8 @@ class RivetDistributions:
             ylabel=r"$1/\sigma$ d$\sigma/$d$p_{T}$ [GeV$^{-1}$]"
         
         dpt_j1_fig = dpt_j1_plotter.plot(
-            xlabel=x_label,
-            ylabel=y_label,
+            xlabel=xlabel,
+            ylabel=ylabel,
             rescaling=self.rescaling,
         )
         dpt_j1_fig.savefig(
@@ -169,8 +169,8 @@ class RivetDistributions:
             ylabel=r"$1/\sigma$ d$\sigma/$d$p_{T}$ [GeV$^{-1}$]"
         
         dpt_j2_fig = dpt_j2_plotter.plot(
-            xlabel=x_label,
-            ylabel=y_label,
+            xlabel=xlabel,
+            ylabel=ylabel,
             rescaling=self.rescaling,
         )
         dpt_j2_fig.savefig(
