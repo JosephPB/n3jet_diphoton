@@ -47,7 +47,7 @@ double nn::destandardise(double value, double mean, double stnd) {
 // Layer
 // ~~~~~
 
-void nn::LayerDense::load_weights(std::ifstream &fin) {
+nn::LayerDense::LayerDense(std::ifstream &fin) {
   fin >> input_node_count >> output_weights;
   double tmp_double;
   char tmp_char;
@@ -84,31 +84,20 @@ std::vector<double> nn::LayerDense::compute_output(std::vector<double> test_inpu
   return out;
 }
 
-//   // } else if (activation_type == "softmax") {
-//   //   double sum = 0.0;
-//   //   for (std::size_t k{0}; k < test_input.size(); ++k) {
-//   //     test_input[k] = std::exp(test_input[k]);
-//   //     sum += test_input[k];
-//   //   }
-//   //   for (std::size_t k{0}; k < test_input.size(); ++k) {
-//   //     test_input[k] /= sum;
-//   //   }
-//   // } else if (activation_type == "sigmoid") {
-//   //   double denominator = 0.0;
-//   //   for (std::size_t k{0}; k < test_input.size(); ++k) {
-//   //     denominator = 1 + std::exp(-(test_input[k]));
-//   //     test_input[k] = 1 / denominator;
-//   //   }
-//   // } else if (activation_type == "softplus") {
-//   //   for (std::size_t k{0}; k < test_input.size(); ++k) {
-//   //     // log1p = natural logarithm (to base e) of 1 plus the given number
-//   (ln(1+x))
-//   //     test_input[k] = std::log1p(std::exp(test_input[k]));
-//   //   }
-//   // } else if (activation_type == "softsign") {
-//   //   for (std::size_t k{0}; k < test_input.size(); ++k) {
-//   //     test_input[k] = test_input[k] / (1 + abs(test_input[k]));
-//   //   }
+nn::LayerActivation::LayerActivation(std::ifstream &fin) {
+  std::string tmp_type;
+  fin >> tmp_type;
+
+  if (tmp_type == "tanh") {
+    activation_type = Tanh;
+  } else if (tmp_type == "linear") {
+    activation_type = Linear;
+  } else {
+    std::cerr << "Error: Activation type " << activation_type << " not defined!" << '\n'
+              << "Please add its implementation before use." << '\n';
+    std::exit(EXIT_FAILURE);
+  }
+}
 
 std::vector<double>
 nn::LayerActivation::compute_output(std::vector<double> test_input) {
@@ -130,20 +119,31 @@ nn::LayerActivation::compute_output(std::vector<double> test_input) {
   return test_input;
 }
 
-void nn::LayerActivation::load_weights(std::ifstream &fin) {
-  std::string tmp_type;
-  fin >> tmp_type;
-
-  if (tmp_type == "tanh") {
-    activation_type = Tanh;
-  } else if (tmp_type == "linear") {
-    activation_type = Linear;
-  } else {
-    std::cerr << "Error: Activation type " << activation_type << " not defined!" << '\n'
-              << "Please add its implementation before use." << '\n';
-    std::exit(EXIT_FAILURE);
-  }
-}
+// } else if (activation_type == "softmax") {
+//   double sum = 0.0;
+//   for (std::size_t k{0}; k < test_input.size(); ++k) {
+//     test_input[k] = std::exp(test_input[k]);
+//     sum += test_input[k];
+//   }
+//   for (std::size_t k{0}; k < test_input.size(); ++k) {
+//     test_input[k] /= sum;
+//   }
+// } else if (activation_type == "sigmoid") {
+//   double denominator = 0.0;
+//   for (std::size_t k{0}; k < test_input.size(); ++k) {
+//     denominator = 1 + std::exp(-(test_input[k]));
+//     test_input[k] = 1 / denominator;
+//   }
+// } else if (activation_type == "softplus") {
+//   for (std::size_t k{0}; k < test_input.size(); ++k) {
+//     // log1p = natural logarithm (to base e) of 1 plus the given number
+//     (ln(1+x))
+//     test_input[k] = std::log1p(std::exp(test_input[k]));
+//   }
+// } else if (activation_type == "softsign") {
+//   for (std::size_t k{0}; k < test_input.size(); ++k) {
+//     test_input[k] = test_input[k] / (1 + abs(test_input[k]));
+//   }
 
 // Network
 // ~~~~~~~
@@ -174,16 +174,15 @@ void nn::KerasModel::load_weights(std::string &input_fname) {
       // pointer to layer
       Layer *layer = 0L;
       if (tmp_layer_type == "Dense") {
-        layer = new LayerDense();
+        layer = new LayerDense(fin);
       } else if (tmp_layer_type == "Activation") {
-        layer = new LayerActivation();
+        layer = new LayerActivation(fin);
       } else {
         std::cerr << "Error: Layer type " << tmp_layer_type << " is not defined!"
                   << '\n'
                   << "Please add its implementation before use." << '\n';
         std::exit(EXIT_FAILURE);
       }
-      layer->load_weights(fin);
       layers.push_back(layer);
     }
   }

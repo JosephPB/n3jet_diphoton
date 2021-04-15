@@ -17,24 +17,24 @@ enum ActivationType { Tanh, ReLU, Linear };
 struct Layer {
   virtual ~Layer(){};
 
-  virtual void load_weights(std::ifstream &input_fname) = 0;
   virtual std::vector<double> compute_output(std::vector<double> test_input) = 0;
 };
 
 struct LayerDense : public Layer {
+  LayerDense(std::ifstream &fin);
+
   int input_node_count;
   int output_weights;
   std::vector<std::vector<double>> layer_weights;
   std::vector<double> bias;
 
-  void load_weights(std::ifstream &fin);
   std::vector<double> compute_output(std::vector<double> test_input);
 };
 
 struct LayerActivation : public Layer {
-  ActivationType activation_type;
+  LayerActivation(std::ifstream &fin);
 
-  void load_weights(std::ifstream &fin);
+  ActivationType activation_type;
   std::vector<double> compute_output(std::vector<double> test_input);
 };
 
