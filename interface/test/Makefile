@@ -7,10 +7,19 @@ LDFLAGS=
 
 .PHONY: clean all
 
-all: test
+all: test time
 
 test: test.o model_fns.o
 	${CXX} -o $@ $^ ${LDFLAGS}
+
+time: time.o model_fns.o
+	${CXX} -o $@ $^ ${LDFLAGS}
+
+test.o: test.cpp
+	${CXX} ${CXXFLAGS} -o $@ -c $< ${CPPFLAGS}
+
+time.o: time.cpp
+	${CXX} ${CXXFLAGS} -o $@ -c $< ${CPPFLAGS}
 
 model_fns.o: ${SRC_DIR}/model_fns.cpp ${SRC_DIR}/model_fns.hpp
 	${CXX} ${CXXFLAGS} -o $@ -c $< ${CPPFLAGS}
