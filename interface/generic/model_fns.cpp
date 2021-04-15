@@ -45,16 +45,17 @@ double nn::destandardise(double value, double mean, double stnd) {
   return value * stnd + mean;
 }
 
-// Layer
-// ~~~~~
+// Layers
+// ~~~~~~
 
 nn::LayerDense::LayerDense(std::ifstream &fin) {
   fin >> input_node_count >> output_weights;
   layer_weights = std::vector<std::vector<double>>(
       output_weights, std::vector<double>(input_node_count));
+
   double tmp_double;
   char tmp_char;
-  // read weights for all the input nodes
+
   for (int i{0}; i < input_node_count; ++i) {
     fin >> tmp_char; // for '['
     for (int j{0}; j < output_weights; ++j) {
@@ -63,10 +64,9 @@ nn::LayerDense::LayerDense(std::ifstream &fin) {
     }
     fin >> tmp_char; // for ']'
   }
-  // read and save bias values
+
   fin >> tmp_char; // for '['
-  for (int output_node_index{0}; output_node_index < output_weights;
-       output_node_index++) {
+  for (int i{0}; i < output_weights; i++) {
     fin >> tmp_double;
     bias.push_back(tmp_double);
   }
@@ -147,8 +147,8 @@ nn::LayerActivation::compute_output(std::vector<double> test_input) {
 // ~~~~~~~
 
 nn::KerasModel::~KerasModel() {
-  for (std::size_t i{0}; i < layers.size(); ++i) {
-    delete layers[i];
+  for (Layer *layer : layers) {
+    delete layer;
   }
 }
 
@@ -167,7 +167,7 @@ void nn::KerasModel::load_weights(std::string &input_fname) {
     // get layers count in layers_count var
     fin >> tmp_str >> layers_count;
     // Now iterate over each layer
-    for (int layer_index{0}; layer_index < layers_count; ++layer_index) {
+    for (int i{0}; i < layers_count; ++i) {
       fin >> tmp_str >> tmp_layer_id >> tmp_layer_type;
       // pointer to layer
       Layer *layer = 0L;
@@ -188,8 +188,8 @@ void nn::KerasModel::load_weights(std::string &input_fname) {
 }
 
 std::vector<double> nn::KerasModel::compute_output(std::vector<double> test_input) {
-  for (int i{0}; i < layers_count; ++i) {
-    test_input = layers[i]->compute_output(test_input);
+  for (Layer *layer : layers) {
+    test_input = layer->compute_output(test_input);
   }
   return test_input;
 }
