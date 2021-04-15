@@ -83,20 +83,8 @@ void nn::KerasModel::load_weights(std::string &input_fname) {
 }
 
 std::vector<double> nn::KerasModel::compute_output(std::vector<double> test_input) {
-#ifdef DEBUG
-  std::cout << "###################################" << '\n';
-  std::cout << "KerasModel compute output" << '\n';
-  std::cout << "for test input " << test_input[0] << ", " << test_input[1] << '\n';
-  std::cout << "Layer count: " << layers_count << '\n';
-#endif
   for (int i{0}; i < layers_count; ++i) {
-#ifdef DEBUG
-    std::cout << "Processing layer to compute output " << layers[i]->layer_name << '\n';
-#endif
     test_input = layers[i]->compute_output(test_input);
-#ifdef DEBUG
-    std::cout << "Response size " << response.size() << '\n';
-#endif
   }
   return test_input;
 }
