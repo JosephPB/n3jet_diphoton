@@ -8,6 +8,9 @@
 #include <string>
 #include <vector>
 
+// utility functions
+// ~~~~~~~~~~~~~~~~~
+
 std::vector<double> nn::read_metadata_from_file(const std::string &fname) {
   std::ifstream fin(fname.c_str());
   int n_x_mean{4};
@@ -41,54 +44,8 @@ double nn::destandardise(double value, double mean, double stnd) {
   return value * stnd + mean;
 }
 
-nn::KerasModel::~KerasModel() {
-  for (std::size_t i{0}; i < layers.size(); ++i) {
-    delete layers[i];
-  }
-}
-
-void nn::KerasModel::load_weights(std::string &input_fname) {
-  std::ifstream fin(input_fname.c_str(), std::ifstream::in);
-
-  if (!fin.good()) {
-    std::cerr << "Error: no nnet file `" << input_fname << "`!\n";
-    std::exit(EXIT_FAILURE);
-  }
-
-  std::string tmp_str;
-  std::string tmp_layer_type;
-  int tmp_layer_id;
-  if (fin.is_open()) {
-    // get layers count in layers_count var
-    fin >> tmp_str >> layers_count;
-    // Now iterate over each layer
-    for (int layer_index{0}; layer_index < layers_count; ++layer_index) {
-      fin >> tmp_str >> tmp_layer_id >> tmp_layer_type;
-      // pointer to layer
-      Layer *layer = 0L;
-      if (tmp_layer_type == "Dense") {
-        layer = new LayerDense();
-      } else if (tmp_layer_type == "Activation") {
-        layer = new LayerActivation();
-      } else {
-        std::cerr << "Error: Layer type " << tmp_layer_type << " is not defined!"
-                  << '\n'
-                  << "Please add its implementation before use." << '\n';
-        std::exit(EXIT_FAILURE);
-      }
-      layer->load_weights(fin);
-      layers.push_back(layer);
-    }
-  }
-  fin.close();
-}
-
-std::vector<double> nn::KerasModel::compute_output(std::vector<double> test_input) {
-  for (int i{0}; i < layers_count; ++i) {
-    test_input = layers[i]->compute_output(test_input);
-  }
-  return test_input;
-}
+// Layer
+// ~~~~~
 
 void nn::LayerDense::load_weights(std::ifstream &fin) {
   fin >> input_node_count >> output_weights;
@@ -188,6 +145,58 @@ void nn::LayerActivation::load_weights(std::ifstream &fin) {
   }
 }
 
+// Network
+// ~~~~~~~
+
+nn::KerasModel::~KerasModel() {
+  for (std::size_t i{0}; i < layers.size(); ++i) {
+    delete layers[i];
+  }
+}
+
+void nn::KerasModel::load_weights(std::string &input_fname) {
+  std::ifstream fin(input_fname.c_str(), std::ifstream::in);
+
+  if (!fin.good()) {
+    std::cerr << "Error: no nnet file `" << input_fname << "`!\n";
+    std::exit(EXIT_FAILURE);
+  }
+
+  std::string tmp_str;
+  std::string tmp_layer_type;
+  int tmp_layer_id;
+  if (fin.is_open()) {
+    // get layers count in layers_count var
+    fin >> tmp_str >> layers_count;
+    // Now iterate over each layer
+    for (int layer_index{0}; layer_index < layers_count; ++layer_index) {
+      fin >> tmp_str >> tmp_layer_id >> tmp_layer_type;
+      // pointer to layer
+      Layer *layer = 0L;
+      if (tmp_layer_type == "Dense") {
+        layer = new LayerDense();
+      } else if (tmp_layer_type == "Activation") {
+        layer = new LayerActivation();
+      } else {
+        std::cerr << "Error: Layer type " << tmp_layer_type << " is not defined!"
+                  << '\n'
+                  << "Please add its implementation before use." << '\n';
+        std::exit(EXIT_FAILURE);
+      }
+      layer->load_weights(fin);
+      layers.push_back(layer);
+    }
+  }
+  fin.close();
+}
+
+std::vector<double> nn::KerasModel::compute_output(std::vector<double> test_input) {
+  for (int i{0}; i < layers_count; ++i) {
+    test_input = layers[i]->compute_output(test_input);
+  }
+  return test_input;
+}
+
 nn::Networks::Networks(const int legs_, const int runs_, const std::string &model_path,
                        const double delta_, const std::string &cut_dirs_)
     // n.b. there is an additional FKS pair for the cut network (for non-divergent
@@ -207,6 +216,9 @@ double nn::Networks::dot(const std::vector<std::vector<double>> &point, const in
          (point[j][1] * point[k][1] + point[j][2] * point[k][2] +
           point[j][3] * point[k][3]);
 }
+
+// Ensemble
+// ~~~~~~~~
 
 nn::NaiveNetworks::NaiveNetworks(const int legs, const int runs,
                                  const std::string &model_path, const double delta_,

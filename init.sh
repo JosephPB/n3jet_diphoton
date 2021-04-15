@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 echo "Initialising local repo git hooks..."
 
@@ -11,9 +11,11 @@ if ! type pre-commit; then
     python3 -m pip install --user pre-commit
 fi
 
-if ! type pre-commit > /dev/null; then
+if ! type pre-commit >/dev/null; then
     echo "I tried to install pre-commit but now I can't find it."
     echo "It's up to you now to install it or add it to your path!"
+else
+    echo "Successfully completed initialisation!"
 fi
 
 # echo "Checking that clang-format is installed..."
@@ -21,5 +23,3 @@ fi
 #     echo "Installing clang-format..."
 #     python3 -m pip install --user clang-format
 # fi
-
-echo "Successfully completed initialisation!"
