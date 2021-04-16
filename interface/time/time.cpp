@@ -70,7 +70,7 @@ int main() {
 
     TP nnt3{std::chrono::high_resolution_clock::now()};
     for (int j{0}; j < num; ++j) {
-      networks.compute_error(momenta[i]);
+      networks.compute_with_error(momenta[i]);
     };
     TP nnt4{std::chrono::high_resolution_clock::now()};
     const long int nndur2{

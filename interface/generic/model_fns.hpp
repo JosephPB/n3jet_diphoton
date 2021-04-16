@@ -132,7 +132,7 @@ public:
               const std::string &cut_dirs_);
 
   T compute(const std::vector<std::vector<T>> &point);
-  void compute_error(const std::vector<std::vector<T>> &point);
+  void compute_with_error(const std::vector<std::vector<T>> &point);
 
   T mean;
   T std_dev;
@@ -486,7 +486,7 @@ T nn::FKSEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
 }
 
 template <typename T>
-void nn::FKSEnsemble<T>::compute_error(const std::vector<std::vector<T>> &point) {
+void nn::FKSEnsemble<T>::compute_with_error(const std::vector<std::vector<T>> &point) {
   // moms is an vector of runs results, each of which is an vector of FKS pairs results,
   // each of which is an vector of flattened momenta
   std::vector<std::vector<std::vector<T>>> moms(

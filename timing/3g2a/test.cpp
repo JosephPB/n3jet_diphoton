@@ -108,7 +108,7 @@ void run(const int start, const int end) {
     const double err_ana{std::abs(amp_ana->virtsq_error().get0().real() / val_ana)};
 
     t0 = std::chrono::high_resolution_clock::now();
-    ensemble.compute_error(moms_alt);
+    ensemble.compute_with_error(moms_alt);
     t1 = std::chrono::high_resolution_clock::now();
     const long dur_nn{
         std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()};

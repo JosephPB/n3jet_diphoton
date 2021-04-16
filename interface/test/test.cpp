@@ -51,7 +51,7 @@ int main() {
 
   std::array<double, 2> python_outputs{{2.2266408e-07, 1.430258598666967e-06}};
 
-  nn::FKSEnsemble<double> networks(
+  nn::FKSEnsemble<double> ensemble(
       legs, training_reruns,
       "../../models/3g2a/RAMBO/"
       "events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet_test/",
@@ -61,14 +61,14 @@ int main() {
     std::cout << "==================== Test point " << i + 1
               << " ====================" << '\n';
 
-    double average_output{networks.compute(momenta[i])};
+    double average_output{ensemble.compute(momenta[i])};
 
-    networks.compute_error(momenta[i]);
+    ensemble.compute_with_error(momenta[i]);
 
     std::cout << std::setw(17) << "Python = " << python_outputs[i] << '\n'
               << std::setw(17) << "C++ = " << average_output << '\n'
-              << std::setw(17) << "C++ 2 = " << networks.mean << " +- "
-              << networks.std_err << '\n'
+              << std::setw(17) << "C++ 2 = " << ensemble.mean << " +- "
+              << ensemble.std_err << '\n'
               << std::setw(17)
               << "d(C++, Python) = " << d(average_output, python_outputs[i]) << '\n';
   }
