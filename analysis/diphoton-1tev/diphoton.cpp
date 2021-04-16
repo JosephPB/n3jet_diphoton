@@ -1,4 +1,8 @@
 // -*- C++ -*-
+
+// created by editing this standard analysis
+// https://rivet.hepforge.org/analyses/ATLAS_2017_I1591327.html
+
 #include "Rivet/Analysis.hh"
 #include "Rivet/Projections/FastJets.hh"
 #include "Rivet/Projections/FinalState.hh"
@@ -113,10 +117,6 @@ public:
       if (!photon.isPrompt())
         continue;
 
-      // Remove photons in ECAL crack region - removed as detector cuts
-      // if (inRange(photon.abseta(), 1.37, 1.56))
-      //    continue;
-
       const double eta_P = photon.eta();
       const double phi_P = photon.phi();
 
@@ -128,30 +128,18 @@ public:
         // Reject if not in cone
         if (deltaR(photon.momentum(), p.momentum()) > 0.4)
           continue;
-        // Reject if in the 5x7 cell central core - removed as detector cuts
-        // if (fabs(eta_P - p.eta()) < 0.025 * 5 * 0.5 && fabs(phi_P - p.phi()) < PI /
-        // 128. * 7 * 0.5)
-        //    continue;
         // Sum momentum
         mom_in_EtCone += p.momentum();
       }
-      // Now figure out the correction (area*density) - removed as detector cuts
-      // const double EtCone_area = M_PI * sqr(0.4) - (7 * .025) * (5 * M_PI / 128.); //
-      // cone area - central core rectangle const double correction =
-      // _ptDensity[binIndex(fabs(eta_P), ETA_BINS)] * EtCone_area;
 
-      // Discard the photon if there is more than 11 GeV of cone activity - removed as
-      // detector cuts NOTE: Shouldn't need to subtract photon itself (it's in the
-      // central core)
-      // if (mom_in_EtCone.Et() - correction > 11 * GeV)
-      //    continue;
       // Add isolated photon to list
       isolated_photons.push_back(photon);
     }
 
     // Require at least two isolated photons
-    if (isolated_photons.size() < 2)
+    if (isolated_photons.size() < 2) {
       vetoEvent;
+    }
 
     // Select leading pT pair
     sortByPt(isolated_photons);
@@ -163,14 +151,17 @@ public:
     const FourMomentum yh = isolated_photons[0];
 
     // Leading photon should have pT > 40 GeV, subleading > 30 GeV
-    if (y1.pT() < 40. * GeV)
+    if (y1.pT() < 40. * GeV) {
       vetoEvent;
-    if (y2.pT() < 30. * GeV)
+    }
+    if (y2.pT() < 30. * GeV) {
       vetoEvent;
+    }
 
     // Require the two photons to be separated (dR>0.4)
-    if (deltaR(y1, y2) < 0.4)
+    if (deltaR(y1, y2) < 0.4) {
       vetoEvent;
+    }
 
     // myy
     const FourMomentum yy = y1 + y2;
