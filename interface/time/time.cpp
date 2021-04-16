@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <array>
 #include <chrono>
 #include <iomanip>
 #include <iostream>
@@ -5,31 +7,66 @@
 
 #include "model_fns.hpp"
 
-int main() {
-  std::cout.setf(std::ios_base::scientific, std::ios_base::floatfield);
-  std::cout.precision(16);
+std::string rpt(int n, const std::string &strg) {
+  std::string out;
+  for (int i{0}; i < n; ++i) {
+    out += strg;
+  }
+  return out;
+}
 
-  const int num{100};
+int main() {
+  const int num{10};
   const int pspoints{2};
+  constexpr int cols{6};
+  // unicode...
+  const std::array<int, cols> cw{{3, 8, 12, 8, 12, 8}};
+  std::array<int, cols> cw2;
+  std::transform(cw.cbegin(), cw.cend(), cw2.begin(),
+                 [](int n) -> int { return n + 2; });
+  std::array<int, cols> cw3;
+  std::transform(cw.cbegin(), cw.cend(), cw3.begin(),
+                 [](int n) -> int { return n - 1; });
 
   std::cout << '\n'
             << "n3jet: benchmark pretrained neural network C++ inference timing" << '\n'
             << "       showing mean of " << num << " runs for " << pspoints << " points"
             << '\n'
-            << "       there seems to be a warmup effect where val+err is faster if evaluated second, but val is faster if evaluated second"
+            << "       there sometimes seems to be a warmup effect where val+err is "
+               "faster if "
+               "evaluated second, but val is faster if evaluated second"
             << '\n'
+            << "       computed in float (f32) and double (f64)" << '\n'
+            << "       all times are in microseconds" << '\n'
             << '\n'
-            << std::setw(3) << "pt" << std::setw(9) << "val" << std::setw(9)
-            << "val+err" << '\n';
+            << "┌";
+  for (int i{0}; i < cols; ++i) {
+    std::cout << rpt(cw[i] - 1, "─") << (i == cols - 1 ? "┐\n" : "┬");
+  }
 
-  using TP = const std::chrono::high_resolution_clock::time_point;
+  std::cout << "│" << std::setw(cw2[0]) << "pt│" << std::setw(cw2[1]) << "val f32│"
+            << std::setw(cw2[2]) << "val+err f32│" << std::setw(cw2[3]) << "val f64│"
+            << std::setw(cw2[4]) << "val+err f64│" << std::setw(cw2[5]) << "f64/f32│"
+            << '\n';
+
+  std::cout << "├";
+  for (int i{0}; i < cols; ++i) {
+    std::cout << rpt(cw[i] - 1, "─") << (i == cols - 1 ? "┤\n" : "┼");
+  }
+
+  using TP = std::chrono::high_resolution_clock::time_point;
+  TP t0, t1;
 
   const int legs{5};
   const int training_reruns{20};
   const double delta{0.02};
+  const std::string model_dir{
+      "../../models/3g2a/RAMBO/"
+      "events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet_test/"};
+  const std::string cut_dir{"cut_0.02/"};
 
   // raw momenta input
-  std::vector<std::vector<std::vector<double>>> momenta{{
+  std::vector<std::vector<std::vector<double>>> momenta_f64{{
       {
           {80.80323390148537, 0.0, 0.0, 80.8032339014854},
           {53.57113343015938, 0.0, 0.0, -53.571133430159385},
@@ -52,31 +89,71 @@ int main() {
       },
   }};
 
-  nn::FKSEnsemble networks(
-      legs, training_reruns,
-      "../../models/3g2a/RAMBO/"
-      "events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet_test/",
-      delta, "cut_0.02/");
+  std::vector<std::vector<std::vector<float>>> momenta_f32(
+      pspoints, std::vector<std::vector<float>>(legs, std::vector<float>(4)));
+  for (int k{0}; k < pspoints; ++k) {
+    for (int j{0}; j < legs; ++j) {
+      for (int i{0}; i < 4; ++i) {
+        momenta_f32[k][j][i] = static_cast<float>(momenta_f64[k][j][i]);
+      }
+    }
+  }
+
+  nn::FKSEnsemble<float> ensemble_f32(legs, training_reruns, model_dir, delta, cut_dir);
+
+  nn::FKSEnsemble<double> ensemble_f64(legs, training_reruns, model_dir, delta,
+                                       cut_dir);
+
+  std::cout << std::fixed;
 
   for (int i{0}; i < pspoints; ++i) {
 
-    TP nnt1{std::chrono::high_resolution_clock::now()};
+    t0 = std::chrono::high_resolution_clock::now();
     for (int j{0}; j < num; ++j) {
-      networks.compute(momenta[i]);
+      ensemble_f32.compute(momenta_f32[i]);
     };
-    TP nnt2{std::chrono::high_resolution_clock::now()};
-    const long int nndur{
-        std::chrono::duration_cast<std::chrono::microseconds>(nnt2 - nnt1).count()};
+    t1 = std::chrono::high_resolution_clock::now();
+    const long int f32dur{
+        std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()};
+    const double avf32{static_cast<double>(f32dur) / num};
 
-    TP nnt3{std::chrono::high_resolution_clock::now()};
+    t0 = std::chrono::high_resolution_clock::now();
     for (int j{0}; j < num; ++j) {
-      networks.compute_with_error(momenta[i]);
+      ensemble_f32.compute_with_error(momenta_f32[i]);
     };
-    TP nnt4{std::chrono::high_resolution_clock::now()};
-    const long int nndur2{
-        std::chrono::duration_cast<std::chrono::microseconds>(nnt4 - nnt3).count()};
+    t1 = std::chrono::high_resolution_clock::now();
+    const long int f32dur2{
+        std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()};
+    const double avf32e{static_cast<double>(f32dur2) / num};
 
-    std::cout << std::setw(3) << i << std::setw(7) << nndur / num << "us"
-              << std::setw(7) << nndur2 / num << "us" << '\n';
+    t0 = std::chrono::high_resolution_clock::now();
+    for (int j{0}; j < num; ++j) {
+      ensemble_f64.compute(momenta_f64[i]);
+    };
+    t1 = std::chrono::high_resolution_clock::now();
+    const long int f64dur{
+        std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()};
+    const double avf64{static_cast<double>(f64dur) / num};
+
+    t0 = std::chrono::high_resolution_clock::now();
+    for (int j{0}; j < num; ++j) {
+      ensemble_f64.compute_with_error(momenta_f64[i]);
+    };
+    t1 = std::chrono::high_resolution_clock::now();
+    const long int f64dur2{
+        std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()};
+    const double avf64e{static_cast<double>(f64dur2) / num};
+
+    const double rto{avf64 / avf32};
+
+    std::cout << std::setprecision(1) << "│" << std::setw(cw3[0]) << i << "│"
+              << std::setw(cw3[1]) << avf32 << "│" << std::setw(cw3[2]) << avf32e << "│"
+              << std::setw(cw3[3]) << avf64 << "│" << std::setw(cw3[4]) << avf64e << "│"
+              << std::setw(cw3[5]) << std::setprecision(2) << rto << "│" << '\n';
+  }
+
+  std::cout << "└";
+  for (int i{0}; i < cols; ++i) {
+    std::cout << rpt(cw[i] - 1, "─") << (i == cols - 1 ? "┘\n" : "┴");
   }
 }
