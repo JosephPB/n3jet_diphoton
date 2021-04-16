@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <ios>
 #include <iostream>
+#include <numeric>
 #include <string>
 #include <vector>
 
@@ -26,11 +27,32 @@ void row(const std::array<int, 6> &cw, int p, const std::string &name, double va
             << '\n';
 }
 
+double mean(const std::vector<long> &data) {
+  return static_cast<double>(std::accumulate(data.cbegin(), data.cend(), 0)) /
+         data.size();
+}
+
+double std_err(const std::vector<long> &data, const double mean) {
+  double err{};
+  for (long datum : data) {
+    const double term{datum - mean};
+    err += term * term;
+  }
+  return std::sqrt(err) / data.size();
+}
+
 void run(const int start, const int end) {
+  const int num{end - start};
+  std::vector<long> tme_num(num);
+  std::vector<long> tme_ana(num);
+  std::vector<long> tme_nn(num);
+
   constexpr int cols{6};
   const std::array<int, cols> cw{{4, 6, 24, 12, 11, 10}};
   const std::array<std::string, cols> titles{
       {"pt", "impl", "value", "rel error", "time (us)", "t ratio"}};
+
+  std::cout << "Running " << num << " point" << (num == 1 ? "" : "s") << '\n' << '\n';
 
   std::cout << std::left << ' ';
   for (int i{0}; i < cols; ++i) {
@@ -70,7 +92,7 @@ void run(const int start, const int end) {
   amp_ana->setNf(Nf);
   amp_ana->setNc(Nc);
 
-  nn::FKSEnsemble<double> ensemble(
+  nn::FKSEnsemble<float> ensemble(
       legs, 20,
       "../../models/3g2a/RAMBO/"
       "events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet_test/",
@@ -82,10 +104,10 @@ void run(const int start, const int end) {
     std::vector<MOM<double>> moms{ps.getPSpoint()};
     refineM(moms, moms, scales2);
 
-    std::vector<std::vector<double>> moms_alt(legs, std::vector<double>(d));
+    std::vector<std::vector<float>> moms_alt(legs, std::vector<float>(d));
     for (int i{0}; i < legs; ++i) {
       moms_alt[i] =
-          std::vector<double>({moms[i].x0, moms[i].x1, moms[i].x2, moms[i].x3});
+          std::vector<float>({moms[i].x0, moms[i].x1, moms[i].x2, moms[i].x3});
     }
 
     amp_num->setMomenta(moms);
@@ -96,6 +118,7 @@ void run(const int start, const int end) {
     t1 = std::chrono::high_resolution_clock::now();
     const long dur_num{
         std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()};
+    tme_num[p - 1] = dur_num;
     const double val_num{amp_num->virtsq_value().get0().real()};
     const double err_num{std::abs(amp_num->virtsq_error().get0().real()) / val_num};
 
@@ -104,6 +127,7 @@ void run(const int start, const int end) {
     t1 = std::chrono::high_resolution_clock::now();
     const long dur_ana{
         std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()};
+    tme_ana[p - 1] = dur_ana;
     const double val_ana{amp_ana->virtsq_value().get0().real()};
     const double err_ana{std::abs(amp_ana->virtsq_error().get0().real() / val_ana)};
 
@@ -112,6 +136,7 @@ void run(const int start, const int end) {
     t1 = std::chrono::high_resolution_clock::now();
     const long dur_nn{
         std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()};
+    tme_nn[p - 1] = dur_nn;
     const double val_nn{ensemble.mean};
     const double err_nn{ensemble.std_err};
 
@@ -123,6 +148,31 @@ void run(const int start, const int end) {
     row(cw, 0, "ana", val_ana, err_ana, dur_ana, tr_ana);
     row(cw, 0, "nn", val_nn, err_nn, dur_nn, tr_nn);
   }
+
+  std::cout << std::setfill('-');
+  for (int d : cw) {
+    std::cout << std::setw(d) << '|';
+  }
+  std::cout << '|' << std::setfill(' ') << '\n';
+
+  const double mn_num{mean(tme_num)};
+  const double std_err_num{std_err(tme_num, mn_num)};
+  const double mn_ana{mean(tme_ana)};
+  const double std_err_ana{std_err(tme_ana, mn_ana)};
+  const double mn_nn{mean(tme_nn)};
+  const double std_err_nn{std_err(tme_nn, mn_nn)};
+
+  std::cout << '\n'
+            << "Mean times (us)" << '\n'
+            << std::setw(5) << "num" << mn_num << " ± " << std_err_num << '\n'
+            << std::setw(5) << "ana" << mn_ana << " ± " << std_err_ana << '\n'
+            << std::setw(5) << "nn" << mn_nn << " ± " << std_err_nn << '\n';
+
+  std::cout << '\n'
+            << "Mean time ratios" << '\n'
+            << std::setw(5) << "num" << mn_num / mn_ana << '\n'
+            << std::setw(5) << "ana" << 1. << '\n'
+            << std::setw(5) << "nn" << mn_nn / mn_ana << '\n';
 }
 
 int main(int argc, char *argv[]) {
@@ -152,9 +202,6 @@ int main(int argc, char *argv[]) {
     std::cerr << "Error: start must be greater than zero!" << '\n';
     std::exit(EXIT_FAILURE);
   }
-
-  const int num{end - start};
-  std::cout << "Running " << num << " point" << (num == 1 ? "" : "s") << '\n' << '\n';
 
   run(start, end);
 
