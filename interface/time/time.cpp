@@ -16,42 +16,40 @@ std::string rpt(int n, const std::string &strg) {
 }
 
 int main() {
-  const int num{10};
+  const int num{10000};
   const int pspoints{2};
   constexpr int cols{6};
-  // unicode...
-  const std::array<int, cols> cw{{3, 8, 12, 8, 12, 8}};
-  std::array<int, cols> cw2;
-  std::transform(cw.cbegin(), cw.cend(), cw2.begin(),
-                 [](int n) -> int { return n + 2; });
-  std::array<int, cols> cw3;
-  std::transform(cw.cbegin(), cw.cend(), cw3.begin(),
-                 [](int n) -> int { return n - 1; });
+  const std::array<std::string, cols> titles{
+      {"pt", "val f32", "val+err f32", "val f64", "val+err f64", "f64/f32"}};
+  std::array<int, cols> cw;
+  std::transform(titles.cbegin(), titles.cend(), cw.begin(),
+                 [](std::string s) -> int { return s.size(); });
 
   std::cout << '\n'
             << "n3jet: benchmark pretrained neural network C++ inference timing" << '\n'
             << "       showing mean of " << num << " runs for " << pspoints << " points"
             << '\n'
             << "       there sometimes seems to be a warmup effect where val+err is "
-               "faster if "
-               "evaluated second, but val is faster if evaluated second"
+               "faster if evaluated"
             << '\n'
+            << "       second, but val is faster if evaluated second" << '\n'
             << "       computed in float (f32) and double (f64)" << '\n'
             << "       all times are in microseconds" << '\n'
             << '\n'
             << "┌";
   for (int i{0}; i < cols; ++i) {
-    std::cout << rpt(cw[i] - 1, "─") << (i == cols - 1 ? "┐\n" : "┬");
+    std::cout << rpt(cw[i], "─") << (i == cols - 1 ? "┐\n" : "┬");
   }
 
-  std::cout << "│" << std::setw(cw2[0]) << "pt│" << std::setw(cw2[1]) << "val f32│"
-            << std::setw(cw2[2]) << "val+err f32│" << std::setw(cw2[3]) << "val f64│"
-            << std::setw(cw2[4]) << "val+err f64│" << std::setw(cw2[5]) << "f64/f32│"
-            << '\n';
+  std::cout << "│";
+  for (int i{0}; i < cols; ++i) {
+    std::cout << std::setw(cw[i]) << titles[i] << "│";
+  }
+  std::cout << '\n';
 
   std::cout << "├";
   for (int i{0}; i < cols; ++i) {
-    std::cout << rpt(cw[i] - 1, "─") << (i == cols - 1 ? "┤\n" : "┼");
+    std::cout << rpt(cw[i], "─") << (i == cols - 1 ? "┤\n" : "┼");
   }
 
   using TP = std::chrono::high_resolution_clock::time_point;
@@ -146,14 +144,14 @@ int main() {
 
     const double rto{avf64 / avf32};
 
-    std::cout << std::setprecision(1) << "│" << std::setw(cw3[0]) << i << "│"
-              << std::setw(cw3[1]) << avf32 << "│" << std::setw(cw3[2]) << avf32e << "│"
-              << std::setw(cw3[3]) << avf64 << "│" << std::setw(cw3[4]) << avf64e << "│"
-              << std::setw(cw3[5]) << std::setprecision(2) << rto << "│" << '\n';
+    std::cout << std::setprecision(1) << "│" << std::setw(cw[0]) << i << "│"
+              << std::setw(cw[1]) << avf32 << "│" << std::setw(cw[2]) << avf32e << "│"
+              << std::setw(cw[3]) << avf64 << "│" << std::setw(cw[4]) << avf64e << "│"
+              << std::setw(cw[5]) << std::setprecision(2) << rto << "│" << '\n';
   }
 
   std::cout << "└";
   for (int i{0}; i < cols; ++i) {
-    std::cout << rpt(cw[i] - 1, "─") << (i == cols - 1 ? "┘\n" : "┴");
+    std::cout << rpt(cw[i], "─") << (i == cols - 1 ? "┘\n" : "┴");
   }
 }
