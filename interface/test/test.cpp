@@ -68,7 +68,7 @@ int main() {
     std::cout << std::setw(17) << "Python = " << python_outputs[i] << '\n'
               << std::setw(17) << "C++ = " << average_output << '\n'
               << std::setw(17) << "C++ 2 = " << networks.mean << " +- "
-              << networks.std_dev << '\n'
+              << networks.std_err << '\n'
               << std::setw(17)
               << "d(C++, Python) = " << d(average_output, python_outputs[i]) << '\n';
   }

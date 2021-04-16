@@ -113,7 +113,7 @@ void run(const int start, const int end) {
     const long dur_nn{
         std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()};
     const double val_nn{ensemble.mean};
-    const double err_nn{ensemble.std_dev};
+    const double err_nn{ensemble.std_err};
 
     const double tr_num{static_cast<double>(dur_num) / dur_ana};
     const double tr_ana{1};

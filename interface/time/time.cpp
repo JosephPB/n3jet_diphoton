@@ -16,6 +16,8 @@ int main() {
             << "n3jet: benchmark pretrained neural network C++ inference timing" << '\n'
             << "       showing mean of " << num << " runs for " << pspoints << " points"
             << '\n'
+            << "       there seems to be a warmup effect where val+err is faster if evaluated second, but val is faster if evaluated second"
+            << '\n'
             << '\n'
             << std::setw(3) << "pt" << std::setw(9) << "val" << std::setw(9)
             << "val+err" << '\n';
@@ -57,6 +59,7 @@ int main() {
       delta, "cut_0.02/");
 
   for (int i{0}; i < pspoints; ++i) {
+
     TP nnt1{std::chrono::high_resolution_clock::now()};
     for (int j{0}; j < num; ++j) {
       networks.compute(momenta[i]);
