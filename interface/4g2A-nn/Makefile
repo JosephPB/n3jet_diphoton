@@ -21,10 +21,7 @@ DEFS+=-DNN_MODEL="\"./models/RAMBO/events_100k_fks_all_legs_all_pairs_new_sherpa
 
 all: libSherpaNN4g2A.so
 
-interface.o: ${SRC_DIR}/interface.cpp ${SRC_DIR}/interface.hpp Makefile
-	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS) $(DEFS)
-
-model_fns.o: ${SRC_DIR}/model_fns.cpp ${SRC_DIR}/model_fns.hpp
+interface.o: ${SRC_DIR}/interface.cpp ${SRC_DIR}/interface.hpp ${SRC_DIR}/model_fns.hpp
 	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS) $(DEFS)
 
 libSherpaNN4g2A.so: interface.o model_fns.o

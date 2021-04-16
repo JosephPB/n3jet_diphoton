@@ -21,10 +21,7 @@ DEFS+=-DNJET # do NJet calculation only (or return NJet result with BOTH)
 
 all: libSherpaNJet4g2A.so OLE_contract_4g2A.lh
 
-interface.o: ${SRC_DIR}/interface.cpp ${SRC_DIR}/interface.hpp Makefile
-	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS) $(DEFS)
-
-model_fns.o: ${SRC_DIR}/model_fns.cpp ${SRC_DIR}/model_fns.hpp
+interface.o: ${SRC_DIR}/interface.cpp ${SRC_DIR}/interface.hpp
 	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS) $(DEFS)
 
 libSherpaNJet4g2A.so: interface.o model_fns.o

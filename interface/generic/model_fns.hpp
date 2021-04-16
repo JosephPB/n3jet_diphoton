@@ -136,6 +136,7 @@ public:
 
   T mean;
   T std_dev;
+  T std_err;
 
   std::vector<std::vector<nn::Network<T>>> kerasModels;
   std::vector<std::vector<std::vector<T>>> metadatas;
@@ -539,5 +540,6 @@ void nn::FKSEnsemble<T>::compute_error(const std::vector<std::vector<T>> &point)
   }
 
   mean = std::accumulate(results.cbegin(), results.cend(), T()) / runs;
-  std_dev = 0.; // TODO
+  std_dev = 0.;
+  std_err = 0.;
 }

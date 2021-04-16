@@ -9,7 +9,9 @@
 #include "PHASIC++/Process/ME_Generator_Base.H"
 #include "PHASIC++/Process/Tree_ME2_Base.H"
 
+#if (defined(NN) || defined(BOTH))
 #include "model_fns.hpp"
+#endif
 
 namespace NN2A {
 

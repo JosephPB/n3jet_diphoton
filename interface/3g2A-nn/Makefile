@@ -21,13 +21,10 @@ DEFS+=-DNN_MODEL="\"../../models/3g2a/RAMBO/events_100k_fks_all_legs_all_pairs_n
 
 all: libSherpaNN3g2A.so
 
-interface.o: ${SRC_DIR}/interface.cpp ${SRC_DIR}/interface.hpp Makefile
+interface.o: ${SRC_DIR}/interface.cpp ${SRC_DIR}/interface.hpp ${SRC_DIR}/model_fns.hpp
 	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS) $(DEFS)
 
-model_fns.o: ${SRC_DIR}/model_fns.cpp ${SRC_DIR}/model_fns.hpp
-	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS) $(DEFS)
-
-libSherpaNN3g2A.so: interface.o model_fns.o
+libSherpaNN3g2A.so: interface.o
 	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LIBS)
 
 clean:
