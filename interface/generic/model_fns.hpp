@@ -541,5 +541,10 @@ void nn::FKSEnsemble<T>::compute_error(const std::vector<std::vector<T>> &point)
 
   mean = std::accumulate(results.cbegin(), results.cend(), T()) / runs;
   std_dev = 0.;
-  std_err = 0.;
+  for (T result : results) {
+    const T term{result - mean};
+    std_dev += term * term;
+  }
+  std_dev = std::sqrt(std_dev / runs);
+  std_err = std_dev / std::sqrt(runs);
 }
