@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cstddef>
 #include <iomanip>
 #include <iostream>
 #include <vector>
@@ -13,6 +14,16 @@ std::string rpt(int n, const std::string &strg) {
     out += strg;
   }
   return out;
+}
+
+template <std::size_t c>
+std::string hline(const std::array<int, c> &cw, std::string out,
+                  const std::string &middle, const std::string &right,
+                  const std::string &spacer = "─") {
+  for (std::size_t i{0}; i < cw.size() - 1; ++i) {
+    out += rpt(cw[i], spacer) + middle;
+  }
+  return out + rpt(cw.back(), spacer) + right + "\n";
 }
 
 int main() {
@@ -36,21 +47,13 @@ int main() {
             << "       computed in float (f32) and double (f64)" << '\n'
             << "       all times are in microseconds" << '\n'
             << '\n'
-            << "┌";
-  for (int i{0}; i < cols; ++i) {
-    std::cout << rpt(cw[i], "─") << (i == cols - 1 ? "┐\n" : "┬");
-  }
+            << hline(cw, "┌", "┬", "┐");
 
   std::cout << "│";
   for (int i{0}; i < cols; ++i) {
     std::cout << std::setw(cw[i]) << titles[i] << "│";
   }
-  std::cout << '\n';
-
-  std::cout << "├";
-  for (int i{0}; i < cols; ++i) {
-    std::cout << rpt(cw[i], "─") << (i == cols - 1 ? "┤\n" : "┼");
-  }
+  std::cout << '\n' << hline(cw, "├", "┼", "┤");
 
   using TP = std::chrono::high_resolution_clock::time_point;
   TP t0, t1;
@@ -150,8 +153,5 @@ int main() {
               << std::setw(cw[5]) << std::setprecision(2) << rto << "│" << '\n';
   }
 
-  std::cout << "└";
-  for (int i{0}; i < cols; ++i) {
-    std::cout << rpt(cw[i], "─") << (i == cols - 1 ? "┘\n" : "┴");
-  }
+  std::cout << hline(cw, "└", "┴", "┘");
 }
