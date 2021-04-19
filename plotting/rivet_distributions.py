@@ -58,11 +58,11 @@ class RivetDistributions:
         dphi_jj_file = self.rivet_dir + "dphijj.dat"
         dphi_jj_plotter = RivetPlotter(dphi_jj_file)
 
-        xlabel = r"$\Delta\phi_{jj}$ [rad]"
+        xlabel = r"$\Delta\phi_{j_1j_2}$ [rad]"
         if self.rescaling == "On":
-            ylabel = r"d$\sigma/$d$\Delta\phi_{jj}$ [fb rad$^{-1}$]"
+            ylabel = r"d$\sigma/$d$\Delta\phi_{j_1j_2}$ [fb rad$^{-1}$]"
         elif self.rescaling == "XS":
-            ylabel = r"$1/\sigma$ d$\sigma/$d$\Delta\phi_{jj}$ [rad$^{-1}$]"
+            ylabel = r"$1/\sigma$ d$\sigma/$d$\Delta\phi_{j_1j_2}$ [rad$^{-1}$]"
 
         dphi_jj_fig = dphi_jj_plotter.plot(
             xlabel=xlabel,
@@ -78,11 +78,11 @@ class RivetDistributions:
         dr_jy_file = self.rivet_dir + "rsepjy.dat"
         dr_jy_plotter = RivetPlotter(dr_jy_file)
 
-        xlabel = r"$R_{j\gamma}$"
+        xlabel = r"$R_{j_1\gamma_1}$"
         if self.rescaling == "On":
-            ylabel = r"d$\sigma/$d$R_{j\gamma}$ [fb]"
+            ylabel = r"d$\sigma/$d$R_{j_1\gamma_1}$ [fb]"
         elif self.rescaling == "XS":
-            ylabel = r"$1/\sigma$ d$\sigma/$d$R_{j\gamma}$"
+            ylabel = r"$1/\sigma$ d$\sigma/$d$R_{j_1\gamma_1}$"
 
         dr_jy_fig = dr_jy_plotter.plot(
             xlabel=xlabel,
@@ -101,11 +101,11 @@ class RivetDistributions:
         deta_yy_file = self.rivet_dir + "etayy.dat"
         deta_yy_plotter = RivetPlotter(deta_yy_file)
 
-        xlabel = r"$\eta_{\gamma\gamma}$"
+        xlabel = r"$\eta_{\gamma_1\gamma_2}$"
         if self.rescaling == "On":
-            ylabel = r"d$\sigma/$d$\eta_{\gamma\gamma}$ [fb]"
+            ylabel = r"d$\sigma/$d$\eta_{\gamma_1\gamma_2}$ [fb]"
         elif self.rescaling == "XS":
-            ylabel = r"$1/\sigma$ d$\sigma/$d$\eta_{\gamma\gamma}$"
+            ylabel = r"$1/\sigma$ d$\sigma/$d$\eta_{\gamma_1\gamma_2}$"
 
         deta_yy_fig = deta_yy_plotter.plot(
             xlabel=xlabel,
@@ -121,11 +121,11 @@ class RivetDistributions:
         dm_yy_file = self.rivet_dir + "mass.dat"
         dm_yy_plotter = RivetPlotter(dm_yy_file)
 
-        xlabel = r"$\eta_{\gamma\gamma}$"
+        xlabel = r"$m_{\gamma_1\gamma_2}$"
         if self.rescaling == "On":
-            ylabel = r"d$\sigma/$d$\eta_{\gamma\gamma}$ [fb]"
+            ylabel = r"d$\sigma/$d$m_{\gamma_1\gamma_2}$ [fb]"
         elif self.rescaling == "XS":
-            ylabel = r"$1/\sigma$ d$\sigma/$d$\eta_{\gamma\gamma}$"
+            ylabel = r"$1/\sigma$ d$\sigma/$d$m_{\gamma_1\gamma_2}$"
 
         dm_yy_fig = dm_yy_plotter.plot(
             xlabel=xlabel,
@@ -143,7 +143,7 @@ class RivetDistributions:
         dpt_j1_file = self.rivet_dir + "j1pt.dat"
         dpt_j1_plotter = RivetPlotter(dpt_j1_file)
 
-        xlabel = r"$p_{T}$ [GeV]"
+        xlabel = r"Leading jet $p_{T}$ [GeV]"
         if self.rescaling == "On":
             ylabel = r"d$\sigma/$d$p_{T}$ [fb GeV$^{-1}$]"
         elif self.rescaling == "XS":
@@ -163,7 +163,7 @@ class RivetDistributions:
         dpt_j2_file = self.rivet_dir + "j2pt.dat"
         dpt_j2_plotter = RivetPlotter(dpt_j2_file)
 
-        xlabel = r"$p_{T}$ [GeV]"
+        xlabel = r"2nd leading jet $p_{T}$ [GeV]"
         if self.rescaling == "On":
             ylabel = r"d$\sigma/$d$p_{T}$ [fb GeV$^{-1}$]"
         elif self.rescaling == "XS":

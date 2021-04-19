@@ -127,8 +127,8 @@ class RivetPlotter:
 
         ax1 = fig.add_axes((0.1, 0.4, 0.8, 0.8))
 
-        ax1.step(njet_bins, njet_vals, color="red")
-        ax1.step(nn_bins, nn_vals, color="blue")
+        ax1.step(njet_bins, njet_vals, color="red", label="NJet")
+        ax1.step(nn_bins, nn_vals, color="blue", label="NN")
         ax1.set_yscale("log")
         ax1.set_xticklabels([])
 
@@ -143,6 +143,7 @@ class RivetPlotter:
             ax1.set_xlim((0, njet_bins[-1]))
 
         ax1.set_ylabel(r"{}".format(ylabel), fontsize=17, labelpad=10)
+        ax1.legend(prop={"size": 17}, frameon=False)
 
         ax2 = fig.add_axes((0.1, 0.1, 0.8, 0.3))
 
