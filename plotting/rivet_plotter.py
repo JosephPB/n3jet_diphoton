@@ -129,6 +129,22 @@ class RivetPlotter:
 
         ax1.step(njet_bins, njet_vals, color="red", label="NJet")
         ax1.step(nn_bins, nn_vals, color="blue", label="NN")
+        ax1.fill_between(
+            njet_bins[:-1],
+            (njet_vals - njet_errs)[1:],
+            (njet_vals + njet_errs)[1:],
+            step="post",
+            color="red",
+            alpha=0.5,
+        )
+        ax1.fill_between(
+            nn_bins[:-1],
+            (nn_vals - nn_errs)[1:],
+            (nn_vals + nn_errs)[1:],
+            step="post",
+            color="blue",
+            alpha=0.5,
+        )
         ax1.set_yscale("log")
         ax1.set_xticklabels([])
 
