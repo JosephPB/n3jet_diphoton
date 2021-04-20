@@ -121,7 +121,7 @@ class RivetPlotter:
 
         plt.clf()
 
-        fig = plt.figure(1)
+        fig = plt.figure(1, figsize=(5, 7))
 
         plt.rc("text", usetex=True)
         plt.rc("font", family="serif")
