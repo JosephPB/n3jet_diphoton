@@ -109,6 +109,7 @@ class RivetPlotter:
         ylabel,
         xlabel,
         xlim=None,
+        ylim=None,
     ):
         """
         Plot two histograms with ratio plot below
@@ -158,6 +159,9 @@ class RivetPlotter:
         else:
             ax1.set_xlim((0, njet_bins[-1]))
 
+        if ylim is not None:
+            ax1.set_ylim(ylim)
+
         ax1.set_ylabel(r"{}".format(ylabel), fontsize=17, labelpad=10)
         ax1.legend(prop={"size": 17}, frameon=False)
 
@@ -197,7 +201,7 @@ class RivetPlotter:
 
         return fig
 
-    def plot(self, xlabel, ylabel, xlim=None, rescaling="On"):
+    def plot(self, xlabel, ylabel, xlim=None, ylim=None, rescaling="On"):
 
         njet_scale, nn_scale, njet_data, nn_data = self.extract_data()
         assert len(njet_data) == len(nn_data)
@@ -240,6 +244,7 @@ class RivetPlotter:
             xlabel=xlabel,
             ylabel=ylabel,
             xlim=xlim,
+            ylim=ylim,
         )
 
         return fig

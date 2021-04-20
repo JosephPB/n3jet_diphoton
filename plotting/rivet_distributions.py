@@ -31,6 +31,13 @@ def parse():
     )
 
     parser.add_argument(
+        "--legs",
+        dest="legs",
+        help="Number of legs",
+        type=int,
+    )
+
+    parser.add_argument(
         "--rescaling",
         dest="rescaling",
         help="Turn Rivet ScaledBy feature On/XS/Off",
@@ -44,10 +51,13 @@ def parse():
 
 
 class RivetDistributions:
-    def __init__(self, rivet_dir, save_dir="./paper_plots/", rescaling="On", dpi=150):
+    def __init__(
+        self, rivet_dir, save_dir="./paper_plots/", legs=5, rescaling="On", dpi=150
+    ):
 
         self.rivet_dir = rivet_dir
         self.save_dir = save_dir
+        self.legs = legs
         self.rescaling = rescaling
         self.dpi = dpi
 
@@ -127,9 +137,15 @@ class RivetDistributions:
         elif self.rescaling == "XS":
             ylabel = r"$1/\sigma$ d$\sigma/$d$m_{\gamma_1\gamma_2}$"
 
+        if self.legs == 5:
+            ylim = (11e-7, 3)
+        else:
+            ylim = None
+
         dm_yy_fig = dm_yy_plotter.plot(
             xlabel=xlabel,
             ylabel=ylabel,
+            ylim=ylim,
             rescaling=self.rescaling,
         )
         dm_yy_fig.savefig(
