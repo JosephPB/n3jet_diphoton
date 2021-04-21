@@ -28,8 +28,8 @@ constexpr int legs{LEGS};
 static_assert(false,
               "You must choose the number of NN runs to average over with -DRUNS=#!");
 #endif
-#if (RUNS == 1) && !defined(A)
-static_assert(false, "You must set the index of the NN run with -DA=#!");
+#if (RUNS == 1) && !defined(INDEX)
+static_assert(false, "You must set the index of the NN run with -DINDEX=#!");
 #endif
 #ifndef NN_MODEL
 static_assert(false, "You must choose the path to the model directory with "

@@ -1,8 +1,8 @@
 SRC_DIR=../generic
 
 CXX?=g++
-CXXFLAGS=-O2 -pedantic -Wall -Wextra -std=c++17
-CPPFLAGS=-I${SRC_DIR}
+CXXFLAGS=-O2 -pedantic -Wall -Wextra -std=c++17 -march=native -mtune=native
+CPPFLAGS=-I${SRC_DIR} $(shell pkg-config eigen3 --cflags)
 LDFLAGS=
 
 .PHONY: clean all

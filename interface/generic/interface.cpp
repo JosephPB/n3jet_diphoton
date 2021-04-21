@@ -29,7 +29,7 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
 #endif
 #endif
 #if (RUNS == 1)
-      resfile("res-" + std::to_string(A)),
+      resfile("res-" + std::to_string(INDEX)),
 #else
       resfile("res"),
 #endif

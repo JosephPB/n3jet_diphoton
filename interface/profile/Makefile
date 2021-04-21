@@ -2,8 +2,8 @@ MDL_DIR=../generic
 TME_DIR=../time
 
 CXX?=g++
-CXXFLAGS=-O2 -pedantic -Wall -Wextra -std=c++17
-CPPFLAGS=-I${MDL_DIR}
+CXXFLAGS=-Og -pedantic -Wall -Wextra -std=c++17 -march=native -mtune=native
+CPPFLAGS=-I${MDL_DIR} $(shell pkg-config eigen3 --cflags)
 LDFLAGS=
 
 PRF_CPL=-g -pg

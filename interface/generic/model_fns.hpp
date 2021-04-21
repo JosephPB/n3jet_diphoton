@@ -12,6 +12,8 @@
 #include <utility>
 #include <vector>
 
+#include <Eigen/Dense>
+
 // ====================================================================================
 // declaration
 // ====================================================================================
@@ -26,7 +28,7 @@ enum ActivationType { Tanh, ReLU, Linear };
 template <typename T> struct Layer {
   virtual ~Layer(){};
 
-  virtual void compute_output(std::vector<T> &test_input) = 0;
+  virtual void compute_output(Eigen::VectorX<T> &test_input) = 0;
 };
 
 template <typename T> struct LayerDense : public Layer<T> {
@@ -34,17 +36,17 @@ template <typename T> struct LayerDense : public Layer<T> {
 
   int input_node_count;
   int output_weights;
-  std::vector<std::vector<T>> layer_weights;
+  std::vector<Eigen::VectorX<T>> layer_weights;
   std::vector<T> bias;
 
-  virtual void compute_output(std::vector<T> &test_input) override;
+  virtual void compute_output(Eigen::VectorX<T> &test_input) override;
 };
 
 template <typename T> struct LayerActivation : public Layer<T> {
   LayerActivation(std::ifstream &fin);
 
   ActivationType activation_type;
-  virtual void compute_output(std::vector<T> &test_input) override;
+  virtual void compute_output(Eigen::VectorX<T> &test_input) override;
 };
 
 // Network
@@ -54,7 +56,7 @@ template <typename T> class Network {
 public:
   ~Network();
   void load_weights(std::string &input_fname);
-  T compute_output(std::vector<T> test_input);
+  T compute_output(Eigen::VectorX<T> test_input);
 
 private:
   int layers_count;
@@ -153,8 +155,8 @@ public:
 
 template <typename T> nn::LayerDense<T>::LayerDense(std::ifstream &fin) {
   fin >> input_node_count >> output_weights;
-  layer_weights =
-      std::vector<std::vector<T>>(output_weights, std::vector<T>(input_node_count));
+  layer_weights = std::vector<Eigen::VectorX<T>>(output_weights,
+                                                 Eigen::VectorX<T>(input_node_count));
 
   T tmp_double;
   char tmp_char;
@@ -177,11 +179,10 @@ template <typename T> nn::LayerDense<T>::LayerDense(std::ifstream &fin) {
 }
 
 template <typename T>
-void nn::LayerDense<T>::compute_output(std::vector<T> &test_input) {
-  std::vector<T> out(output_weights);
+void nn::LayerDense<T>::compute_output(Eigen::VectorX<T> &test_input) {
+  Eigen::VectorX<T> out(output_weights);
   for (int i{0}; i < output_weights; ++i) {
-    out[i] = std::inner_product(test_input.begin(), test_input.end(),
-                                layer_weights[i].begin(), bias[i]);
+    out[i] = test_input.dot(layer_weights[i]) + bias[i];
   }
   test_input = out;
 }
@@ -202,7 +203,7 @@ template <typename T> nn::LayerActivation<T>::LayerActivation(std::ifstream &fin
 }
 
 template <typename T>
-void nn::LayerActivation<T>::compute_output(std::vector<T> &test_input) {
+void nn::LayerActivation<T>::compute_output(Eigen::VectorX<T> &test_input) {
   switch (activation_type) {
   case Tanh:
     std::transform(test_input.cbegin(), test_input.cend(), test_input.begin(),
@@ -290,7 +291,7 @@ template <typename T> void nn::Network<T>::load_weights(std::string &input_fname
   fin.close();
 }
 
-template <typename T> T nn::Network<T>::compute_output(std::vector<T> test_input) {
+template <typename T> T nn::Network<T>::compute_output(Eigen::VectorX<T> test_input) {
   for (Layer<T> *layer : layers) {
     layer->compute_output(test_input);
   }
@@ -374,7 +375,7 @@ template <typename T>
 T nn::NaiveEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
   // moms is an vector of runs results, each of which is an vector of flattened momenta
   // std::array<std::array<T, legs * d>, runs> moms;
-  std::vector<std::vector<T>> moms(runs, std::vector<T>(legs * d));
+  std::vector<Eigen::VectorX<T>> moms(runs, Eigen::VectorX<T>(legs * d));
 
   // flatten momenta
   for (int p{0}; p < legs; ++p) {
@@ -432,8 +433,8 @@ template <typename T>
 T nn::FKSEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
   // moms is an vector of runs results, each of which is an vector of FKS pairs results,
   // each of which is an vector of flattened momenta
-  std::vector<std::vector<std::vector<T>>> moms(
-      runs, std::vector<std::vector<T>>(pairs + 1, std::vector<T>(legs * d)));
+  std::vector<std::vector<Eigen::VectorX<T>>> moms(
+      runs, std::vector<Eigen::VectorX<T>>(pairs + 1, Eigen::VectorX<T>(legs * d)));
 
   // NN compute_output accepts vectors - could edit model_fns
   // std::array<std::array<std::array<T, NN2A::legs * NN2A::d>, pairs + 1>, runs>
@@ -489,8 +490,8 @@ template <typename T>
 void nn::FKSEnsemble<T>::compute_with_error(const std::vector<std::vector<T>> &point) {
   // moms is an vector of runs results, each of which is an vector of FKS pairs results,
   // each of which is an vector of flattened momenta
-  std::vector<std::vector<std::vector<T>>> moms(
-      runs, std::vector<std::vector<T>>(pairs + 1, std::vector<T>(legs * d)));
+  std::vector<std::vector<Eigen::VectorX<T>>> moms(
+      runs, std::vector<Eigen::VectorX<T>>(pairs + 1, Eigen::VectorX<T>(legs * d)));
 
   // NN compute_output accepts vectors - could edit model_fns
   // std::array<std::array<std::array<T, NN2A::legs * NN2A::d>, pairs + 1>, runs>
