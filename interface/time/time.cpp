@@ -26,8 +26,7 @@ std::string hline(const std::array<int, c> &cw, std::string out,
   return out + rpt(cw.back(), spacer) + right + "\n";
 }
 
-int main() {
-  const int num{10000};
+void run(const int num) {
   const int pspoints{2};
   constexpr int cols{6};
   const std::array<std::string, cols> titles{
@@ -154,4 +153,9 @@ int main() {
   }
 
   std::cout << hline(cw, "└", "┴", "┘");
+}
+
+int main() {
+  run(1000);
+  run(10000);
 }

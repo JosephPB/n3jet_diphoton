@@ -12,4 +12,5 @@ callgrind.out.*
 vgcore.*
 */*/test
 interface/*/time
+interface/*/time_O*
 *.out
