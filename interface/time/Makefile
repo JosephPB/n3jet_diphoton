@@ -22,4 +22,4 @@ time_O3.o: time.cpp ${SRC_DIR}/model_fns.hpp
 	${CXX} ${CXXFLAGS} -O2 -o $@ -c $< ${CPPFLAGS}
 
 clean:
-	-rm *.o test
+	-rm *.o time_O*
