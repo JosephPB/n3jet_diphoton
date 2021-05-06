@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "analytic/0q3g2A-analytic.h"
+#include "chsums/0q3gA.h"
 #include "chsums/NJetAccuracy.h"
 #include "ngluon2/Model.h"
 #include "ngluon2/Mom.h"
@@ -27,7 +28,7 @@ void run(const int start, const int end) {
   constexpr int cols{6};
   const std::array<int, cols> cw{{4, 6, 24, 12, 11, 10}};
   const std::array<std::string, cols> titles{
-      {"pt", "impl", "value", "rel error", "time (us)", "t ratio"}};
+      {"pt", "impl", "value", "rel error", "time (ns)", "t ratio"}};
 
   std::cout << "Running " << num << " point" << (num == 1 ? "" : "s") << '\n' << '\n';
 
@@ -97,7 +98,7 @@ void run(const int start, const int end) {
     amp_num->virtsq();
     t1 = std::chrono::high_resolution_clock::now();
     const long dur_num{
-        std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()};
+        std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count()};
     tme_num[p - 1] = dur_num;
     const double val_num{amp_num->virtsq_value().get0().real()};
     const double err_num{std::abs(amp_num->virtsq_error().get0().real()) / val_num};
@@ -106,7 +107,7 @@ void run(const int start, const int end) {
     amp_ana->virtsq();
     t1 = std::chrono::high_resolution_clock::now();
     const long dur_ana{
-        std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()};
+        std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count()};
     tme_ana[p - 1] = dur_ana;
     const double val_ana{amp_ana->virtsq_value().get0().real()};
     const double err_ana{std::abs(amp_ana->virtsq_error().get0().real() / val_ana)};
@@ -115,14 +116,14 @@ void run(const int start, const int end) {
     ensemble.compute_with_error(moms_alt);
     t1 = std::chrono::high_resolution_clock::now();
     const long dur_nn{
-        std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()};
+        std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count()};
     tme_nn[p - 1] = dur_nn;
     const double val_nn{ensemble.mean};
     const double err_nn{ensemble.std_err};
 
     const double tr_num{static_cast<double>(dur_num) / dur_ana};
-    const double tr_ana{1};
-    const double tr_nn{static_cast<double>(dur_nn) / dur_ana};
+    const double tr_ana{static_cast<double>(dur_ana) / dur_nn};
+    const double tr_nn{static_cast<double>(dur_nn) / dur_nn};
 
     row(cw, p, "num", val_num, err_num, dur_num, tr_num);
     row(cw, 0, "ana", val_ana, err_ana, dur_ana, tr_ana);
@@ -135,24 +136,7 @@ void run(const int start, const int end) {
   }
   std::cout << '|' << std::setfill(' ') << '\n';
 
-  const double mn_num{mean(tme_num)};
-  const double std_err_num{std_err(tme_num, mn_num)};
-  const double mn_ana{mean(tme_ana)};
-  const double std_err_ana{std_err(tme_ana, mn_ana)};
-  const double mn_nn{mean(tme_nn)};
-  const double std_err_nn{std_err(tme_nn, mn_nn)};
-
-  std::cout << '\n'
-            << "Mean times (us)" << '\n'
-            << std::setw(5) << "num" << mn_num << " ± " << std_err_num << '\n'
-            << std::setw(5) << "ana" << mn_ana << " ± " << std_err_ana << '\n'
-            << std::setw(5) << "nn" << mn_nn << " ± " << std_err_nn << '\n';
-
-  std::cout << '\n'
-            << "Mean time ratios" << '\n'
-            << std::setw(5) << "num" << mn_num / mn_ana << '\n'
-            << std::setw(5) << "ana" << 1. << '\n'
-            << std::setw(5) << "nn" << mn_nn / mn_ana << '\n';
+  report(tme_num, tme_ana, tme_nn);
 }
 
 int main(int argc, char *argv[]) {

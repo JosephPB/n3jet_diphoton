@@ -8,8 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "analytic/0q2g2A-analytic.h"
-#include "chsums/0q2gA.h"
+#include "chsums/0q4gA.h"
 #include "chsums/NJetAccuracy.h"
 #include "ngluon2/Model.h"
 #include "ngluon2/Mom.h"
@@ -53,22 +52,16 @@ void run(const int start, const int end) {
   const int d{4};
   const int Nc{3};
   const int Nf{5};
-  const int legs{4};
+  const int legs{6};
 
   const Flavour<double> Ax{
       StandardModel::Ax(StandardModel::IL(), StandardModel::IL().C())};
 
   NJetAccuracy<double> *const amp_num{
-      NJetAccuracy<double>::template create<Amp0q2gAA<double>>(Ax)};
+      NJetAccuracy<double>::template create<Amp0q4gAA<double>>(Ax)};
   amp_num->setMuR2(mur * mur);
   amp_num->setNf(Nf);
   amp_num->setNc(Nc);
-
-  NJetAccuracy<double> *const amp_ana{
-      NJetAccuracy<double>::template create<Amp0q2g2A_a<double>>(Ax)};
-  amp_ana->setMuR2(mur * mur);
-  amp_ana->setNf(Nf);
-  amp_ana->setNc(Nc);
 
   // nn::FKSEnsemble<float> ensemble(
   //    legs, 20,
@@ -93,7 +86,6 @@ void run(const int start, const int end) {
     }
 
     amp_num->setMomenta(moms);
-    amp_ana->setMomenta(moms);
 
     t0 = std::chrono::high_resolution_clock::now();
     amp_num->virtsq();
@@ -103,15 +95,6 @@ void run(const int start, const int end) {
     tme_num[p - 1] = dur_num;
     const double val_num{amp_num->virtsq_value().get0().real()};
     const double err_num{std::abs(amp_num->virtsq_error().get0().real()) / val_num};
-
-    t0 = std::chrono::high_resolution_clock::now();
-    amp_ana->virtsq();
-    t1 = std::chrono::high_resolution_clock::now();
-    const long dur_ana{
-        std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count()};
-    tme_ana[p - 1] = dur_ana;
-    const double val_ana{amp_ana->virtsq_value().get0().real()};
-    const double err_ana{std::abs(amp_ana->virtsq_error().get0().real() / val_ana)};
 
     t0 = std::chrono::high_resolution_clock::now();
     // ensemble.compute_with_error(moms_alt);
@@ -124,12 +107,10 @@ void run(const int start, const int end) {
     // const double val_nn{ensemble.mean};
     // const double err_nn{ensemble.std_err};
 
-    const double tr_num{static_cast<double>(dur_num) / dur_ana};
-    const double tr_ana{static_cast<double>(dur_ana) / dur_nn};
+    const double tr_num{static_cast<double>(dur_num) / dur_nn};
     const double tr_nn{static_cast<double>(dur_nn) / dur_nn};
 
     row(cw, p, "num", val_num, err_num, dur_num, tr_num);
-    row(cw, 0, "ana", val_ana, err_ana, dur_ana, tr_ana);
     row(cw, 0, "nn", val_nn, err_nn, dur_nn, tr_nn);
   }
 
@@ -139,12 +120,12 @@ void run(const int start, const int end) {
   }
   std::cout << '|' << std::setfill(' ') << '\n';
 
-  report(tme_num, tme_ana, tme_nn);
+  report(tme_num, tme_nn);
 }
 
 int main(int argc, char *argv[]) {
   std::cout << '\n'
-            << "Comparison of evaluation speeds for 2g2a implementations" << '\n'
+            << "Comparison of evaluation speeds for 4g2a implementations" << '\n'
             << '\n';
 
   int start;
