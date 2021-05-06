@@ -18,7 +18,7 @@ void row(const std::array<int, 6> &cw, int p, const std::string &name, double va
 }
 
 double mean(const std::vector<long> &data) {
-  return static_cast<double>(std::accumulate(data.cbegin(), data.cend(), 0)) /
+  return std::accumulate(data.cbegin(), data.cend(), 0.) /
          data.size();
 }
 
