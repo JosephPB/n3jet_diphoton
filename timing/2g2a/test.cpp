@@ -71,7 +71,7 @@ void run(const int start, const int end) {
 
   //nn::FKSEnsemble<float> ensemble(
   //    legs, 20,
-  //    "../../models/2g2a/RAMBO/"
+  //    "../../models/2g2A/RAMBO/"
   //    "100k_unit_002/",
   //    0.02, "cut_0.02/");
 

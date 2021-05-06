@@ -22,8 +22,8 @@ int main() {
   const int training_reruns{20};
   const double delta{0.02};
   const std::string model_dir{
-      "../../models/3g2a/RAMBO/"
-      "events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet_test/"};
+      "../../models/3g2A/RAMBO/"
+      "100k_unit_002/"};
   const std::string cut_dir{"cut_0.02/"};
 
   const std::vector<std::vector<std::vector<double>>> momenta_f64{{
