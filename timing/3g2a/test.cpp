@@ -92,11 +92,10 @@ void run(const int start, const int end) {
   amp_ana->setNf(Nf);
   amp_ana->setNc(Nc);
 
-  nn::FKSEnsemble<float> ensemble(
-      legs, 20,
-      "../../models/3g2a/RAMBO/"
-      "events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet_test/",
-      0.02, "cut_0.02/");
+  nn::FKSEnsemble<float> ensemble(legs, 20,
+                                  "../../models/3g2A/RAMBO/"
+                                  "100k_unit_002/",
+                                  0.02, "cut_0.02/");
 
   // rseed = p
   for (int p{start}; p < end; ++p) {
@@ -106,8 +105,12 @@ void run(const int start, const int end) {
 
     std::vector<std::vector<float>> moms_alt(legs, std::vector<float>(d));
     for (int i{0}; i < legs; ++i) {
-      moms_alt[i] =
-          std::vector<float>({moms[i].x0, moms[i].x1, moms[i].x2, moms[i].x3});
+      moms_alt[i] = std::vector<float>({
+          static_cast<float>(moms[i].x0),
+          static_cast<float>(moms[i].x1),
+          static_cast<float>(moms[i].x2),
+          static_cast<float>(moms[i].x3),
+      });
     }
 
     amp_num->setMomenta(moms);
