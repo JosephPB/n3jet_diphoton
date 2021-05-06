@@ -1,5 +1,4 @@
 #include <chrono>
-#include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iomanip>
@@ -17,29 +16,7 @@
 #include "tools/PhaseSpace.h"
 
 //#include "model_fns.hpp"
-
-void row(const std::array<int, 6> &cw, int p, const std::string &name, double val,
-         double err, long dur, double tr) {
-  std::cout << ' ' << std::setw(cw[0]) << (p > 0 ? std::to_string(p) : "")
-            << std::setw(cw[1]) << name << std::scientific << std::setprecision(16)
-            << std::setw(cw[2]) << val << std::setprecision(1) << std::setw(cw[3])
-            << err << std::fixed << std::setw(cw[4]) << dur << std::setw(cw[5]) << tr
-            << '\n';
-}
-
-double mean(const std::vector<long> &data) {
-  return static_cast<double>(std::accumulate(data.cbegin(), data.cend(), 0)) /
-         data.size();
-}
-
-double std_err(const std::vector<long> &data, const double mean) {
-  double err{};
-  for (long datum : data) {
-    const double term{datum - mean};
-    err += term * term;
-  }
-  return std::sqrt(err) / data.size();
-}
+#include "timing.hpp"
 
 void run(const int start, const int end) {
   const int num{end - start};
@@ -94,8 +71,8 @@ void run(const int start, const int end) {
 
   //nn::FKSEnsemble<float> ensemble(
   //    legs, 20,
-  //    "../../models/3g2a/RAMBO/"
-  //    "events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet_test/",
+  //    "../../models/2g2a/RAMBO/"
+  //    "100k_unit_002/",
   //    0.02, "cut_0.02/");
 
   // rseed = p
@@ -183,7 +160,7 @@ void run(const int start, const int end) {
 
 int main(int argc, char *argv[]) {
   std::cout << '\n'
-            << "Comparison of evaluation speeds for 3g2a implementations" << '\n'
+            << "Comparison of evaluation speeds for 2g2a implementations" << '\n'
             << '\n';
 
   int start;
