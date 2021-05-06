@@ -4,6 +4,8 @@ CXX?=g++
 CXXFLAGS=-pedantic -Wall -Wextra -std=c++17 -march=native -mtune=native -O2
 CPPFLAGS=-I${SRC_DIR} -I$(NJET_DEV) $(shell pkg-config njet2 eigen3 --cflags)
 LDFLAGS=$(shell pkg-config njet2 --libs) -lnjet2tools
+LDFLAGS+=-lnjet2an0q3g2A
+LDFLAGS+=-lnjet2an0q5g -lnjet2an2q3g
 
 .PHONY: clean all
 
