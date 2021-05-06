@@ -106,8 +106,12 @@ void run(const int start, const int end) {
 
     std::vector<std::vector<float>> moms_alt(legs, std::vector<float>(d));
     for (int i{0}; i < legs; ++i) {
-      moms_alt[i] =
-          std::vector<float>({moms[i].x0, moms[i].x1, moms[i].x2, moms[i].x3});
+      moms_alt[i] = std::vector<float>({
+          static_cast<float>(moms[i].x0),
+          static_cast<float>(moms[i].x1),
+          static_cast<float>(moms[i].x2),
+          static_cast<float>(moms[i].x3),
+      });
     }
 
     amp_num->setMomenta(moms);
