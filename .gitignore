@@ -14,3 +14,4 @@ vgcore.*
 interface/*/time
 interface/*/time_O*
 *.out
+*.pyc
