@@ -2,7 +2,7 @@ SRC_DIR=../../interface/generic
 
 CXX?=g++
 CXXFLAGS=-O2 -std=c++17 -Wall -Wextra -pedantic
-CPPFLAGS=`pkg-config njet2 --cflags` -I$(NJET_DEV) -I${SRC_DIR}
+CPPFLAGS=`pkg-config njet2 eigen3 --cflags` -I$(NJET_DEV) -I${SRC_DIR}
 LDFLAGS=`pkg-config njet2 --libs` -lnjet2tools -lnjet2an0q3g2A
 
 SRCS=$(wildcard *.cpp)
