@@ -151,9 +151,14 @@ def lin(means, stds, line_labels, x_labels):
 # main
 
 if __name__ == "__main__":
-    data_5pt = read("3g2a/result.5pt.csv")
-
     titles = ("Numerical", "Analytical", "Neural net ensemble")
+
+    data_4pt = read("3g2a/result.5pt.csv")
+
+    times_rows_4pt = data_4pt[:, [3, 6, 9]] / 1e6  # ms
+    times_4pt = numpy.transpose(times_rows_4pt)
+
+    data_5pt = read("3g2a/result.5pt.csv")
 
     times_rows_5pt = data_5pt[:, [3, 6, 9]] / 1e6  # ms
     times_5pt = numpy.transpose(times_rows_5pt)
@@ -169,24 +174,28 @@ if __name__ == "__main__":
     # hist(times_6pt, titles)
     # vio(times_rows_6pt, titles)
 
-    means = []
-    stds = []
+    muls = ("4", "5", "6")
 
-    for times_proc in (times_5pt, times_6pt):
-        means_proc = []
-        stds_proc = []
-        for impl, time in zip(titles, times_proc):
+    means = numpy.empty((3, 3))
+    stds = numpy.empty((3, 3))
+
+    for j, (m, times_mul) in enumerate(zip(muls, (times_4pt, times_5pt, times_6pt))):
+        print(m)
+        for i, (impl, time) in enumerate(zip(titles, times_mul)):
             mean = numpy.mean(time)
             abs_std = numpy.std(time)
-            # rel_std = abs_std / mean
-            # print(impl, mean, rel_std)
-            means_proc.append(mean)
-            stds_proc.append(abs_std)
 
-        means.append(means_proc)
-        stds.append(stds_proc)
+            rel_std = abs_std / mean
+            print(impl, mean, rel_std)
 
-    means = numpy.transpose(means)
-    stds = numpy.transpose(stds)
+            means[i, j] = mean
+            stds[i, j] = abs_std
+    print()
 
-    lin(means, stds, titles, ("5", "6"))
+    # while these are fake
+    for j in (0, 2):
+        for i in range(3):
+            means[i, j] = 10 ** (2 * j)
+            stds[i, j] = 0.1
+
+    lin(means, stds, titles, muls)
