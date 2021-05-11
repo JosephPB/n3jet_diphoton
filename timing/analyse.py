@@ -123,20 +123,66 @@ def vio(rows, titles):
     save(fig, "vio")
 
 
+def lin(cols, labels):
+    fig, ax = matplotlib.pyplot.subplots()
+
+    matplotlib.pyplot.yscale("log")
+
+    pos_x = ("5", "6")
+
+    for label, datum in zip(labels, cols):
+        ax.plot(
+            pos_x,
+            datum,
+            label=label,
+        )
+
+    ax.set_xlabel("Multiplicity")
+    ax.set_ylabel("Evaluation time (ms)")
+    ax.legend(loc="best")
+
+    save(fig, "lin")
+
+
 # main
 
 if __name__ == "__main__":
-    data = read("3g2a/result.5pt.csv")
+    data_5pt = read("3g2a/result.5pt.csv")
 
     titles = ("Numerical", "Analytical", "Neural net ensemble")
-    times_rows = data[:, [3, 6, 9]] / 1e6  # ms
-    times = numpy.transpose(times_rows)
 
-    for title, time in zip(titles, times):
-        mean = numpy.mean(time)
-        abs_std = numpy.std(time)
-        rel_std = abs_std / mean
-        print(title, mean, rel_std)
+    times_rows_5pt = data_5pt[:, [3, 6, 9]] / 1e6  # ms
+    times_5pt = numpy.transpose(times_rows_5pt)
 
-    hist(times, titles)
-    vio(times_rows, titles)
+    # hist(times_5pt, titles)
+    # vio(times_rows_5pt, titles)
+
+    data_6pt = read("3g2a/result.5pt.csv")
+
+    times_rows_6pt = data_6pt[:, [3, 6, 9]] / 1e6  # ms
+    times_6pt = numpy.transpose(times_rows_6pt)
+
+    # hist(times_6pt, titles)
+    # vio(times_rows_6pt, titles)
+
+    means = []
+    stds = []
+
+    for times_proc in (times_5pt, times_6pt):
+        means_proc = []
+        stds_proc = []
+        for impl, time in zip(titles, times_proc):
+            mean = numpy.mean(time)
+            abs_std = numpy.std(time)
+            # rel_std = abs_std / mean
+            # print(impl, mean, rel_std)
+            means_proc.append(mean)
+            stds_proc.append(abs_std)
+
+        means.append(means_proc)
+        stds.append(stds_proc)
+
+    means = numpy.transpose(means)
+    stds = numpy.transpose(stds)
+
+    lin(means, titles)
