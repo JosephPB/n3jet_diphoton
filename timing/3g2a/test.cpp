@@ -75,8 +75,12 @@ void run(const int start, const int end) {
                                   "100k_unit_002/",
                                   0.02, "cut_0.02/");
 
+  std::ofstream o("result.csv", std::ios::app);
+  o << std::scientific << std::setprecision(16);
+
   // rseed = p
-  for (int p{start}; p < end; ++p) {
+  for (int a{0}; a < num; ++a) {
+    const int p{a + start};
     PhaseSpace<double> ps(legs, p, sqrtS);
     std::vector<MOM<double>> moms{ps.getPSpoint()};
     refineM(moms, moms, scales2);
@@ -99,7 +103,7 @@ void run(const int start, const int end) {
     t1 = std::chrono::high_resolution_clock::now();
     const long dur_num{
         std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count()};
-    tme_num[p - 1] = dur_num;
+    tme_num[a] = dur_num;
     const double val_num{amp_num->virtsq_value().get0().real()};
     const double err_num{std::abs(amp_num->virtsq_error().get0().real()) / val_num};
 
@@ -108,7 +112,7 @@ void run(const int start, const int end) {
     t1 = std::chrono::high_resolution_clock::now();
     const long dur_ana{
         std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count()};
-    tme_ana[p - 1] = dur_ana;
+    tme_ana[a] = dur_ana;
     const double val_ana{amp_ana->virtsq_value().get0().real()};
     const double err_ana{std::abs(amp_ana->virtsq_error().get0().real() / val_ana)};
 
@@ -117,7 +121,7 @@ void run(const int start, const int end) {
     t1 = std::chrono::high_resolution_clock::now();
     const long dur_nn{
         std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count()};
-    tme_nn[p - 1] = dur_nn;
+    tme_nn[a] = dur_nn;
     const double val_nn{ensemble.mean};
     const double err_nn{ensemble.std_err};
 
@@ -128,6 +132,10 @@ void run(const int start, const int end) {
     row(cw, p, "num", val_num, err_num, dur_num, tr_num);
     row(cw, 0, "ana", val_ana, err_ana, dur_ana, tr_ana);
     row(cw, 0, "nn", val_nn, err_nn, dur_nn, tr_nn);
+
+    o << p << ' ' << val_num << ' ' << err_num << ' ' << dur_num << ' ' << val_ana
+      << ' ' << err_ana << ' ' << dur_ana << ' ' << val_nn << ' ' << err_nn << ' '
+      << dur_nn << '\n';
   }
 
   std::cout << std::setfill('-');
