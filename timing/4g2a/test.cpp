@@ -21,8 +21,8 @@
 void run(const int start, const int end) {
   const int num{end - start};
   std::vector<long> tme_num(num);
-  std::vector<long> tme_ana(num);
-  std::vector<long> tme_nn(num);
+  std::vector<long> tme_nn_f32(num);
+  std::vector<long> tme_nn_f64(num);
 
   constexpr int cols{6};
   const std::array<int, cols> cw{{4, 6, 24, 12, 11, 10}};
@@ -63,11 +63,15 @@ void run(const int start, const int end) {
   amp_num->setNf(Nf);
   amp_num->setNc(Nc);
 
-  nn::FKSEnsemble<double> ensemble(
-     legs, 20,
-     "../../models/4g2A/RAMBO/"
-     "100k_unit_0001_fks/",
-     0.02, "cut_0.02/");
+  nn::FKSEnsemble<float> ensemble_f32(legs, 20,
+                                      "../../models/4g2A/RAMBO/"
+                                      "100k_unit_0001_fks/",
+                                      0.02, "cut_0.02/");
+
+  nn::FKSEnsemble<double> ensemble_f64(legs, 20,
+                                       "../../models/4g2A/RAMBO/"
+                                       "100k_unit_0001_fks/",
+                                       0.02, "cut_0.02/");
 
   std::ofstream o("result.csv", std::ios::app);
   o << std::scientific << std::setprecision(16);
@@ -79,13 +83,23 @@ void run(const int start, const int end) {
     std::vector<MOM<double>> moms{ps.getPSpoint()};
     refineM(moms, moms, scales2);
 
-    std::vector<std::vector<float>> moms_alt(legs, std::vector<float>(d));
+    std::vector<std::vector<float>> moms_f32(legs, std::vector<float>(d));
     for (int i{0}; i < legs; ++i) {
-      moms_alt[i] = std::vector<float>({
+      moms_f32[i] = std::vector<float>({
           static_cast<float>(moms[i].x0),
           static_cast<float>(moms[i].x1),
           static_cast<float>(moms[i].x2),
           static_cast<float>(moms[i].x3),
+      });
+    }
+
+    std::vector<std::vector<double>> moms_f64(legs, std::vector<double>(d));
+    for (int i{0}; i < legs; ++i) {
+      moms_f64[i] = std::vector<double>({
+          moms[i].x0,
+          moms[i].x1,
+          moms[i].x2,
+          moms[i].x3,
       });
     }
 
@@ -101,22 +115,34 @@ void run(const int start, const int end) {
     const double err_num{std::abs(amp_num->virtsq_error().get0().real()) / val_num};
 
     t0 = std::chrono::high_resolution_clock::now();
-    ensemble.compute_with_error(moms_alt);
+    ensemble_f32.compute_with_error(moms_f32);
     t1 = std::chrono::high_resolution_clock::now();
-    const long dur_nn{
+    const long dur_nn_f32{
         std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count()};
-    tme_nn[a] = dur_nn;
-    const double val_nn{ensemble.mean};
-    const double err_nn{ensemble.std_err};
+    tme_nn_f32[a] = dur_nn_f32;
+    const double val_nn_f32{ensemble_f32.mean};
+    const double err_nn_f32{ensemble_f32.std_err};
 
-    const double tr_num{static_cast<double>(dur_num) / dur_nn};
-    const double tr_nn{static_cast<double>(dur_nn) / dur_nn};
+    t0 = std::chrono::high_resolution_clock::now();
+    ensemble_f64.compute_with_error(moms_f64);
+    t1 = std::chrono::high_resolution_clock::now();
+    const long dur_nn_f64{
+        std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count()};
+    tme_nn_f64[a] = dur_nn_f64;
+    const double val_nn_f64{ensemble_f64.mean};
+    const double err_nn_f64{ensemble_f64.std_err};
+
+    const double tr_num{static_cast<double>(dur_num) / dur_nn_f32};
+    const double tr_nn_f32{static_cast<double>(dur_nn_f32) / dur_nn_f32};
+    const double tr_nn_f64{static_cast<double>(dur_nn_f64) / dur_nn_f32};
 
     row(cw, p, "num", val_num, err_num, dur_num, tr_num);
-    row(cw, 0, "nn", val_nn, err_nn, dur_nn, tr_nn);
+    row(cw, 0, "nn_f32", val_nn_f32, err_nn_f32, dur_nn_f32, tr_nn_f32);
+    row(cw, 0, "nn_f64", val_nn_f64, err_nn_f64, dur_nn_f64, tr_nn_f64);
 
-    o << p << ' ' << val_num << ' ' << err_num << ' ' << dur_num << ' ' << val_nn << ' '
-      << err_nn << ' ' << dur_nn << '\n';
+    o << p << ' ' << val_num << ' ' << err_num << ' ' << dur_num << ' ' << val_nn_f32
+      << ' ' << err_nn_f32 << ' ' << dur_nn_f32 << val_nn_f64 << ' ' << err_nn_f64
+      << ' ' << dur_nn_f64 << '\n';
   }
 
   std::cout << std::setfill('-');
@@ -125,7 +151,7 @@ void run(const int start, const int end) {
   }
   std::cout << '|' << std::setfill(' ') << '\n';
 
-  report(tme_num, tme_nn);
+  report(tme_num, tme_nn_f32, tme_nn_f64, "num", "nn_f32", "nn_f64");
 }
 
 int main(int argc, char *argv[]) {
