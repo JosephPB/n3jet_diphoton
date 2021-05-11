@@ -141,7 +141,7 @@ void run(const int start, const int end) {
     row(cw, 0, "nn_f64", val_nn_f64, err_nn_f64, dur_nn_f64, tr_nn_f64);
 
     o << p << ' ' << val_num << ' ' << err_num << ' ' << dur_num << ' ' << val_nn_f32
-      << ' ' << err_nn_f32 << ' ' << dur_nn_f32 << val_nn_f64 << ' ' << err_nn_f64
+      << ' ' << err_nn_f32 << ' ' << dur_nn_f32 << ' ' << val_nn_f64 << ' ' << err_nn_f64
       << ' ' << dur_nn_f64 << '\n';
   }
 
