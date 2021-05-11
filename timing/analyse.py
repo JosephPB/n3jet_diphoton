@@ -123,17 +123,21 @@ def vio(rows, titles):
     save(fig, "vio")
 
 
-def lin(cols, labels):
+def lin(means, stds, line_labels, x_labels):
     fig, ax = matplotlib.pyplot.subplots()
 
     matplotlib.pyplot.yscale("log")
 
-    pos_x = ("5", "6")
-
-    for label, datum in zip(labels, cols):
+    for label, mean, std in zip(line_labels, means, stds):
+        ax.fill_between(
+            x=x_labels,
+            y1=mean - std,
+            y2=mean + std,
+            alpha=0.2,
+        )
         ax.plot(
-            pos_x,
-            datum,
+            x_labels,
+            mean,
             label=label,
         )
 
@@ -185,4 +189,4 @@ if __name__ == "__main__":
     means = numpy.transpose(means)
     stds = numpy.transpose(stds)
 
-    lin(means, titles)
+    lin(means, stds, titles, ("5", "6"))
