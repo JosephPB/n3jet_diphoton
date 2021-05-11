@@ -69,13 +69,13 @@ def save(fig, name):
 # vis
 
 
-def hist(data, titles):
+def hist(cols, titles):
     fig, ax = matplotlib.pyplot.subplots()
 
     matplotlib.pyplot.xscale("log")
     lbins = numpy.logspace(-1, 3, num=1000, base=10)
 
-    for title, datum in zip(titles, data):
+    for title, datum in zip(titles, cols):
         ax.hist(
             datum,
             bins=lbins,
@@ -90,7 +90,7 @@ def hist(data, titles):
     save(fig, "hist")
 
 
-def vio(data, titles):
+def vio(rows, titles):
     fig, ax = matplotlib.pyplot.subplots()
 
     matplotlib.pyplot.yscale("log")
@@ -98,7 +98,7 @@ def vio(data, titles):
     pos_x = (1, 2, 3)
 
     parts = ax.violinplot(
-        data,
+        rows,
         positions=pos_x,
         vert=True,
         showextrema=False,
@@ -129,8 +129,14 @@ if __name__ == "__main__":
     data = read("3g2a/result.5pt.csv")
 
     titles = ("Numerical", "Analytical", "Neural net ensemble")
-    times = data[:, [3, 6, 9]] / 1e6  # ms
+    times_rows = data[:, [3, 6, 9]] / 1e6  # ms
+    times = numpy.transpose(times_rows)
+
+    for title, time in zip(titles, times):
+        mean = numpy.mean(time)
+        abs_std = numpy.std(time)
+        rel_std = abs_std / mean
+        print(title, mean, rel_std)
 
     hist(times, titles)
-
-    vio(times, titles)
+    vio(times_rows, titles)
