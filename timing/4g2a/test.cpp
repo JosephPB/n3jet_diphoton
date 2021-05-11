@@ -63,11 +63,11 @@ void run(const int start, const int end) {
   amp_num->setNf(Nf);
   amp_num->setNc(Nc);
 
-  // nn::FKSEnsemble<float> ensemble(
-  //    legs, 20,
-  //    "../../models/2g2A/RAMBO/"
-  //    "100k_unit_002/",
-  //    0.02, "cut_0.02/");
+  nn::FKSEnsemble<double> ensemble(
+     legs, 20,
+     "../../models/4g2A/RAMBO/"
+     "100k_unit_0001_fks/",
+     0.02, "cut_0.02/");
 
   std::ofstream o("result.csv", std::ios::app);
   o << std::scientific << std::setprecision(16);

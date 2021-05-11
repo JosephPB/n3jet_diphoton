@@ -72,7 +72,7 @@ void run(const int start, const int end) {
 
   nn::FKSEnsemble<float> ensemble(legs, 20,
                                   "../../models/3g2A/RAMBO/"
-                                  "100k_unit_002/",
+                                  "100k_unit_002_fks/",
                                   0.02, "cut_0.02/");
 
   std::ofstream o("result.csv", std::ios::app);
