@@ -179,17 +179,32 @@ if __name__ == "__main__":
     means = numpy.empty((3, 3))
     stds = numpy.empty((3, 3))
 
+    print("Duration values (ms +- %)")
+
     for j, (m, times_mul) in enumerate(zip(muls, (times_4pt, times_5pt, times_6pt))):
         print(m)
+
         for i, (impl, time) in enumerate(zip(titles, times_mul)):
             mean = numpy.mean(time)
             abs_std = numpy.std(time)
 
             rel_std = abs_std / mean
-            print(impl, mean, rel_std)
+            print(impl, mean, round(100 * rel_std, 1))
 
             means[i, j] = mean
             stds[i, j] = abs_std
+
+    print()
+
+    min_dur = numpy.min(means)
+
+    print("Duration ratios")
+
+    for impl, means_impl in zip(titles, means):
+        print(impl)
+        for m, mean in zip(muls, means_impl):
+            print(m, round(mean / min_dur, 1))
+
     print()
 
     # while these are fake
@@ -198,4 +213,4 @@ if __name__ == "__main__":
             means[i, j] = 10 ** (2 * j)
             stds[i, j] = 0.1
 
-    lin(means, stds, titles, muls)
+    # lin(means, stds, titles, muls)
