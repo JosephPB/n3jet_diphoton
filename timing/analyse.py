@@ -69,11 +69,11 @@ def save(fig, name):
 # vis
 
 
-def hist(cols, titles):
+def hist(cols, titles, name, x_pow_max):
     fig, ax = matplotlib.pyplot.subplots()
 
     matplotlib.pyplot.xscale("log")
-    lbins = numpy.logspace(-1, 3, num=1000, base=10)
+    lbins = numpy.logspace(-1, x_pow_max, num=1000, base=10)
 
     for title, datum in zip(titles, cols):
         ax.hist(
@@ -87,10 +87,10 @@ def hist(cols, titles):
     ax.set_ylabel("Frequency")
     ax.legend(loc="upper left")
 
-    save(fig, "hist")
+    save(fig, "hist_" + name)
 
 
-def vio(rows, titles):
+def vio(rows, titles, name):
     fig, ax = matplotlib.pyplot.subplots()
 
     matplotlib.pyplot.yscale("log")
@@ -120,7 +120,7 @@ def vio(rows, titles):
         pc.set_facecolor(cmap(0))
         pc.set_alpha(1)
 
-    save(fig, "vio")
+    save(fig, "vio_" + name)
 
 
 def lin(means, stds, line_labels, x_labels):
@@ -163,25 +163,27 @@ if __name__ == "__main__":
     times_rows_5pt = data_5pt[:, [3, 6, 9]] / 1e6  # ms
     times_5pt = numpy.transpose(times_rows_5pt)
 
-    # hist(times_5pt, titles)
-    # vio(times_rows_5pt, titles)
+    # hist(times_5pt, titles, "5", 3)
+    # vio(times_rows_5pt, titles, "5")
 
-    data_6pt = read("3g2a/result.5pt.csv")
+    titles_6pt = ("Numerical", "Neural net ensemble f32", "Neural net ensemble f64")
+
+    data_6pt = read("4g2a/result.6pt.csv")
 
     times_rows_6pt = data_6pt[:, [3, 6, 9]] / 1e6  # ms
     times_6pt = numpy.transpose(times_rows_6pt)
 
-    # hist(times_6pt, titles)
-    # vio(times_rows_6pt, titles)
+    # hist(times_6pt, titles_6pt, "6", 5)
+    # vio(times_rows_6pt, titles_6pt, "6")
 
     muls = ("4", "5", "6")
 
-    means = numpy.empty((3, 3))
-    stds = numpy.empty((3, 3))
+    means = numpy.ma.empty((3, 3))
+    stds = numpy.ma.empty((3, 3))
 
     print("Duration values (ms +- %)")
 
-    for j, (m, times_mul) in enumerate(zip(muls, (times_4pt, times_5pt, times_6pt))):
+    for j, (m, times_mul) in enumerate(zip(muls, (times_4pt, times_5pt))):
         print(m)
 
         for i, (impl, time) in enumerate(zip(titles, times_mul)):
@@ -194,6 +196,25 @@ if __name__ == "__main__":
             means[i, j] = mean
             stds[i, j] = abs_std
 
+    print(6)
+    for i, impl, time in zip(
+        (0, 2, 3),
+        titles_6pt,
+        times_6pt,
+    ):
+        mean = numpy.mean(time)
+        abs_std = numpy.std(time)
+
+        rel_std = abs_std / mean
+        print(impl, mean, round(100 * rel_std, 1))
+
+        if i < 3:
+            means[i, 2] = mean
+            stds[i, 2] = abs_std
+
+    means[1, 2] = numpy.ma.masked
+    stds[1, 2] = numpy.ma.masked
+
     print()
 
     min_dur = numpy.min(means)
@@ -203,14 +224,14 @@ if __name__ == "__main__":
     for impl, means_impl in zip(titles, means):
         print(impl)
         for m, mean in zip(muls, means_impl):
-            print(m, round(mean / min_dur, 1))
+            if mean is not numpy.ma.masked:
+                print(m, round(mean / min_dur, 1))
 
     print()
 
-    # while these are fake
-    for j in (0, 2):
-        for i in range(3):
-            means[i, j] = 10 ** (2 * j)
-            stds[i, j] = 0.1
+    # while no 4pt results
+    for i in range(3):
+        means[i, 0] = 1.0
+        stds[i, 0] = 0.1
 
-    # lin(means, stds, titles, muls)
+    lin(means, stds, titles, muls)
