@@ -15,3 +15,6 @@ interface/*/time_O*
 *.out
 *.pyc
 *.csv
+*.png
+*.pdf
+*.pickle
