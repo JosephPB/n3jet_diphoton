@@ -63,14 +63,43 @@ def _save(fig, filename):
 
 def save(fig, name):
     for suffix in ("png", "pdf"):
+        # for suffix in ("png",):
         _save(fig, name + "." + suffix)
 
 
 # vis
 
 
+def init_plots():
+    matplotlib.pyplot.rc("text", usetex=True)
+    matplotlib.pyplot.rc("font", family="serif")
+
+
+def new_plot(xlabel=None, ylabel=None):
+    fig, ax = matplotlib.pyplot.subplots(figsize=(6.4, 4.8))
+
+    ax.set_prop_cycle("color", matplotlib.cm.tab10(range(10)))
+
+    ax.tick_params(axis="x", labelsize=15, direction="in", top=True, which="both")
+    ax.tick_params(axis="y", labelsize=15, direction="in", right=True, which="both")
+
+    if xlabel:
+        ax.set_xlabel(xlabel, fontsize=17, labelpad=10)
+    if ylabel:
+        ax.set_ylabel(ylabel, fontsize=17, labelpad=10)
+
+    return fig, ax
+
+
+def add_legend(ax, loc="best"):
+    ax.legend(loc=loc, prop={"size": 15}, frameon=False)
+
+
 def hist(cols, titles, name, x_pow_max):
-    fig, ax = matplotlib.pyplot.subplots()
+    fig, ax = new_plot(
+        xlabel="Frequency",
+        ylabel="Evaluation time (ms)",
+    )
 
     matplotlib.pyplot.xscale("log")
     lbins = numpy.logspace(-1, x_pow_max, num=1000, base=10)
@@ -83,15 +112,15 @@ def hist(cols, titles, name, x_pow_max):
             label=title,
         )
 
-    ax.set_xlabel("Evaluation time (ms)")
-    ax.set_ylabel("Frequency")
-    ax.legend(loc="upper left")
+    add_legend(ax, "upper left")
 
     save(fig, "hist_" + name)
 
 
 def vio(rows, titles, name):
-    fig, ax = matplotlib.pyplot.subplots()
+    fig, ax = new_plot(
+        ylabel="Evaluation time (ms)",
+    )
 
     matplotlib.pyplot.yscale("log")
 
@@ -111,9 +140,7 @@ def vio(rows, titles, name):
     ax.set_xticks(pos_x)
     ax.set_xticklabels(titles)
 
-    ax.set_ylabel("Evaluation time (ms)")
-
-    cmap = matplotlib.cm.get_cmap("Paired")
+    cmap = matplotlib.cm.Paired
 
     for pc in parts["bodies"]:
         pc.set_edgecolor(cmap(1))
@@ -124,7 +151,10 @@ def vio(rows, titles, name):
 
 
 def lin(means, stds, line_labels, x_labels):
-    fig, ax = matplotlib.pyplot.subplots()
+    fig, ax = new_plot(
+        xlabel="Multiplicity",
+        ylabel="Evaluation time (ms)",
+    )
 
     matplotlib.pyplot.yscale("log")
 
@@ -141,16 +171,50 @@ def lin(means, stds, line_labels, x_labels):
             label=label,
         )
 
-    ax.set_xlabel("Multiplicity")
-    ax.set_ylabel("Evaluation time (ms)")
-    ax.legend(loc="best")
+    add_legend(ax, "upper left")
 
     save(fig, "lin")
+
+
+def sca(means, line_labels, x_labels):
+    fig, ax = new_plot(
+        xlabel="Multiplicity",
+        ylabel="Evaluation time (ms)",
+    )
+
+    matplotlib.pyplot.yscale("log")
+
+    fmts = ("x", "^", "o")
+
+    for label, mean, fmt in zip(line_labels, means, fmts):
+        ax.scatter(x_labels, mean, marker=fmt, label=label)
+
+    add_legend(ax, "upper left")
+
+    save(fig, "sca")
+
+
+def err(means, stds, line_labels, x_labels):
+    fig, ax = new_plot(
+        xlabel="Multiplicity",
+        ylabel="Evaluation time (ms)",
+    )
+
+    matplotlib.pyplot.yscale("log")
+
+    for label, mean, std in zip(line_labels, means, stds):
+        ax.errorbar(x_labels, mean, yerr=std, label=label, fmt=".", capsize=2)
+
+    add_legend(ax, "upper left")
+
+    save(fig, "err")
 
 
 # main
 
 if __name__ == "__main__":
+    init_plots()
+
     titles = ("Numerical", "Analytical", "Neural net ensemble")
 
     data_4pt = read("3g2a/result.5pt.csv")
@@ -234,4 +298,4 @@ if __name__ == "__main__":
         means[i, 0] = 1.0
         stds[i, 0] = 0.1
 
-    lin(means, stds, titles, muls)
+    sca(means, titles, muls)
