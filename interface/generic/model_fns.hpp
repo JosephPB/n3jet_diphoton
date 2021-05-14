@@ -206,13 +206,12 @@ template <typename T>
 void nn::LayerActivation<T>::compute_output(Eigen::VectorX<T> &test_input) {
   switch (activation_type) {
   case Tanh:
-    std::transform(test_input.cbegin(), test_input.cend(), test_input.begin(),
-                   [](T a) -> T { return std::tanh(a); });
+    test_input = test_input.array().tanh();
     break;
   case ReLU:
     for (T &d : test_input) {
-      if (d < 0) {
-        d = 0;
+      if (d < T()) {
+        d = T();
       }
     }
     break;

@@ -12,13 +12,13 @@ LDFLAGS+=-lnjet2an0q5g
 
 .PHONY: clean all
 
-all: time
+all: prec
 
-time: time.o
+prec: prec.o
 	${CXX} -o $@ $^ ${LDFLAGS}
 
-time.o: time.cpp ${SRC_DIR}/model_fns.hpp
+prec.o: prec.cpp ${SRC_DIR}/model_fns.hpp
 	${CXX} ${CXXFLAGS} -O2 -o $@ -c $< ${CPPFLAGS}
 
 clean:
-	-rm *.o time_O*
+	-rm *.o prec_O*
