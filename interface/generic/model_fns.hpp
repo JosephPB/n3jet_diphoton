@@ -23,8 +23,6 @@ namespace nn {
 // Layers
 // ~~~~~~
 
-enum ActivationType { Tanh, ReLU, Linear };
-
 template <typename T> struct Layer {
   virtual ~Layer(){};
 
