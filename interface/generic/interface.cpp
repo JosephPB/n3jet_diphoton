@@ -9,8 +9,6 @@
 #include "njet.h"
 #endif
 
-#include "model_fns.hpp"
-
 #include "interface.hpp"
 
 // Use (void) to silent unused warnings.

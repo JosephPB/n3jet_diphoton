@@ -1,0 +1,13 @@
+# OLE_order for diphoton production
+
+AmplitudeType           loopsq
+CorrectionType          QCD
+IRregularisation        CDR
+AlphasPower             0
+AlphaPower              2
+NJetPrintStats          yes
+NJetReturnAccuracy      2
+Precision               1e-16
+
+# process list
+21 21 -> 22 22
