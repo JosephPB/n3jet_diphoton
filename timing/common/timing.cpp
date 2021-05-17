@@ -18,8 +18,7 @@ void row(const std::array<int, 6> &cw, int p, const std::string &name, double va
 }
 
 double mean(const std::vector<long> &data) {
-  return std::accumulate(data.cbegin(), data.cend(), 0.) /
-         data.size();
+  return std::accumulate(data.cbegin(), data.cend(), 0.) / data.size();
 }
 
 double std_err(const std::vector<long> &data, const double mean) {
@@ -32,8 +31,8 @@ double std_err(const std::vector<long> &data, const double mean) {
 }
 
 void report(const std::vector<long> &tme_num, const std::vector<long> &tme_ana,
-            const std::vector<long> &tme_nn) {
-
+            const std::vector<long> &tme_nn, const std::string &title1,
+            const std::string &title2, const std::string &title3) {
   const double mn_num{mean(tme_num)};
   const double abs_std_err_num{std_err(tme_num, mn_num)};
   const double rel_std_err_num{abs_std_err_num / mn_num};
@@ -51,26 +50,25 @@ void report(const std::vector<long> &tme_num, const std::vector<long> &tme_ana,
 
   std::cout << '\n'
             << "Mean times (ns)" << '\n'
-            << std::setw(5) << "num" << std::scientific << std::setprecision(abs_prec)
+            << std::setw(5) << title1 << std::scientific << std::setprecision(abs_prec)
             << mn_num << " ± " << abs_std_err_num << " (" << std::fixed
             << std::setprecision(perc_prec) << 100 * rel_std_err_num << "%)" << '\n'
-            << std::setw(5) << "ana" << std::scientific << std::setprecision(abs_prec)
+            << std::setw(5) << title2 << std::scientific << std::setprecision(abs_prec)
             << mn_ana << " ± " << abs_std_err_ana << " (" << std::fixed
             << std::setprecision(perc_prec) << 100 * rel_std_err_ana << "%)" << '\n'
-            << std::setw(5) << "nn" << std::scientific << std::setprecision(abs_prec)
+            << std::setw(5) << title3 << std::scientific << std::setprecision(abs_prec)
             << mn_nn << " ± " << abs_std_err_nn << " (" << std::fixed
             << std::setprecision(perc_prec) << 100 * rel_std_err_nn << "%)" << '\n';
 
   std::cout << '\n'
             << "Mean time ratios" << '\n'
-            << std::setw(5) << "num" << std::fixed << std::setprecision(abs_prec)
+            << std::setw(5) << title1 << std::fixed << std::setprecision(abs_prec)
             << mn_num / mn_nn << '\n'
-            << std::setw(5) << "ana" << mn_ana / mn_nn << '\n'
-            << std::setw(5) << "nn" << mn_nn / mn_nn << '\n';
+            << std::setw(5) << title2 << mn_ana / mn_nn << '\n'
+            << std::setw(5) << title3 << mn_nn / mn_nn << '\n';
 }
 
 void report(const std::vector<long> &tme_num, const std::vector<long> &tme_nn) {
-
   const double mn_num{mean(tme_num)};
   const double abs_std_err_num{std_err(tme_num, mn_num)};
   const double rel_std_err_num{abs_std_err_num / mn_num};

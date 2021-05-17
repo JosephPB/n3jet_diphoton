@@ -23,8 +23,6 @@ namespace nn {
 // Layers
 // ~~~~~~
 
-enum ActivationType { Tanh, ReLU, Linear };
-
 template <typename T> struct Layer {
   virtual ~Layer(){};
 
@@ -42,10 +40,15 @@ template <typename T> struct LayerDense : public Layer<T> {
   virtual void compute_output(Eigen::VectorX<T> &test_input) override;
 };
 
-template <typename T> struct LayerActivation : public Layer<T> {
-  LayerActivation(std::ifstream &fin);
+template <typename T> struct LayerActivationTanh : public Layer<T> {
+  virtual void compute_output(Eigen::VectorX<T> &test_input) override;
+};
 
-  ActivationType activation_type;
+template <typename T> struct LayerActivationLinear : public Layer<T> {
+  virtual void compute_output(Eigen::VectorX<T> & /* test_input */) override;
+};
+
+template <typename T> struct LayerActivationReLU : public Layer<T> {
   virtual void compute_output(Eigen::VectorX<T> &test_input) override;
 };
 
@@ -187,38 +190,18 @@ void nn::LayerDense<T>::compute_output(Eigen::VectorX<T> &test_input) {
   test_input = out;
 }
 
-template <typename T> nn::LayerActivation<T>::LayerActivation(std::ifstream &fin) {
-  std::string tmp_type;
-  fin >> tmp_type;
-
-  if (tmp_type == "tanh") {
-    activation_type = Tanh;
-  } else if (tmp_type == "linear") {
-    activation_type = Linear;
-  } else {
-    std::cerr << "Error: Activation type " << activation_type << " not defined!" << '\n'
-              << "Please add its implementation before use." << '\n';
-    std::exit(EXIT_FAILURE);
-  }
+template <typename T>
+void nn::LayerActivationTanh<T>::compute_output(Eigen::VectorX<T> &test_input) {
+  test_input = test_input.array().tanh();
 }
 
 template <typename T>
-void nn::LayerActivation<T>::compute_output(Eigen::VectorX<T> &test_input) {
-  switch (activation_type) {
-  case Tanh:
-    std::transform(test_input.cbegin(), test_input.cend(), test_input.begin(),
-                   [](T a) -> T { return std::tanh(a); });
-    break;
-  case ReLU:
-    for (T &d : test_input) {
-      if (d < 0) {
-        d = 0;
-      }
-    }
-    break;
-  case Linear:
-    break;
-  }
+void nn::LayerActivationLinear<T>::compute_output(
+    Eigen::VectorX<T> & /* test_input */) {}
+
+template <typename T>
+void nn::LayerActivationReLU<T>::compute_output(Eigen::VectorX<T> &test_input) {
+  test_input = test_input.unaryExpr([](T a) -> T { return std::max(T(), a); });
 }
 
 // } else if (activation_type == "softmax") {
@@ -278,7 +261,21 @@ template <typename T> void nn::Network<T>::load_weights(std::string &input_fname
       if (tmp_layer_type == "Dense") {
         layer = new LayerDense<T>(fin);
       } else if (tmp_layer_type == "Activation") {
-        layer = new LayerActivation<T>(fin);
+        std::string activation_type;
+        fin >> activation_type;
+
+        if (activation_type == "tanh") {
+          layer = new LayerActivationTanh<T>;
+        } else if (activation_type == "linear") {
+          layer = new LayerActivationLinear<T>;
+        } else if (activation_type == "relu") {
+          layer = new LayerActivationReLU<T>;
+        } else {
+          std::cerr << "Error: Activation type " << activation_type << " not defined!"
+                    << '\n'
+                    << "Please add its implementation before use." << '\n';
+          std::exit(EXIT_FAILURE);
+        }
       } else {
         std::cerr << "Error: Layer type " << tmp_layer_type << " is not defined!"
                   << '\n'

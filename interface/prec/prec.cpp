@@ -52,7 +52,7 @@ void run(const int start, const int end) {
   const int training_reruns{20};
   const double delta{0.02};
   const std::string model_dir{"../../models/3g2A/RAMBO/"
-                              "100k_unit_002/"};
+                              "100k_unit_002_fks/"};
   const std::string cut_dir{"cut_0.02/"};
 
   nn::FKSEnsemble<float> ensemble_f32(legs, training_reruns, model_dir, delta, cut_dir);

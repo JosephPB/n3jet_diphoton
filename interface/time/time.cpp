@@ -62,7 +62,7 @@ void run(const int num) {
   const double delta{0.02};
   const std::string model_dir{
       "../../models/3g2A/RAMBO/"
-      "100k_unit_002/"};
+      "100k_unit_002_fks/"};
   const std::string cut_dir{"cut_0.02/"};
 
   // raw momenta input
