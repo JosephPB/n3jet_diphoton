@@ -12,7 +12,7 @@ DEFS=-DLEGS=5 # choose 5 or 6 for 3g2a or 4g2a
 DEFS+=-DNJET # do NJet calculation only (or return NJet result with BOTH)
 # DEFS+=-DNN # do NN calculation only (or return NN result with BOTH)
 # DEFS+=-DBOTH # generate both NN and NJet and choose return by one of two above flags
-#DEFS+=-DREC # record results
+DEFS+=-DREC # record results
 # DEFS+=-DTIMING # recording runtime information
 #DEFS+=-DNAIVE # use naive single NN implementation
 # DEFS+=-DNN_MODEL="\"./models/RAMBO/events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet/\""
