@@ -8,7 +8,7 @@ LDFLAGS+=-lqd -lnjet2an0q2g2A
 DEFS=-DLEGS=4
 # DEFS+=-DRUNS=20 # choose number of NN runs to average over
 #DEFS+=-DA=0 # the index of the NN run
-# DEFS+=-DUNIT # for generating unit integration grid
+DEFS+=-DUNIT # for generating unit integration grid
 DEFS+=-DNJET # do NJet calculation only (or return NJet result with BOTH)
 # DEFS+=-DNN # do NN calculation only (or return NN result with BOTH)
 # DEFS+=-DBOTH # generate both NN and NJet and choose return by one of two above flags
