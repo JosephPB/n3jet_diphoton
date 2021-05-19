@@ -1,0 +1,25 @@
+N=3
+RUNCARD=Run.dat
+LIB=libSherpaNN${N}g2A.so # symlink
+CORES?=$(shell nproc)
+
+.PHONY: clean wipe reset
+
+# Generate matrix element mapping/process information
+Process/: $(RUNCARD) $(LIB) OLE_contract_$(N)g2A.lh
+	Sherpa -f $< INIT_ONLY=1 -l process.log || exit 0
+
+# Do integration (grid optimisation)
+Results.db: $(RUNCARD) Process/
+	mpirun -n $(CORES) Sherpa -f $< -e 0 -a 0 -l integration.log
+
+clean:
+	-rm Analysis.*.yoda *.out *.err *.log Sherpa_References.tex Results.db.bak Events.*.hepmc2g
+	-rm -r Status__*/ rivet-plots/
+
+reset: clean
+	-rm res moms sijs time Analysis.yoda Results.db Events.hepmc2g
+	-rm -r Process/
+
+wipe: reset
+	-rm *.pdf
