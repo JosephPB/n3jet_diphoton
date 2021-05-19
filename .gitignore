@@ -22,4 +22,6 @@ time_O*
 *.pickle
 prec
 !prec/
+*.err
 *.log
+*.data
