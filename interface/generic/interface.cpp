@@ -261,10 +261,14 @@ ATOOLS::Getter<PHASIC::Tree_ME2_Base, PHASIC::Process_Info, NN2A::Process>::oper
   assert(fl[0].Kfcode() == kf_gluon && fl[1].Kfcode() == kf_gluon &&
          fl[4].Kfcode() == kf_gluon && fl[2].Kfcode() == kf_photon &&
          fl[3].Kfcode() == kf_photon);
-#elif LEGS == 5
+#elif LEGS == 6
   // check for g g  -> g g a a
   assert(fl[0].Kfcode() == kf_gluon && fl[1].Kfcode() == kf_gluon &&
          fl[4].Kfcode() == kf_gluon && fl[5].Kfcode() == kf_gluon &&
+         fl[2].Kfcode() == kf_photon && fl[3].Kfcode() == kf_photon);
+#elif LEGS == 4
+  // check for g g  -> a a
+  assert(fl[0].Kfcode() == kf_gluon && fl[1].Kfcode() == kf_gluon &&
          fl[2].Kfcode() == kf_photon && fl[3].Kfcode() == kf_photon);
 #endif
   return new NN2A::Process(pi, fl, 0, 0);
