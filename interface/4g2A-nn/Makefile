@@ -24,7 +24,7 @@ all: libSherpaNN4g2A.so
 interface.o: ${SRC_DIR}/interface.cpp ${SRC_DIR}/interface.hpp ${SRC_DIR}/model_fns.hpp
 	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS) $(DEFS)
 
-libSherpaNN4g2A.so: interface.o model_fns.o
+libSherpaNN4g2A.so: interface.o
 	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LIBS)
 
 clean:
