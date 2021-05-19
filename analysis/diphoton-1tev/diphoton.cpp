@@ -121,7 +121,6 @@ public:
       const double phi_P = photon.phi();
 
       // Compute isolation via particles within an R=0.4 cone of the photon
-      // (IsolationCut?)
       const Particles fs = apply<FinalState>(event, "FS").particles();
       FourMomentum mom_in_EtCone;
       for (const Particle &p : fs) {
