@@ -3,7 +3,7 @@ RUNCARD=Run.dat
 LIB=libSherpaNN${N}g2A.so # symlink
 CORES?=$(shell nproc)
 
-.PHONY: clean wipe reset
+.PHONY: clean reset
 
 # Generate matrix element mapping/process information
 Process/: $(RUNCARD) $(LIB) OLE_contract_$(N)g2A.lh
@@ -20,6 +20,3 @@ clean:
 reset: clean
 	-rm res moms sijs time Analysis.yoda Results.db Events.hepmc2g
 	-rm -r Process/
-
-wipe: reset
-	-rm *.pdf
