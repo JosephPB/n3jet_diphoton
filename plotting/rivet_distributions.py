@@ -111,11 +111,11 @@ class RivetDistributions:
         deta_yy_file = self.rivet_dir + "etayy.dat"
         deta_yy_plotter = RivetPlotter(deta_yy_file)
 
-        xlabel = r"$\eta_{\gamma_1\gamma_2}$"
+        xlabel = r"$\Delta\eta_{\gamma_1\gamma_2}$"
         if self.rescaling == "On":
-            ylabel = r"d$\sigma/$d$\eta_{\gamma_1\gamma_2}$ [fb]"
+            ylabel = r"d$\sigma/$d$\Delta\eta_{\gamma_1\gamma_2}$ [fb]"
         elif self.rescaling == "XS":
-            ylabel = r"$1/\sigma$ d$\sigma/$d$\eta_{\gamma_1\gamma_2}$"
+            ylabel = r"$1/\sigma$ d$\sigma/$d$\Delta\eta_{\gamma_1\gamma_2}$"
 
         deta_yy_fig = deta_yy_plotter.plot(
             xlabel=xlabel,
@@ -159,16 +159,17 @@ class RivetDistributions:
         dpt_j1_file = self.rivet_dir + "j1pt.dat"
         dpt_j1_plotter = RivetPlotter(dpt_j1_file)
 
-        xlabel = r"Leading jet $p_{T}$ [GeV]"
+        xlabel = r"$p_{T,j_1}$ [GeV]"
         if self.rescaling == "On":
-            ylabel = r"d$\sigma/$d$p_{T}$ [fb GeV$^{-1}$]"
+            ylabel = r"d$\sigma/$d$p_{T,j_1}$ [fb GeV$^{-1}$]"
         elif self.rescaling == "XS":
-            ylabel = r"$1/\sigma$ d$\sigma/$d$p_{T}$ [GeV$^{-1}$]"
+            ylabel = r"$1/\sigma$ d$\sigma/$d$p_{T,j_1}$ [GeV$^{-1}$]"
 
         dpt_j1_fig = dpt_j1_plotter.plot(
             xlabel=xlabel,
             ylabel=ylabel,
             rescaling=self.rescaling,
+            xlim=500,
         )
         dpt_j1_fig.savefig(
             self.save_dir + "dpt_j1.png", dpi=self.dpi, bbox_inches="tight"
@@ -179,16 +180,17 @@ class RivetDistributions:
         dpt_j2_file = self.rivet_dir + "j2pt.dat"
         dpt_j2_plotter = RivetPlotter(dpt_j2_file)
 
-        xlabel = r"2nd leading jet $p_{T}$ [GeV]"
+        xlabel = r"$p_{T,j_2}$ [GeV]"
         if self.rescaling == "On":
-            ylabel = r"d$\sigma/$d$p_{T}$ [fb GeV$^{-1}$]"
+            ylabel = r"d$\sigma/$d$p_{T,j_2}$ [fb GeV$^{-1}$]"
         elif self.rescaling == "XS":
-            ylabel = r"$1/\sigma$ d$\sigma/$d$p_{T}$ [GeV$^{-1}$]"
+            ylabel = r"$1/\sigma$ d$\sigma/$d$p_{T,j_2}$ [GeV$^{-1}$]"
 
         dpt_j2_fig = dpt_j2_plotter.plot(
             xlabel=xlabel,
             ylabel=ylabel,
             rescaling=self.rescaling,
+            xlim=500,
         )
         dpt_j2_fig.savefig(
             self.save_dir + "dpt_j2.png", dpi=self.dpi, bbox_inches="tight"
