@@ -14,7 +14,7 @@ Results.db: $(RUNCARD) Process/
 	mpirun -n $(CORES) Sherpa -f $< -e 0 -a 0 -l integration.log
 
 clean:
-	-rm Analysis.*.yoda *.out *.err *.log Sherpa_References.tex Results.db.bak Events.*.hepmc2g
+	-rm Analysis.*.yoda *.out *.err *.log *.data Sherpa_References.tex Results.db.bak Events.*.hepmc2g
 	-rm -r Status__*/ rivet-plots/
 
 reset: clean
