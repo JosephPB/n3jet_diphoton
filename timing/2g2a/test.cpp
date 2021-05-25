@@ -16,7 +16,7 @@
 #include "ngluon2/refine.h"
 #include "tools/PhaseSpace.h"
 
-//#include "model_fns.hpp"
+#include "model_fns.hpp"
 #include "timing.hpp"
 
 void run(const int start, const int end) {
@@ -70,11 +70,10 @@ void run(const int start, const int end) {
   amp_ana->setNf(Nf);
   amp_ana->setNc(Nc);
 
-  // nn::FKSEnsemble<float> ensemble(
-  //    legs, 20,
-  //    "../../models/2g2A/RAMBO/"
-  //    "100k_unit_002/",
-  //    0.02, "cut_0.02/");
+  nn::FKSEnsemble<float> ensemble(legs, 20,
+                                  "../../models/2g2A/RAMBO/"
+                                  "100k_unit_002_fks/",
+                                  0.02, "cut_0.02/");
 
   std::ofstream o("result.csv", std::ios::app);
   o << std::scientific << std::setprecision(16);
@@ -118,15 +117,13 @@ void run(const int start, const int end) {
     const double err_ana{std::abs(amp_ana->virtsq_error().get0().real() / val_ana)};
 
     t0 = std::chrono::high_resolution_clock::now();
-    // ensemble.compute_with_error(moms_alt);
+    ensemble.compute_with_error(moms_alt);
     t1 = std::chrono::high_resolution_clock::now();
     const long dur_nn{
         std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count()};
     tme_nn[a] = dur_nn;
-    const double val_nn{0.};
-    const double err_nn{0.};
-    // const double val_nn{ensemble.mean};
-    // const double err_nn{ensemble.std_err};
+    const double val_nn{ensemble.mean};
+    const double err_nn{ensemble.std_err};
 
     const double tr_num{static_cast<double>(dur_num) / dur_ana};
     const double tr_ana{static_cast<double>(dur_ana) / dur_nn};

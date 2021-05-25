@@ -176,7 +176,7 @@ def lin(means, stds, line_labels, x_labels):
     save(fig, "lin")
 
 
-def sca(means, line_labels, x_labels):
+def sca(means, line_labels, x_labels, name="sca"):
     fig, ax = new_plot(
         xlabel="Multiplicity",
         ylabel="Evaluation time (ms)",
@@ -191,7 +191,7 @@ def sca(means, line_labels, x_labels):
 
     add_legend(ax, "upper left")
 
-    save(fig, "sca")
+    save(fig, name)
 
 
 def err(means, stds, line_labels, x_labels):
@@ -215,14 +215,14 @@ def err(means, stds, line_labels, x_labels):
 if __name__ == "__main__":
     init_plots()
 
-    titles = ("Numerical", "Analytical", "Neural net ensemble")
+    titles = ("Numerical", "Analytical", "NN ensemble")
 
-    data_4pt = read("3g2a/result.5pt.csv")
+    data_4pt = read("2g2a/result.2g2a.csv")
 
     times_rows_4pt = data_4pt[:, [3, 6, 9]] / 1e6  # ms
     times_4pt = numpy.transpose(times_rows_4pt)
 
-    data_5pt = read("3g2a/result.5pt.csv")
+    data_5pt = read("3g2a/result.3g2a.csv")
 
     times_rows_5pt = data_5pt[:, [3, 6, 9]] / 1e6  # ms
     times_5pt = numpy.transpose(times_rows_5pt)
@@ -230,9 +230,9 @@ if __name__ == "__main__":
     # hist(times_5pt, titles, "5", 3)
     # vio(times_rows_5pt, titles, "5")
 
-    titles_6pt = ("Numerical", "Neural net ensemble f32", "Neural net ensemble f64")
+    titles_6pt = ("Numerical", "NN ensemble f32", "NN ensemble f64")
 
-    data_6pt = read("4g2a/result.6pt.csv")
+    data_6pt = read("4g2a/result.4g2a.csv")
 
     times_rows_6pt = data_6pt[:, [3, 6, 9]] / 1e6  # ms
     times_6pt = numpy.transpose(times_rows_6pt)
@@ -293,9 +293,11 @@ if __name__ == "__main__":
 
     print()
 
-    # while no 4pt results
-    for i in range(3):
-        means[i, 0] = 1.0
-        stds[i, 0] = 0.1
+    sca(means, titles, muls, "timing-ensemble")
 
-    sca(means, titles, muls)
+    titles_single = ("Numerical", "Analytical", "NN")
+
+    means[[0, 1], :] = means[[0, 1], :] / 2
+    means[2, :] = means[2, :] / 20
+
+    sca(means, titles_single, muls, "timing-single")
