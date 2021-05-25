@@ -12,8 +12,8 @@ from n3jet.models import Model
 data_dir = "./test_data/"
 model_dir = "./test_model/"
 
-mom_file = "3g2A_test_momenta.npy"
-nj_file = "3g2A_test_nj.npy"
+mom_file = data_dir + "3g2A_test_momenta.npy"
+nj_file = data_dir + "3g2A_test_nj.npy"
 
 try:
     test_momenta = np.load(mom_file, allow_pickle=True)
@@ -35,6 +35,8 @@ NN = Model(
     all_legs=True,
     high_precision=False,
 )
+
+_,_,_,_,_,_,_,_ = NN.process_training_data()
 
 model = load_model(
     model_dir + "model",
