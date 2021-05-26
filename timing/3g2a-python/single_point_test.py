@@ -36,7 +36,7 @@ NN = Model(
     high_precision=False,
 )
 
-_,_,_,_,_,_,_,_ = NN.process_training_data()
+_, _, _, _, _, _, _, _ = NN.process_training_data()
 
 model = load_model(
     model_dir + "model",
