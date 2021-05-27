@@ -17,16 +17,15 @@ for ((nnrun = 0; nnrun < 20; nnrun++)); do
 
     cd ${dir}/interface
 
-    ln -s ../../../../interface/generic/model_fns.cpp .
-    ln -s ../../../../interface/generic/model_fns.hpp .
-    ln -s ../../../../interface/generic/interface.cpp .
-    ln -s ../../../../interface/generic/interface.hpp .
+    ln -sf ../../../../interface/generic/model_fns.hpp .
+    ln -sf ../../../../interface/generic/interface.cpp .
+    ln -sf ../../../../interface/generic/interface.hpp .
 
     make -j
 
     cd ../run
 
-    ln -s ../interface/libInterface${nnrun}.so .
+    ln -sf ../interface/libInterface${nnrun}.so .
 
     name=${nnrun}.${rseed}.analysis
     RIVET_ANALYSIS_PATH=../../../../analysis/diphoton-1tev Sherpa -f Run.${nnrun}.dat -R ${rseed} -e ${run_events} -A ${name} >${name}.out 2>${name}.err &

@@ -1,11 +1,10 @@
 CXX?=g++
 CXXFLAGS=-g -O2 -pedantic -Wall -Wextra -fPIC -DPIC -std=c++14 -march=native -mtune=native
-CPPFLAGS=$(shell pkg-config njet2 eigen3 --cflags) -I$(shell Sherpa-config --incdir)
-LDFLAGS=$(shell pkg-config njet2 --libs) $(shell Sherpa-config --ldflags)
-LDFLAGS+=-lqd
+CPPFLAGS=$(shell pkg-config eigen3 --cflags) -I$(shell Sherpa-config --incdir)
+LDFLAGS=$(shell Sherpa-config --ldflags)
 DEFS=-DLEGS=5 # choose 5 or 6 for 3g2a or 4g2a
 DEFS+=-DRUNS=1 # choose number of NN runs to average over
-DEFS+=-DA=AAAAA # the index of the NN run
+DEFS+=-DINDEX=AAAAA # the index of the NN run
 # DEFS+=-DUNIT # for generating unit integration grid
 # DEFS+=-DNJET # do NJet calculation only (or return NJet result with BOTH)
 DEFS+=-DNN # do NN calculation only (or return NN result with BOTH)
@@ -19,13 +18,10 @@ DEFS+=-DNN_MODEL="\"../../../../models/3g2A/RAMBO/100k_unit_002_fks/\""
 
 all: libInterfaceAAAAA.so
 
-interface.o: interface.cpp interface.hpp Makefile
+interface.o: interface.cpp interface.hpp model_fns.hpp
 	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS) $(DEFS)
 
-model_fns.o: model_fns.cpp model_fns.h
-	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS) $(DEFS)
-
-libInterfaceAAAAA.so: interface.o model_fns.o
+libInterfaceAAAAA.so: interface.o
 	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LIBS)
 
 clean:
