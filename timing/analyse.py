@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import pathlib
 import pickle
 
@@ -213,7 +214,16 @@ def err(means, stds, line_labels, x_labels):
 # main
 
 if __name__ == "__main__":
-    init_plots()
+    parser = argparse.ArgumentParser(
+        "analyse timing of evaluation for available methods over various multiplicities"
+    )
+    parser.add_argument(
+        "-p",
+        "--plot",
+        action="store_true",
+        help="produce plots",
+    )
+    args = parser.parse_args()
 
     titles = ("Numerical", "Analytical", "NN ensemble")
 
@@ -227,18 +237,12 @@ if __name__ == "__main__":
     times_rows_5pt = data_5pt[:, [3, 6, 9]] / 1e6  # ms
     times_5pt = numpy.transpose(times_rows_5pt)
 
-    # hist(times_5pt, titles, "5", 3)
-    # vio(times_rows_5pt, titles, "5")
-
     titles_6pt = ("Numerical", "NN ensemble f32", "NN ensemble f64")
 
     data_6pt = read("4g2a/result.4g2a.csv")
 
     times_rows_6pt = data_6pt[:, [3, 6, 9]] / 1e6  # ms
     times_6pt = numpy.transpose(times_rows_6pt)
-
-    # hist(times_6pt, titles_6pt, "6", 5)
-    # vio(times_rows_6pt, titles_6pt, "6")
 
     muls = ("4", "5", "6")
 
@@ -293,11 +297,20 @@ if __name__ == "__main__":
 
     print()
 
-    sca(means, titles, muls, "timing-ensemble")
+    if args.plot:
+        init_plots()
 
-    titles_single = ("Numerical", "Analytical", "NN")
+        sca(means, titles, muls, "timing-ensemble")
 
-    means[[0, 1], :] = means[[0, 1], :] / 2
-    means[2, :] = means[2, :] / 20
+        titles_single = ("Numerical", "Analytical", "NN")
 
-    sca(means, titles_single, muls, "timing-single")
+        means[[0, 1], :] = means[[0, 1], :] / 2
+        means[2, :] = means[2, :] / 20
+
+        sca(means, titles_single, muls, "timing-single")
+
+        # hist(times_5pt, titles, "5", 3)
+        # vio(times_rows_5pt, titles, "5")
+
+        # hist(times_6pt, titles_6pt, "6", 5)
+        # vio(times_rows_6pt, titles_6pt, "6")
