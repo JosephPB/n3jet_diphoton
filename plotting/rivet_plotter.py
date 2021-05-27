@@ -17,7 +17,7 @@ class RivetPlotter:
 
         self.dat_file = dat_file
 
-    def extract_data(self, **kwargs):
+    def extract_data_file(self, return_scales = True, **kwargs):
         """
         Extract histogram data from a data file
 
@@ -64,9 +64,12 @@ class RivetPlotter:
                             ).format(data_extracting)
                         )
 
-        return scales[0], scales[1], njet_data, nn_data
+        if return_scales:
+            return scales[0], scales[1], njet_data, nn_data
+        else:
+            return njet_data, nn_data
 
-    def parse_data_step(self, data):
+    def parse_data_step_file(self, data):
         """
         Parse data extracted from a data file
 
