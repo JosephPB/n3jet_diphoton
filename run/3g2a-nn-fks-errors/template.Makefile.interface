@@ -1,5 +1,5 @@
 CXX?=g++
-CXXFLAGS=-g -O2 -pedantic -Wall -Wextra -fPIC -DPIC -std=c++17
+CXXFLAGS=-g -O2 -pedantic -Wall -Wextra -fPIC -DPIC -std=c++14 -march=native -mtune=native
 CPPFLAGS=$(shell pkg-config njet2 --cflags) -I$(shell Sherpa-config --incdir)
 LDFLAGS=$(shell pkg-config njet2 --libs) $(shell Sherpa-config --ldflags)
 LDFLAGS+=-lqd
@@ -13,6 +13,7 @@ DEFS+=-DNN # do NN calculation only (or return NN result with BOTH)
 DEFS+=-DREC # record results
 DEFS+=-DTIMING # recording runtime information
 # DEFS+=-DNAIVE # use naive single NN implementation
+DEFS+=-DNN_MODEL="\"../../../../models/3g2A/RAMBO/100k_unit_002_fks/\""
 
 .PHONY: clean all
 
