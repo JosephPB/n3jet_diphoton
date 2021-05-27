@@ -18,7 +18,7 @@ for ((nnrun = 0; nnrun < 20; nnrun++)); do
     cd ${dir}/interface
 
     ln -s ../../../interface/generic/model_fns.cpp .
-    ln -s ../../../interface/generic/model_fns.h .
+    ln -s ../../../interface/generic/model_fns.hpp .
     ln -s ../../../interface/generic/interface.cpp .
     ln -s ../../../interface/generic/interface.hpp .
 
