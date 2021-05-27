@@ -19,13 +19,10 @@ DEFS+=-DNN_MODEL="\"../../../../models/3g2A/RAMBO/100k_unit_002_fks/\""
 
 all: libInterfaceAAAAA.so
 
-interface.o: interface.cpp interface.hpp Makefile
+interface.o: interface.cpp interface.hpp model_fns.hpp
 	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS) $(DEFS)
 
-model_fns.o: model_fns.cpp model_fns.h
-	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS) $(DEFS)
-
-libInterfaceAAAAA.so: interface.o model_fns.o
+libInterfaceAAAAA.so: interface.o
 	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LIBS)
 
 clean:

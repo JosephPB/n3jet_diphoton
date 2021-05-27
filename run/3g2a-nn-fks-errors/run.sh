@@ -17,10 +17,9 @@ for ((nnrun = 0; nnrun < 20; nnrun++)); do
 
     cd ${dir}/interface
 
-    ln -s ../../../interface/generic/model_fns.cpp .
-    ln -s ../../../interface/generic/model_fns.hpp .
-    ln -s ../../../interface/generic/interface.cpp .
-    ln -s ../../../interface/generic/interface.hpp .
+    ln -sf ../../../../interface/generic/model_fns.hpp .
+    ln -sf ../../../../interface/generic/interface.cpp .
+    ln -sf ../../../../interface/generic/interface.hpp .
 
     make -j
 

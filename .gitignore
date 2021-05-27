@@ -25,3 +25,4 @@ prec
 *.err
 *.log
 *.data
+run-*/
