@@ -8,7 +8,7 @@ for ((nnrun = 0; nnrun < 20; nnrun++)); do
     cd ${dir}/run
     cp ${nnrun}.${rseed}.analysis.yoda Analysis-nn-${nnrun}.yoda
 
-    RIVET_ANALYSIS_PATH=analysis-diphoton rivet-mkhtml ../../Analysis-njet.yoda Analysis-nn-${nnrun}.yoda --errs -t "NJet vs NN for run ${rseed}"
+    RIVET_ANALYSIS_PATH=../../../../analysis/diphoton-1tev/ rivet-mkhtml ../../Analysis-njet.yoda Analysis-nn-${nnrun}.yoda --errs -t "NJet vs NN for run ${rseed}"
 
     cd ../..
 
