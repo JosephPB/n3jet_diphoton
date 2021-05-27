@@ -25,7 +25,7 @@ for ((nnrun = 0; nnrun < 20; nnrun++)); do
 
     cd ../run
 
-    ln -s ../interface/libInterface${nnrun}.so .
+    ln -sf ../interface/libInterface${nnrun}.so .
 
     name=${nnrun}.${rseed}.analysis
     RIVET_ANALYSIS_PATH=../../../../analysis/diphoton-1tev Sherpa -f Run.${nnrun}.dat -R ${rseed} -e ${run_events} -A ${name} >${name}.out 2>${name}.err &
