@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-rseed=1
-run_events=100
+rseed=$1
+run_events=$2
 
 for ((nnrun = 0; nnrun < 20; nnrun++)); do
     dir=run-${nnrun}
