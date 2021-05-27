@@ -8,32 +8,42 @@ class RivetPlotter:
     Extract and plot data from Rivet analysis .dat file
     """
 
-    def __init__(self, dat_file):
+    def __init__(self, rivet_path, dat_file=False):
         """
         Parameters
         ----------
-        dat_file: path to data file
+        rivet_path: path to rivet folders
+        dat_file: path from rivet_path to specific data file
         """
 
+        self.rivet_path = rivet_path
         self.dat_file = dat_file
 
-    def extract_data_file(self, return_scales = True, **kwargs):
+    def extract_data_file(self, return_scales=True, **kwargs):
         """
-        Extract histogram data from a data file
+        Extract data from a data file
 
         Assumptions
         -----------
-        Two histograms per data file
+        Two graphs per data file
+
+        Parameters
+        ----------
+        return_scales: True for histograms and False for XS
 
         Returns
         -------
-        ScaledBy value for first histogram
-        ScaledBy value for second histogram
-        data for first histogram as a 2D list
-        data for second histogram as a 2D list
+        ScaledBy value for first graph
+        ScaledBy value for second graph
+        data for first graph as a 2D list
+        data for second graph as a 2D list
         """
 
         dat_file = kwargs.get("dat_file", self.dat_file)
+        if dat_file:
+            dat_file = self.rivet_path + dat_file
+        else:
+            raise ValueError("dat_file is not defined")
 
         scales = []
         njet_data = []
