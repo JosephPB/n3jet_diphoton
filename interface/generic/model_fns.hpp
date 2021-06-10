@@ -527,19 +527,6 @@ template <typename T>
 T nn::FKSEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
   std::vector<std::vector<Eigen::VectorX<T>>> moms{std_mom(point)};
 
-  // flatten momenta
-  for (int p{0}; p < legs; ++p) {
-    for (int mu{0}; mu < d; ++mu) {
-      // standardise input
-      for (int k{0}; k < runs; ++k) {
-        for (int j{0}; j <= pairs; ++j) {
-          moms[k][j][p * d + mu] =
-              standardise(point[p][mu], metadatas[k][j][mu], metadatas[k][j][d + mu]);
-        }
-      }
-    }
-  }
-
   const T s_com{dot(point, 0, 1)};
 
   // cut/near check
