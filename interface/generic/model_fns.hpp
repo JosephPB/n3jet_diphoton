@@ -74,6 +74,7 @@ public:
   Ensemble(int legs_, int runs_, const std::string &model_path,
            const std::string &cut_dirs_);
 
+  virtual T compute_single(const std::vector<std::vector<T>> &point, int index) = 0;
   virtual T compute(const std::vector<std::vector<T>> &point) = 0;
   virtual void compute_with_error(const std::vector<std::vector<T>> &point) = 0;
 
@@ -107,6 +108,8 @@ public:
   NaiveEnsemble(const int legs, const int runs, const std::string &model_path,
                 const std::string &cut_dirs_);
 
+  virtual T compute_single(const std::vector<std::vector<T>> &point,
+                           int index) override;
   virtual T compute(const std::vector<std::vector<T>> &point) override;
   virtual void compute_with_error(const std::vector<std::vector<T>> &point) override;
 
@@ -142,6 +145,8 @@ public:
   FKSEnsemble(const int legs, const int runs, const std::string &model_path, T delta_,
               const std::string &cut_dirs_);
 
+  virtual T compute_single(const std::vector<std::vector<T>> &point,
+                           int index) override;
   virtual T compute(const std::vector<std::vector<T>> &point) override;
   virtual void compute_with_error(const std::vector<std::vector<T>> &point) override;
 
@@ -431,6 +436,16 @@ nn::NaiveEnsemble<T>::std_mom(const std::vector<std::vector<T>> &point) {
 }
 
 template <typename T>
+T nn::NaiveEnsemble<T>::compute_single(const std::vector<std::vector<T>> &point,
+                                       const int index) {
+  std::vector<Eigen::VectorX<T>> moms{std_mom(point)};
+
+  // inference
+  return destandardise(kerasModels[index].compute_output(moms[index]),
+                       metadatas[index][8], metadatas[index][9]);
+}
+
+template <typename T>
 T nn::NaiveEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
   std::vector<Eigen::VectorX<T>> moms{std_mom(point)};
 
@@ -542,14 +557,37 @@ bool nn::FKSEnsemble<T>::check_div(const std::vector<std::vector<T>> &point) con
 }
 
 template <typename T>
+T nn::FKSEnsemble<T>::compute_single(const std::vector<std::vector<T>> &point,
+                                     const int index) {
+  std::vector<std::vector<Eigen::VectorX<T>>> moms{std_mom(point)};
+
+  // inference
+  if (check_div(point)) {
+    // the point is near an IR singularity
+    // infer over all FKS pairs
+    T result{};
+    for (int k{0}; k < pairs; ++k) {
+      result += destandardise(kerasModels[index][k].compute_output(moms[index][k]),
+                              metadatas[index][k][8], metadatas[index][k][9]);
+    }
+    return result;
+  } else {
+    // the point is in a non-divergent region
+    // use the 'cut' network which is the final entry in the pair network
+    return destandardise(kerasModels[index][pairs].compute_output(moms[index][pairs]),
+                         metadatas[index][pairs][8], metadatas[index][pairs][9]);
+  }
+}
+
+template <typename T>
 T nn::FKSEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
   std::vector<std::vector<Eigen::VectorX<T>>> moms{std_mom(point)};
-  const bool cut_near{check_div(point)};
+  const bool div{check_div(point)};
 
   // inference
   _mean = T();
   for (int j{0}; j < runs; ++j) {
-    if (cut_near) {
+    if (div) {
       // the point is near an IR singularity
       // infer over all FKS pairs
       for (int k{0}; k < pairs; ++k) {
@@ -571,12 +609,12 @@ T nn::FKSEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
 template <typename T>
 void nn::FKSEnsemble<T>::compute_with_error(const std::vector<std::vector<T>> &point) {
   std::vector<std::vector<Eigen::VectorX<T>>> moms{std_mom(point)};
-  const bool cut_near{check_div(point)};
+  const bool div{check_div(point)};
 
   // inference
   std::vector<T> results(runs);
   for (int j{0}; j < runs; ++j) {
-    if (cut_near) {
+    if (div) {
       // the point is near an IR singularity
       // infer over all FKS pairs
       for (int k{0}; k < pairs; ++k) {
