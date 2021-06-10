@@ -124,6 +124,8 @@ private:
 
   std::vector<Eigen::VectorX<T>> std_mom(const std::vector<std::vector<T>> &point);
 
+  T infer(const std::vector<Eigen::VectorX<T>> &point, int ensemble_index);
+
   using Base::_mean;
   using Base::_std_dev;
   using Base::_std_err;
@@ -167,6 +169,9 @@ private:
   std_mom(const std::vector<std::vector<T>> &point) const;
 
   bool check_div(const std::vector<std::vector<T>> &point) const;
+
+  T infer(const std::vector<std::vector<Eigen::VectorX<T>>> &point, int ensemble_index,
+          int pair_index);
 
   using Base::_mean;
   using Base::_std_dev;
@@ -436,13 +441,18 @@ nn::NaiveEnsemble<T>::std_mom(const std::vector<std::vector<T>> &point) {
 }
 
 template <typename T>
+T nn::NaiveEnsemble<T>::infer(const std::vector<Eigen::VectorX<T>> &point,
+                              const int i) {
+  return destandardise(kerasModels[i].compute_output(point[i]), metadatas[i][8],
+                       metadatas[i][9]);
+}
+
+template <typename T>
 T nn::NaiveEnsemble<T>::compute_single(const std::vector<std::vector<T>> &point,
                                        const int index) {
   std::vector<Eigen::VectorX<T>> moms{std_mom(point)};
 
-  // inference
-  return destandardise(kerasModels[index].compute_output(moms[index]),
-                       metadatas[index][8], metadatas[index][9]);
+  return infer(moms, index);
 }
 
 template <typename T>
@@ -452,8 +462,7 @@ T nn::NaiveEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
   // inference
   _mean = T();
   for (int j{0}; j < runs; ++j) {
-    _mean += destandardise(kerasModels[j].compute_output(moms[j]), metadatas[j][8],
-                           metadatas[j][9]);
+    _mean += infer(moms, j);
   }
   _mean /= runs;
 
@@ -468,17 +477,18 @@ void nn::NaiveEnsemble<T>::compute_with_error(
   // inference
   std::vector<T> results(runs);
   for (int j{0}; j < runs; ++j) {
-    results[j] = destandardise(kerasModels[j].compute_output(moms[j]), metadatas[j][8],
-                               metadatas[j][9]);
+    results[j] = infer(moms, j);
   }
 
   _mean = std::accumulate(results.cbegin(), results.cend(), T()) / runs;
+
   _std_dev = T();
   for (const T result : results) {
     const T term{result - _mean};
     _std_dev += term * term;
   }
   _std_dev = std::sqrt(_std_dev / runs);
+
   _std_err = _std_dev / std::sqrt(runs);
 }
 
@@ -557,6 +567,13 @@ bool nn::FKSEnsemble<T>::check_div(const std::vector<std::vector<T>> &point) con
 }
 
 template <typename T>
+T nn::FKSEnsemble<T>::infer(const std::vector<std::vector<Eigen::VectorX<T>>> &point,
+                            const int i, const int j) {
+  return destandardise(kerasModels[i][j].compute_output(point[i][j]),
+                       metadatas[i][j][8], metadatas[i][j][9]);
+}
+
+template <typename T>
 T nn::FKSEnsemble<T>::compute_single(const std::vector<std::vector<T>> &point,
                                      const int index) {
   std::vector<std::vector<Eigen::VectorX<T>>> moms{std_mom(point)};
@@ -567,15 +584,13 @@ T nn::FKSEnsemble<T>::compute_single(const std::vector<std::vector<T>> &point,
     // infer over all FKS pairs
     T result{};
     for (int k{0}; k < pairs; ++k) {
-      result += destandardise(kerasModels[index][k].compute_output(moms[index][k]),
-                              metadatas[index][k][8], metadatas[index][k][9]);
+      result += infer(moms, index, k);
     }
     return result;
   } else {
     // the point is in a non-divergent region
     // use the 'cut' network which is the final entry in the pair network
-    return destandardise(kerasModels[index][pairs].compute_output(moms[index][pairs]),
-                         metadatas[index][pairs][8], metadatas[index][pairs][9]);
+    return infer(moms, index, pairs);
   }
 }
 
@@ -591,14 +606,12 @@ T nn::FKSEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
       // the point is near an IR singularity
       // infer over all FKS pairs
       for (int k{0}; k < pairs; ++k) {
-        _mean += destandardise(kerasModels[j][k].compute_output(moms[j][k]),
-                               metadatas[j][k][8], metadatas[j][k][9]);
+        _mean += infer(moms, j, k);
       }
     } else {
       // the point is in a non-divergent region
       // use the 'cut' network which is the final entry in the pair network
-      _mean += destandardise(kerasModels[j][pairs].compute_output(moms[j][pairs]),
-                             metadatas[j][pairs][8], metadatas[j][pairs][9]);
+      _mean += infer(moms, j, pairs);
     }
   }
   _mean /= runs;
@@ -618,23 +631,23 @@ void nn::FKSEnsemble<T>::compute_with_error(const std::vector<std::vector<T>> &p
       // the point is near an IR singularity
       // infer over all FKS pairs
       for (int k{0}; k < pairs; ++k) {
-        results[j] += destandardise(kerasModels[j][k].compute_output(moms[j][k]),
-                                    metadatas[j][k][8], metadatas[j][k][9]);
+        results[j] += infer(moms, j, k);
       }
     } else {
       // the point is in a non-divergent region
       // use the 'cut' network which is the final entry in the pair network
-      results[j] = destandardise(kerasModels[j][pairs].compute_output(moms[j][pairs]),
-                                 metadatas[j][pairs][8], metadatas[j][pairs][9]);
+      results[j] = infer(moms, j, pairs);
     }
   }
 
   _mean = std::accumulate(results.cbegin(), results.cend(), T()) / runs;
+
   _std_dev = T();
   for (const T result : results) {
     const T term{result - _mean};
     _std_dev += term * term;
   }
   _std_dev = std::sqrt(_std_dev / runs);
+
   _std_err = _std_dev / std::sqrt(runs);
 }
