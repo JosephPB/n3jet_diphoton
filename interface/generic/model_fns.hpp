@@ -159,7 +159,9 @@ private:
   std::vector<std::vector<std::vector<T>>> metadatas;
 
   std::vector<std::vector<Eigen::VectorX<T>>>
-  std_mom(const std::vector<std::vector<T>> &point);
+  std_mom(const std::vector<std::vector<T>> &point) const;
+
+  bool check_div(const std::vector<std::vector<T>> &point) const;
 
   using Base::_mean;
   using Base::_std_dev;
@@ -501,7 +503,7 @@ nn::FKSEnsemble<T>::FKSEnsemble(const int legs, const int runs,
 
 template <typename T>
 std::vector<std::vector<Eigen::VectorX<T>>>
-nn::FKSEnsemble<T>::std_mom(const std::vector<std::vector<T>> &point) {
+nn::FKSEnsemble<T>::std_mom(const std::vector<std::vector<T>> &point) const {
   // moms is an vector of runs results, each of which is an vector of FKS pairs results,
   // each of which is an vector of flattened momenta
   std::vector<std::vector<Eigen::VectorX<T>>> moms(
@@ -524,25 +526,30 @@ nn::FKSEnsemble<T>::std_mom(const std::vector<std::vector<T>> &point) {
 }
 
 template <typename T>
-T nn::FKSEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
-  std::vector<std::vector<Eigen::VectorX<T>>> moms{std_mom(point)};
-
+bool nn::FKSEnsemble<T>::check_div(const std::vector<std::vector<T>> &point) const {
   const T s_com{dot(point, 0, 1)};
 
   // cut/near check
-  int cut_near{0};
   for (int j{0}; j < legs - 1; ++j) {
     for (int k{j + 1}; k < legs; ++k) {
       if (dot(point, j, k) / s_com < delta) {
-        cut_near += 1;
+        return true;
       }
     }
   }
 
+  return false;
+}
+
+template <typename T>
+T nn::FKSEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
+  std::vector<std::vector<Eigen::VectorX<T>>> moms{std_mom(point)};
+  const bool cut_near{check_div(point)};
+
   // inference
   _mean = T();
   for (int j{0}; j < runs; ++j) {
-    if (cut_near > 0) {
+    if (cut_near) {
       // the point is near an IR singularity
       // infer over all FKS pairs
       for (int k{0}; k < pairs; ++k) {
@@ -564,23 +571,12 @@ T nn::FKSEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
 template <typename T>
 void nn::FKSEnsemble<T>::compute_with_error(const std::vector<std::vector<T>> &point) {
   std::vector<std::vector<Eigen::VectorX<T>>> moms{std_mom(point)};
-
-  const T s_com{dot(point, 0, 1)};
-
-  // cut/near check
-  int cut_near{0};
-  for (int j{0}; j < legs - 1; ++j) {
-    for (int k{j + 1}; k < legs; ++k) {
-      if (dot(point, j, k) / s_com < delta) {
-        cut_near += 1;
-      }
-    }
-  }
+  const bool cut_near{check_div(point)};
 
   // inference
   std::vector<T> results(runs);
   for (int j{0}; j < runs; ++j) {
-    if (cut_near > 0) {
+    if (cut_near) {
       // the point is near an IR singularity
       // infer over all FKS pairs
       for (int k{0}; k < pairs; ++k) {
