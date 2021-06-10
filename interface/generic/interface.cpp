@@ -92,7 +92,11 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector &point) 
       momenta[i][j] = point[i][j];
     }
   }
-  const double mean{networks.compute(momenta)};
+#if (RUNS == 1)
+  const double nn_ans{networks.compute_single(momenta, INDEX)};
+#else
+  const double nn_ans{networks.compute(momenta)};
+#endif
 #ifdef TIMING
   TP nnt2{std::chrono::high_resolution_clock::now()};
   const long int nndur{
@@ -143,7 +147,7 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector &point) 
       }
     }
 #if defined(NN) || defined(BOTH)
-    results_vector.push_back(mean);
+    results_vector.push_back(nn_ans);
 #endif
 
 #if defined(NJET) || defined(BOTH)
@@ -167,7 +171,7 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector &point) 
 #endif
 
 #ifdef NN
-  return mean;
+  return nn_ans;
 #endif
 }
 

@@ -74,7 +74,8 @@ public:
   Ensemble(int legs_, int runs_, const std::string &model_path,
            const std::string &cut_dirs_);
 
-  virtual T compute_single(const std::vector<std::vector<T>> &point, int index) = 0;
+  virtual T compute_single(const std::vector<std::vector<T>> &point,
+                           int ensemble_index) = 0;
   virtual T compute(const std::vector<std::vector<T>> &point) = 0;
   virtual void compute_with_error(const std::vector<std::vector<T>> &point) = 0;
 
@@ -148,7 +149,7 @@ public:
               const std::string &cut_dirs_);
 
   virtual T compute_single(const std::vector<std::vector<T>> &point,
-                           int index) override;
+                           int ensemble_index) override;
   virtual T compute(const std::vector<std::vector<T>> &point) override;
   virtual void compute_with_error(const std::vector<std::vector<T>> &point) override;
 
