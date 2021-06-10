@@ -30,7 +30,7 @@ void run(const int num) {
   const int pspoints{2};
   constexpr int cols{6};
   const std::array<std::string, cols> titles{
-      {"pt", "val f32", "val+err f32", "val f64", "val+err f64", "f64/f32"}};
+      {" pt", "val f32", "val+err f32", "val f64", "val+err f64", "f64/f32"}};
   std::array<int, cols> cw;
   std::transform(titles.cbegin(), titles.cend(), cw.begin(),
                  [](std::string s) -> int { return s.size(); });
@@ -39,7 +39,7 @@ void run(const int num) {
             << "n3jet: benchmark pretrained neural network C++ inference timing" << '\n'
             << "       showing mean of " << num << " runs for " << pspoints << " points"
             << '\n'
-            << "       there sometimes seems to be a warmup effect where val+err is "
+            << "       it seems there can be a warmup effect where val+err is "
                "faster if evaluated"
             << '\n'
             << "       second, but val is faster if evaluated second" << '\n'

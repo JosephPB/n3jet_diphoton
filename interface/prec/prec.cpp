@@ -11,7 +11,7 @@
 
 #include "model_fns.hpp"
 
-double d(double a, double b) { return 2 * std::abs((a - b) / (a + b)); }
+double d(double a, double b) { return 2. * std::abs((a - b) / (a + b)); }
 
 std::string rpt(int n, const std::string &strg) {
   std::string out;
@@ -32,9 +32,9 @@ std::string hline(const std::array<int, c> &cw, std::string out,
 }
 
 void run(const int start, const int end) {
-  constexpr int cols{4};
+  constexpr int cols{5};
   const std::array<std::string, cols> titles{
-      {"pt", "err f32", "err f64", "d(f64,f32)"}};
+      {" pt", "err_f32", "err_f64", "d(f64,f32)", "err_f32>d(f64,f32)"}};
   std::array<int, cols> cw;
   std::transform(titles.cbegin(), titles.cend(), cw.begin(),
                  [](std::string s) -> int { return s.size(); });
@@ -60,6 +60,7 @@ void run(const int start, const int end) {
   nn::FKSEnsemble<double> ensemble_f64(legs, training_reruns, model_dir, delta,
                                        cut_dir);
 
+  int count{};
   for (int p{start}; p < end; ++p) {
 
     PhaseSpace<double> ps(legs, p);
@@ -85,17 +86,30 @@ void run(const int start, const int end) {
 
     ensemble_f64.compute_with_error(momenta_f64);
 
+    const double diff{d(ensemble_f32.mean(), ensemble_f64.mean())};
+
     std::cout << "│" << std::setw(cw[0]) << p << "│" << std::setw(cw[1])
-              << ensemble_f32.std_err << "│" << std::setw(cw[2]) << ensemble_f64.std_err
-              << "│" << std::setw(cw[3]) << d(ensemble_f32.mean, ensemble_f64.mean)
-              << "│" << '\n';
+              << ensemble_f32.std_err() << "│" << std::setw(cw[2])
+              << ensemble_f64.std_err() << "│" << std::setw(cw[3]) << diff << "│"
+              << std::setw(cw[4]);
+    if (ensemble_f32.std_err() > diff) {
+      std::cout << "Y";
+      ++count;
+    } else {
+      std::cout << "N";
+    }
+    std::cout << "│" << '\n';
   }
 
-  std::cout << hline(cw, "└", "┴", "┘");
+  const int num{end - start};
+  std::cout << hline(cw, "└", "┴", "┘") << '\n'
+            << num << " points in total" << '\n'
+            << "err_f32>d(f32,f64) at " << count << " points (" << std::fixed
+            << 100. * count / num << " %)";
 }
 
 int main(int argc, char *argv[]) {
-  std::cout << std::scientific << std::setprecision(1);
+  std::cout << std::scientific << std::setprecision(0);
 
   std::cout << '\n'
             << "Comparison of neural net error with inference at different numerical "
@@ -113,11 +127,12 @@ int main(int argc, char *argv[]) {
     start = std::atoi(argv[1]);
     end = std::atoi(argv[2]);
   } else {
-    std::cerr
-        << "Error: run as `./test <initial rseed> <final rseed (exclusive)>`, where "
-           "rseed is the random number seed for the phase space point generator."
-        << '\n'
-        << "If <final seed> is omitted, only <initial seed> will be evaluated." << '\n';
+    std::cerr << "Error: run as `./test <initial rseed> <final rseed (exclusive)>`, "
+                 "where "
+                 "rseed is the random number seed for the phase space point generator."
+              << '\n'
+              << "If <final seed> is omitted, only <initial seed> will be evaluated."
+              << '\n';
     std::exit(EXIT_FAILURE);
   }
 

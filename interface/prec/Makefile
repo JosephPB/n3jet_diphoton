@@ -2,13 +2,8 @@ SRC_DIR=../generic
 
 CXX?=g++
 CXXFLAGS=-pedantic -Wall -Wextra -std=c++17 -march=native -mtune=native -O2
-CPPFLAGS=-I${SRC_DIR} -I${NJET_DEV} $(shell pkg-config njet2 eigen3 --cflags)
-LDFLAGS=`pkg-config njet2 --libs` -lnjet2tools
-LDFLAGS+=-lnjet2an0q3g2A
-LDFLAGS+=-lnjet2an0q2g2A
-LDFLAGS+=-lnjet2an0q4g
-LDFLAGS+=-lnjet2an0q5g
-# LDFLAGS+=-lnjet2an2q3g
+CPPFLAGS=-I${SRC_DIR} $(shell pkg-config njet3 eigen3 --cflags)
+LDFLAGS=$(shell pkg-config njet3 --libs) -lnjet3tools
 
 .PHONY: clean all
 
@@ -21,4 +16,4 @@ prec.o: prec.cpp ${SRC_DIR}/model_fns.hpp
 	${CXX} ${CXXFLAGS} -O2 -o $@ -c $< ${CPPFLAGS}
 
 clean:
-	-rm *.o prec_O*
+	-rm *.o prec
