@@ -71,7 +71,8 @@ int main() {
     std::cout << std::scientific << std::setprecision(16) << std::setw(cw)
               << "Python = " << python_outputs[i] << '\n'
               << std::setw(cw) << "C++ = " << average_output << '\n'
-              << std::setw(cw) << "d(C++, Python) = " << diff << '\n'
+              << std::setw(cw) << "d(C++, Python) = " << std::setprecision(0) << diff
+              << '\n'
               << std::setw(cw) << "" << (diff < cutoff ? "Pass" : "Fail") << '\n';
   }
 }

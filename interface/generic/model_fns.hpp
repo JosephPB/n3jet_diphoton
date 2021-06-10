@@ -35,7 +35,7 @@ template <typename T> struct LayerDense : public Layer<T> {
   int input_node_count;
   int output_weights;
   std::vector<Eigen::VectorX<T>> layer_weights;
-  std::vector<T> bias;
+  Eigen::VectorX<T> bias;
 
   virtual void compute_output(Eigen::VectorX<T> &test_input) override;
 };
@@ -74,7 +74,18 @@ public:
   Ensemble(int legs_, int runs_, const std::string &model_path,
            const std::string &cut_dirs_);
 
+  virtual T compute(const std::vector<std::vector<T>> &point) = 0;
+  virtual void compute_with_error(const std::vector<std::vector<T>> &point) = 0;
+
+  T mean() const;
+  T std_dev() const;
+  T std_err() const;
+
 protected:
+  T _mean;
+  T _std_dev;
+  T _std_err;
+
   static constexpr int d{4};
   const int legs;
   const int runs;
@@ -84,67 +95,85 @@ protected:
   std::vector<std::string> model_dirs;
 
   T dot(const std::vector<std::vector<T>> &point, int k, int j) const;
-  T standardise(T value, T mean, T stnd);
-  T destandardise(T value, T mean, T stnd);
+  T standardise(T value, T mean_, T stnd) const;
+  T destandardise(T value, T mean_, T stnd) const;
   std::vector<T> read_metadata_from_file(const std::string &fname);
 };
 
-template <typename T> class NaiveEnsemble : protected Ensemble<T> {
+template <typename T> class NaiveEnsemble : public Ensemble<T> {
+  using Base = Ensemble<T>;
+
 public:
   NaiveEnsemble(const int legs, const int runs, const std::string &model_path,
                 const std::string &cut_dirs_);
 
-  T compute(const std::vector<std::vector<T>> &point);
+  virtual T compute(const std::vector<std::vector<T>> &point) override;
+  virtual void compute_with_error(const std::vector<std::vector<T>> &point) override;
 
-  std::vector<nn::Network<T>> kerasModels;
-  std::vector<std::vector<T>> metadatas;
+  using Base::mean;
+  using Base::std_dev;
+  using Base::std_err;
 
 private:
+  std::vector<nn::Network<T>> kerasModels;
+  std::vector<std::vector<T>> metadatas;
   std::vector<std::string> model_dir_models;
 
-  using Ensemble<T>::d;
-  using Ensemble<T>::legs;
-  using Ensemble<T>::runs;
-  using Ensemble<T>::model_base;
-  using Ensemble<T>::model_dirs;
-  using Ensemble<T>::dot;
-  using Ensemble<T>::standardise;
-  using Ensemble<T>::destandardise;
-  using Ensemble<T>::read_metadata_from_file;
+  std::vector<Eigen::VectorX<T>> std_mom(const std::vector<std::vector<T>> &point);
+
+  using Base::_mean;
+  using Base::_std_dev;
+  using Base::_std_err;
+  using Base::d;
+  using Base::destandardise;
+  using Base::dot;
+  using Base::legs;
+  using Base::model_base;
+  using Base::model_dirs;
+  using Base::read_metadata_from_file;
+  using Base::runs;
+  using Base::standardise;
 };
 
-template <typename T> class FKSEnsemble : protected Ensemble<T> {
+template <typename T> class FKSEnsemble : public Ensemble<T> {
+  using Base = Ensemble<T>;
+
+public:
+  FKSEnsemble(const int legs, const int runs, const std::string &model_path, T delta_,
+              const std::string &cut_dirs_);
+
+  virtual T compute(const std::vector<std::vector<T>> &point) override;
+  virtual void compute_with_error(const std::vector<std::vector<T>> &point) override;
+
+  using Base::mean;
+  using Base::std_dev;
+  using Base::std_err;
+
 private:
   const std::array<int, 11> n_choose_2;
   const int pairs;
   const T delta;
   std::vector<std::string> pair_dirs;
   std::vector<std::vector<std::string>> model_dir_models;
-
-  using Ensemble<T>::d;
-  using Ensemble<T>::legs;
-  using Ensemble<T>::runs;
-  using Ensemble<T>::model_base;
-  using Ensemble<T>::model_dirs;
-  using Ensemble<T>::cut_dirs;
-  using Ensemble<T>::dot;
-  using Ensemble<T>::standardise;
-  using Ensemble<T>::destandardise;
-  using Ensemble<T>::read_metadata_from_file;
-
-public:
-  FKSEnsemble(const int legs, const int runs, const std::string &model_path, T delta_,
-              const std::string &cut_dirs_);
-
-  T compute(const std::vector<std::vector<T>> &point);
-  void compute_with_error(const std::vector<std::vector<T>> &point);
-
-  T mean;
-  T std_dev;
-  T std_err;
-
   std::vector<std::vector<nn::Network<T>>> kerasModels;
   std::vector<std::vector<std::vector<T>>> metadatas;
+
+  std::vector<std::vector<Eigen::VectorX<T>>>
+  std_mom(const std::vector<std::vector<T>> &point);
+
+  using Base::_mean;
+  using Base::_std_dev;
+  using Base::_std_err;
+  using Base::cut_dirs;
+  using Base::d;
+  using Base::destandardise;
+  using Base::dot;
+  using Base::legs;
+  using Base::model_base;
+  using Base::model_dirs;
+  using Base::read_metadata_from_file;
+  using Base::runs;
+  using Base::standardise;
 };
 
 } // namespace nn
@@ -160,6 +189,7 @@ template <typename T> nn::LayerDense<T>::LayerDense(std::ifstream &fin) {
   fin >> input_node_count >> output_weights;
   layer_weights = std::vector<Eigen::VectorX<T>>(output_weights,
                                                  Eigen::VectorX<T>(input_node_count));
+  bias = Eigen::VectorX<T>(output_weights);
 
   T tmp_double;
   char tmp_char;
@@ -176,7 +206,7 @@ template <typename T> nn::LayerDense<T>::LayerDense(std::ifstream &fin) {
   fin >> tmp_char; // for '['
   for (int i{0}; i < output_weights; i++) {
     fin >> tmp_double;
-    bias.push_back(tmp_double);
+    bias[i] = tmp_double;
   }
   fin >> tmp_char; // for ']'
 }
@@ -295,16 +325,16 @@ template <typename T> T nn::Network<T>::compute_output(Eigen::VectorX<T> test_in
   return test_input[0];
 }
 
-// Ensemble
-// ~~~~~~~~
+// Ensemble Base
+// ~~~~~~~~~~~~~
 
 template <typename T>
 nn::Ensemble<T>::Ensemble(const int legs_, const int runs_,
                           const std::string &model_path, const std::string &cut_dirs_)
     // n.b. there is an additional FKS pair for the cut network (for non-divergent
     // regions)
-    : legs(legs_), runs(runs_), cut_dirs(cut_dirs_), model_base(model_path),
-      model_dirs(runs) {
+    : _mean(), _std_dev(), _std_err(), legs(legs_), runs(runs_), cut_dirs(cut_dirs_),
+      model_base(model_path), model_dirs(runs) {
   std::generate(model_dirs.begin(), model_dirs.end(),
                 [n = 0]() mutable { return std::to_string(n++) + "/"; });
 }
@@ -317,12 +347,18 @@ T nn::Ensemble<T>::dot(const std::vector<std::vector<T>> &point, const int k,
           point[j][3] * point[k][3]);
 }
 
-template <typename T> T nn::Ensemble<T>::standardise(T value, T mean, T stnd) {
-  return (value - mean) / stnd;
+template <typename T> T nn::Ensemble<T>::mean() const { return _mean; }
+
+template <typename T> T nn::Ensemble<T>::std_dev() const { return _std_dev; }
+
+template <typename T> T nn::Ensemble<T>::std_err() const { return _std_err; }
+
+template <typename T> T nn::Ensemble<T>::standardise(T value, T mean_, T stnd) const {
+  return (value - mean_) / stnd;
 }
 
-template <typename T> T nn::Ensemble<T>::destandardise(T value, T mean, T stnd) {
-  return value * stnd + mean;
+template <typename T> T nn::Ensemble<T>::destandardise(T value, T mean_, T stnd) const {
+  return value * stnd + mean_;
 }
 
 template <typename T>
@@ -351,6 +387,9 @@ std::vector<T> nn::Ensemble<T>::read_metadata_from_file(const std::string &fname
   return metadata;
 }
 
+// Naive Ensemble
+// ~~~~~~~~~~~~~~
+
 template <typename T>
 nn::NaiveEnsemble<T>::NaiveEnsemble(const int legs, const int runs,
                                     const std::string &model_path,
@@ -369,7 +408,8 @@ nn::NaiveEnsemble<T>::NaiveEnsemble(const int legs, const int runs,
 }
 
 template <typename T>
-T nn::NaiveEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
+std::vector<Eigen::VectorX<T>>
+nn::NaiveEnsemble<T>::std_mom(const std::vector<std::vector<T>> &point) {
   // moms is an vector of runs results, each of which is an vector of flattened momenta
   // std::array<std::array<T, legs * d>, runs> moms;
   std::vector<Eigen::VectorX<T>> moms(runs, Eigen::VectorX<T>(legs * d));
@@ -385,15 +425,48 @@ T nn::NaiveEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
     }
   }
 
+  return moms;
+}
+
+template <typename T>
+T nn::NaiveEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
+  std::vector<Eigen::VectorX<T>> moms{std_mom(point)};
+
   // inference
-  T results_sum{0.};
+  _mean = T();
   for (int j{0}; j < runs; ++j) {
-    results_sum += destandardise(kerasModels[j].compute_output(moms[j]),
-                                 metadatas[j][8], metadatas[j][9]);
+    _mean += destandardise(kerasModels[j].compute_output(moms[j]), metadatas[j][8],
+                           metadatas[j][9]);
+  }
+  _mean /= runs;
+
+  return _mean;
+}
+
+template <typename T>
+void nn::NaiveEnsemble<T>::compute_with_error(
+    const std::vector<std::vector<T>> &point) {
+  std::vector<Eigen::VectorX<T>> moms{std_mom(point)};
+
+  // inference
+  std::vector<T> results(runs);
+  for (int j{0}; j < runs; ++j) {
+    results[j] = destandardise(kerasModels[j].compute_output(moms[j]), metadatas[j][8],
+                               metadatas[j][9]);
   }
 
-  return results_sum / runs;
+  _mean = std::accumulate(results.cbegin(), results.cend(), T()) / runs;
+  _std_dev = T();
+  for (const T result : results) {
+    const T term{result - _mean};
+    _std_dev += term * term;
+  }
+  _std_dev = std::sqrt(_std_dev / runs);
+  _std_err = _std_dev / std::sqrt(runs);
 }
+
+// FKS Ensemble
+// ~~~~~~~~~~~~
 
 template <typename T>
 nn::FKSEnsemble<T>::FKSEnsemble(const int legs, const int runs,
@@ -427,15 +500,32 @@ nn::FKSEnsemble<T>::FKSEnsemble(const int legs, const int runs,
 }
 
 template <typename T>
-T nn::FKSEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
+std::vector<std::vector<Eigen::VectorX<T>>>
+nn::FKSEnsemble<T>::std_mom(const std::vector<std::vector<T>> &point) {
   // moms is an vector of runs results, each of which is an vector of FKS pairs results,
   // each of which is an vector of flattened momenta
   std::vector<std::vector<Eigen::VectorX<T>>> moms(
       runs, std::vector<Eigen::VectorX<T>>(pairs + 1, Eigen::VectorX<T>(legs * d)));
 
-  // NN compute_output accepts vectors - could edit model_fns
-  // std::array<std::array<std::array<T, NN2A::legs * NN2A::d>, pairs + 1>, runs>
-  // moms;
+  // flatten momenta
+  for (int p{0}; p < legs; ++p) {
+    for (int mu{0}; mu < d; ++mu) {
+      // standardise input
+      for (int k{0}; k < runs; ++k) {
+        for (int j{0}; j <= pairs; ++j) {
+          moms[k][j][p * d + mu] =
+              standardise(point[p][mu], metadatas[k][j][mu], metadatas[k][j][d + mu]);
+        }
+      }
+    }
+  }
+
+  return moms;
+}
+
+template <typename T>
+T nn::FKSEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
+  std::vector<std::vector<Eigen::VectorX<T>>> moms{std_mom(point)};
 
   // flatten momenta
   for (int p{0}; p < legs; ++p) {
@@ -463,49 +553,30 @@ T nn::FKSEnsemble<T>::compute(const std::vector<std::vector<T>> &point) {
   }
 
   // inference
-  T results_sum{0.};
+  _mean = T();
   for (int j{0}; j < runs; ++j) {
     if (cut_near > 0) {
       // the point is near an IR singularity
       // infer over all FKS pairs
       for (int k{0}; k < pairs; ++k) {
-        results_sum += destandardise(kerasModels[j][k].compute_output(moms[j][k]),
-                                     metadatas[j][k][8], metadatas[j][k][9]);
+        _mean += destandardise(kerasModels[j][k].compute_output(moms[j][k]),
+                               metadatas[j][k][8], metadatas[j][k][9]);
       }
     } else {
       // the point is in a non-divergent region
       // use the 'cut' network which is the final entry in the pair network
-      results_sum += destandardise(kerasModels[j][pairs].compute_output(moms[j][pairs]),
-                                   metadatas[j][pairs][8], metadatas[j][pairs][9]);
+      _mean += destandardise(kerasModels[j][pairs].compute_output(moms[j][pairs]),
+                             metadatas[j][pairs][8], metadatas[j][pairs][9]);
     }
   }
+  _mean /= runs;
 
-  return results_sum / runs;
+  return _mean;
 }
 
 template <typename T>
 void nn::FKSEnsemble<T>::compute_with_error(const std::vector<std::vector<T>> &point) {
-  // moms is an vector of runs results, each of which is an vector of FKS pairs results,
-  // each of which is an vector of flattened momenta
-  std::vector<std::vector<Eigen::VectorX<T>>> moms(
-      runs, std::vector<Eigen::VectorX<T>>(pairs + 1, Eigen::VectorX<T>(legs * d)));
-
-  // NN compute_output accepts vectors - could edit model_fns
-  // std::array<std::array<std::array<T, NN2A::legs * NN2A::d>, pairs + 1>, runs>
-  // moms;
-
-  // flatten momenta
-  for (int p{0}; p < legs; ++p) {
-    for (int mu{0}; mu < d; ++mu) {
-      // standardise input
-      for (int k{0}; k < runs; ++k) {
-        for (int j{0}; j <= pairs; ++j) {
-          moms[k][j][p * d + mu] =
-              standardise(point[p][mu], metadatas[k][j][mu], metadatas[k][j][d + mu]);
-        }
-      }
-    }
-  }
+  std::vector<std::vector<Eigen::VectorX<T>>> moms{std_mom(point)};
 
   const T s_com{dot(point, 0, 1)};
 
@@ -537,12 +608,12 @@ void nn::FKSEnsemble<T>::compute_with_error(const std::vector<std::vector<T>> &p
     }
   }
 
-  mean = std::accumulate(results.cbegin(), results.cend(), T()) / runs;
-  std_dev = 0.;
-  for (T result : results) {
-    const T term{result - mean};
-    std_dev += term * term;
+  _mean = std::accumulate(results.cbegin(), results.cend(), T()) / runs;
+  _std_dev = T();
+  for (const T result : results) {
+    const T term{result - _mean};
+    _std_dev += term * term;
   }
-  std_dev = std::sqrt(std_dev / runs);
-  std_err = std_dev / std::sqrt(runs);
+  _std_dev = std::sqrt(_std_dev / runs);
+  _std_err = _std_dev / std::sqrt(runs);
 }
