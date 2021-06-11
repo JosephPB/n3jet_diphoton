@@ -188,7 +188,7 @@ def sca(means, line_labels, x_labels, name="sca"):
     fmts = ("x", "^", "o")
 
     for label, mean, fmt in zip(line_labels, means, fmts):
-        ax.scatter(x_labels, mean, marker=fmt, label=label)
+        ax.scatter(x_labels, mean, marker=fmt, label=label, s=100)
 
     add_legend(ax, "upper left")
 
