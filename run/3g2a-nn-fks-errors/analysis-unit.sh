@@ -3,7 +3,7 @@
 rseed=1
 
 for ((nnrun = 0; nnrun < 20; nnrun++)); do
-    dir=run-${nnrun}
+    dir=res-${nnrun}
 
     cd ${dir}/run
     cp ${nnrun}.${rseed}.analysis.yoda Analysis-nn-${nnrun}.yoda

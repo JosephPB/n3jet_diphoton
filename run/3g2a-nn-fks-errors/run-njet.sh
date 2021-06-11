@@ -4,7 +4,7 @@ rseed=$1
 run_events=$2
 
 for ((nnrun = 0; nnrun < 20; nnrun++)); do
-    dir=run-${nnrun}
+    dir=res-${nnrun}
     mkdir -p ${dir}
     mkdir -p ${dir}/interface
     mkdir -p ${dir}/run
