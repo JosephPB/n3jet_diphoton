@@ -26,7 +26,7 @@ NN2A::SquaredMatrixElement::SquaredMatrixElement()
       networks(NN2A::legs, training_reruns, NN_MODEL, delta, "cut_0.02/"),
 #endif
 #endif
-#if (RUNS == 1)
+#ifdef INDEX
       resfile("res-" + std::to_string(INDEX)),
 #else
       resfile("res"),
@@ -92,7 +92,7 @@ double NN2A::SquaredMatrixElement::Calculate(const ATOOLS::Vec4D_Vector &point) 
       momenta[i][j] = point[i][j];
     }
   }
-#if (RUNS == 1)
+#ifdef INDEX
   const double nn_ans{networks.compute_single(momenta, INDEX)};
 #else
   const double nn_ans{networks.compute(momenta)};
