@@ -5,7 +5,7 @@ CXXFLAGS=-g -O2 -pedantic -Wall -Wextra -fPIC -DPIC -std=c++14 -march=native -mt
 CPPFLAGS=$(shell pkg-config eigen3 --cflags) -I$(shell Sherpa-config --incdir)
 LDFLAGS=$(shell Sherpa-config --ldflags)
 DEFS=-DLEGS=4
-DEFS=-DDELTA=0.02 # choose delta (y_cut from the paper)
+DEFS+=-DDELTA=0.02 # choose delta (y_cut from the paper)
 DEFS+=-DRUNS=20
 #DEFS+=-DINDEX=0 # the index of the NN run
 # DEFS+=-DUNIT # for generating unit integration grid
