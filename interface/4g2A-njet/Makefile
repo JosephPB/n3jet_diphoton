@@ -6,6 +6,7 @@ CPPFLAGS=$(shell pkg-config njet2 --cflags) -I$(shell Sherpa-config --incdir)
 LDFLAGS=$(shell pkg-config njet2 --libs) $(shell Sherpa-config --ldflags)
 LDFLAGS+=-lqd
 DEFS=-DLEGS=6 # choose 5 or 6 for 3g2a or 4g2a
+DEFS=-DDELTA=0.02 # choose delta (y_cut from the paper)
 # DEFS+=-DRUNS=20 # choose number of NN runs to average over
 #DEFS+=-DA=0 # the index of the NN run
 # DEFS+=-DUNIT # for generating unit integration grid
