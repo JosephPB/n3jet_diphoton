@@ -19,7 +19,7 @@ time_O3: time_O3.o
 	${CXX} -o $@ $^ ${LDFLAGS}
 
 time_O3.o: time.cpp ${SRC_DIR}/model_fns.hpp
-	${CXX} ${CXXFLAGS} -O2 -o $@ -c $< ${CPPFLAGS}
+	${CXX} ${CXXFLAGS} -O3 -o $@ -c $< ${CPPFLAGS}
 
 clean:
 	-rm *.o time_O*

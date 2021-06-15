@@ -28,9 +28,10 @@ std::string hline(const std::array<int, c> &cw, std::string out,
 
 void run(const int num) {
   const int pspoints{2};
-  constexpr int cols{6};
-  const std::array<std::string, cols> titles{
-      {" pt", "val f32", "val+err f32", "val f64", "val+err f64", "f64/f32"}};
+  constexpr int cols{7};
+  const std::array<std::string, cols> titles{{"  pt", "FKS val f32", "FKS val+err f32",
+                                              "FKS val f64", "FKS val+err f64",
+                                              "FKS val f64/f32", "Naive val f32"}};
   std::array<int, cols> cw;
   std::transform(titles.cbegin(), titles.cend(), cw.begin(),
                  [](std::string s) -> int { return s.size(); });
@@ -39,10 +40,6 @@ void run(const int num) {
             << "n3jet: benchmark pretrained neural network C++ inference timing" << '\n'
             << "       showing mean of " << num << " runs for " << pspoints << " points"
             << '\n'
-            << "       it seems there can be a warmup effect where val+err is "
-               "faster if evaluated"
-            << '\n'
-            << "       second, but val is faster if evaluated second" << '\n'
             << "       computed in float (f32) and double (f64)" << '\n'
             << "       all times are in microseconds" << '\n'
             << '\n'
@@ -60,9 +57,8 @@ void run(const int num) {
   const int legs{5};
   const int training_reruns{20};
   const double delta{0.02};
-  const std::string model_dir{
-      "../../models/3g2A/RAMBO/"
-      "100k_unit_002_fks/"};
+  const std::string model_dir{"../../models/3g2A/RAMBO/"
+                              "100k_unit_002_fks/"};
   const std::string cut_dir{"cut_0.02/"};
 
   // raw momenta input
@@ -99,6 +95,11 @@ void run(const int num) {
     }
   }
 
+  nn::NaiveEnsemble<float> naive_ensemble_f32(legs, training_reruns,
+                                              "../../models/3g2A/RAMBO/"
+                                              "100k_unit_002_single/",
+                                              cut_dir);
+
   nn::FKSEnsemble<float> ensemble_f32(legs, training_reruns, model_dir, delta, cut_dir);
 
   nn::FKSEnsemble<double> ensemble_f64(legs, training_reruns, model_dir, delta,
@@ -122,9 +123,9 @@ void run(const int num) {
       ensemble_f32.compute_with_error(momenta_f32[i]);
     };
     t1 = std::chrono::high_resolution_clock::now();
-    const long int f32dur2{
+    const long int f32dure{
         std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()};
-    const double avf32e{static_cast<double>(f32dur2) / num};
+    const double avf32e{static_cast<double>(f32dure) / num};
 
     t0 = std::chrono::high_resolution_clock::now();
     for (int j{0}; j < num; ++j) {
@@ -140,16 +141,26 @@ void run(const int num) {
       ensemble_f64.compute_with_error(momenta_f64[i]);
     };
     t1 = std::chrono::high_resolution_clock::now();
-    const long int f64dur2{
+    const long int f64dure{
         std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()};
-    const double avf64e{static_cast<double>(f64dur2) / num};
+    const double avf64e{static_cast<double>(f64dure) / num};
 
     const double rto{avf64 / avf32};
+
+    t0 = std::chrono::high_resolution_clock::now();
+    for (int j{0}; j < num; ++j) {
+      naive_ensemble_f32.compute(momenta_f32[i]);
+    };
+    t1 = std::chrono::high_resolution_clock::now();
+    const long int naive_f32dur{
+        std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()};
+    const double naive_avf32{static_cast<double>(naive_f32dur) / num};
 
     std::cout << std::setprecision(1) << "│" << std::setw(cw[0]) << i << "│"
               << std::setw(cw[1]) << avf32 << "│" << std::setw(cw[2]) << avf32e << "│"
               << std::setw(cw[3]) << avf64 << "│" << std::setw(cw[4]) << avf64e << "│"
-              << std::setw(cw[5]) << std::setprecision(2) << rto << "│" << '\n';
+              << std::setw(cw[5]) << rto << "│" << std::setw(cw[6]) << naive_avf32
+              << "│" << '\n';
   }
 
   std::cout << hline(cw, "└", "┴", "┘");
