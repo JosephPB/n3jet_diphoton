@@ -213,15 +213,9 @@ class RivetPlotter:
         )
 
         return fig
-
-    def plot(self, xlabel, ylabel, xlim=None, ylim=None, rescaling="On"):
-
-        njet_scale, nn_scale, njet_data, nn_data = self.extract_data()
-        assert len(njet_data) == len(nn_data)
-
-        njet_bins, njet_vals, njet_errs = self.parse_data_step(njet_data)
-        nn_bins, nn_vals, nn_errs = self.parse_data_step(nn_data)
-
+    
+    def rescale(rescaling):
+        
         if rescaling == "On":
             njet_vals_pass = njet_vals
             nn_vals_pass = nn_vals
@@ -232,20 +226,34 @@ class RivetPlotter:
             njet_vals_pass = njet_vals / njet_scale
             nn_vals_pass = nn_vals / nn_scale
             njet_errs_pass = njet_errs / njet_scale
-            nn_errs_pass = nn_errs / njet_scale
+            nn_errs_pass = nn_errs / nn_scale
 
         elif rescaling == "XS":
             njet_vals_pass = njet_vals / np.sum(njet_vals)
             nn_vals_pass = nn_vals / np.sum(nn_vals)
             njet_errs_pass = njet_errs / np.sum(njet_vals)
-            nn_errs_pass = nn_errs / np.sum(njet_vals)
-
+            nn_errs_pass = nn_errs / np.sum(nn_vals)
+            
         else:
             raise ValueError(
                 "rescaling takes values: On/XS/Off but you have passed {}".format(
                     rescaling
                 )
             )
+            
+        return njet_vals_pass, nn_vals_pass, njet_errs_pass, nn_errs_pass
+
+    def plot(self, xlabel, ylabel, xlim=None, ylim=None, rescaling="On"):
+
+        njet_scale, nn_scale, njet_data, nn_data = self.extract_data()
+        assert len(njet_data) == len(nn_data)
+
+        njet_bins, njet_vals, njet_errs = self.parse_data_step(njet_data)
+        nn_bins, nn_vals, nn_errs = self.parse_data_step(nn_data)
+        
+        njet_vals_pass, nn_vals_pass, njet_errs_pass, nn_errs_pass = rescale(
+            rescaling = rescaling
+        )
 
         fig = self.plot_distribution(
             njet_bins=njet_bins,
@@ -261,3 +269,7 @@ class RivetPlotter:
         )
 
         return fig
+    
+    def plot_errors(self, xlabel, ylabels, xlim=None, ylim=None, rescaling="On"):
+        
+        
