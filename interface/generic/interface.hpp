@@ -18,28 +18,31 @@ namespace NN2A {
 constexpr int d{4};
 
 #ifndef LEGS
-static_assert(false, "You must choose the number of legs with -DLEGS=#!");
+static_assert(false, "You must choose the number of legs with `-DLEGS=#`!");
 #endif
 
 constexpr int legs{LEGS};
 
 #if (defined(NN) || defined(BOTH))
+#ifndef DELTA
+static_assert(false, "You must set delta with `-DDELTA=#`!");
+#endif
 #ifndef RUNS
 static_assert(false,
-              "You must choose the number of NN runs to average over with -DRUNS=#!");
+              "You must choose the number of NN runs to average over with `-DRUNS=#`!");
 #endif
 #ifndef NN_MODEL
 static_assert(false, "You must choose the path to the model directory with "
-                     "-DNN_MODEL=\"\\\"/path/to/model\\\"\"!");
+                     "`-DNN_MODEL=\"\\\"/path/to/model\\\"\"`!");
 #endif
 #endif
 
 #if !defined(NN) && !defined(NJET)
-static_assert(false, "You must choose one of -DNN and -DNJET!");
+static_assert(false, "You must choose one of `-DNN` and `-DNJET`!");
 #endif
 
 #if defined(NN) && defined(NJET)
-static_assert(false, "You cannot use -DNN and -DNJET at the same time!");
+static_assert(false, "You cannot use `-DNN` and `-DNJET` at the same time!");
 #endif
 
 class SquaredMatrixElement {
@@ -54,10 +57,14 @@ private:
 
   static constexpr int n{5}; // BLHA momentum fifth entry is mass
 
-  const double zero, m_alpha, m_alphas, m_mur, delta, x;
+  const double zero, m_alpha, m_alphas, m_mur, x;
 
 #ifdef RUNS
   static constexpr int training_reruns{RUNS};
+#endif
+
+#ifdef DELTA
+  static constexpr double delta{DELTA};
 #endif
 
 #if (defined(NN) || defined(BOTH))

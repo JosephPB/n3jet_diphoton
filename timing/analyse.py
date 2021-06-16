@@ -225,7 +225,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    titles = ("Numerical", "Analytical", "NN ensemble")
+    titles = ("Numerical", "Analytical", "Averaged models")
 
     data_4pt = read("2g2a/result.2g2a.csv")
 
@@ -302,7 +302,7 @@ if __name__ == "__main__":
 
         sca(means, titles, muls, "timing-ensemble")
 
-        titles_single = ("Numerical", "Analytical", "NN")
+        titles_single = ("Numerical", "Analytical", "NN ensemble")
 
         means[[0, 1], :] = means[[0, 1], :] / 2
         means[2, :] = means[2, :] / 20

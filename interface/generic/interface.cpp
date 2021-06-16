@@ -17,8 +17,7 @@
 // SquaredMatrixElement class constructor and member implementations
 
 NN2A::SquaredMatrixElement::SquaredMatrixElement()
-    : zero(0.), m_alpha(1. / 137.035999084), m_alphas(0.118), m_mur(91.188),
-      delta(2e-2), x(1e-2),
+    : zero(0.), m_alpha(1. / 137.035999084), m_alphas(0.118), m_mur(91.188), x(1e-2),
 #if (defined(NN) || defined(BOTH))
 #ifdef NAIVE
       networks(NN2A::legs, training_reruns, NN_MODEL, "cut_0.02/"),

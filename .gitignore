@@ -26,3 +26,4 @@ prec
 *.log
 *.data
 run-*/
+.ipynb_checkpoints/
