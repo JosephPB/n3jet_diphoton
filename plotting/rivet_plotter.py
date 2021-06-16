@@ -214,7 +214,7 @@ class RivetPlotter:
 
         return fig
     
-    def rescale(rescaling, njet_vals, nn_vals, njet_errs, nn_errs):
+    def rescale(self, rescaling, njet_vals, nn_vals, njet_errs, nn_errs):
         
         if rescaling == "On":
             njet_vals_pass = njet_vals
@@ -251,9 +251,9 @@ class RivetPlotter:
         njet_bins, njet_vals, njet_errs = self.parse_data_step(njet_data)
         nn_bins, nn_vals, nn_errs = self.parse_data_step(nn_data)
         
-        njet_vals_pass, nn_vals_pass, njet_errs_pass, nn_errs_pass = rescale(
+        njet_vals_pass, nn_vals_pass, njet_errs_pass, nn_errs_pass = self.rescale(
             rescaling = rescaling,
-            njet_vals = njetvals, 
+            njet_vals = njet_vals, 
             nn_vals = nn_vals, 
             njet_errs = njet_errs, 
             nn_errs = nn_errs
@@ -281,7 +281,7 @@ class RivetPlotter:
         xlim = None, 
         ylim = None, 
         training_reruns = 20, 
-        rescaling = "On"
+        rescaling = "On",
     ):
         
         njet_bins_all = []
@@ -298,22 +298,22 @@ class RivetPlotter:
                 dat_file = dfile,
                 return_scales=True,
             )
-            njet_bins, njet_vals, njet_errs = plotter.parse_data_step(njet_data)
+            njet_bins, njet_vals, njet_errs = self.parse_data_step(njet_data)
             njet_bins_all.append(njet_bins)
             njet_vals_all.append(njet_vals)
             njet_errs_all.append(njet_errs)
             
-            nn_bins, nn_vals, _ = plotter.parse_data_step(nn_data)
+            nn_bins, nn_vals, _ = self.parse_data_step(nn_data)
             nn_bins_all.append(nn_bins)
             nn_vals_all.append(nn_vals)
             
-            dfile = "rivet-plots-dataset-{}/".format(i) + dat_file
+            dfile = "rivet-plots-dataset-{}/".format(i) + self.dat_file
             
-            njet_scale, nn_scale, njet_data, nn_data = plotter.extract_data(
+            njet_scale, nn_scale, njet_data, nn_data = self.extract_data(
                 dat_file = dfile,
                 return_scales=True,
             )
-            nn_bins, nn_vals, _ = plotter.parse_data_step(nn_data)
+            nn_bins, nn_vals, _ = self.parse_data_step(nn_data)
             nn_vals_dataset_all.append(nn_vals)
                 
         njet_bins = njet_bins_all[0]
@@ -327,9 +327,9 @@ class RivetPlotter:
                 np.std(nn_vals_all, axis=0)**2 + np.std(nn_vals_dataset_all, axis=0)**2)
         ) / np.sqrt(20)
         
-        njet_vals_pass, nn_vals_pass, njet_errs_pass, nn_errs_pass = rescale(
+        njet_vals_pass, nn_vals_pass, njet_errs_pass, nn_errs_pass = self.rescale(
             rescaling = rescaling,
-            njet_vals = njetvals, 
+            njet_vals = njet_vals, 
             nn_vals = nn_vals, 
             njet_errs = njet_errs, 
             nn_errs = nn_errs
