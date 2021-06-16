@@ -71,6 +71,7 @@ class RivetDistributions:
         self.rivet_dir = rivet_dir
         self.save_dir = save_dir
         self.legs = legs
+        self.training_reruns = training_reruns
         self.rescaling = rescaling
 
     # Angluar plots
@@ -113,7 +114,7 @@ class RivetDistributions:
         elif self.rescaling == "XS":
             ylabel = r"$1/\sigma$ d$\sigma/$d$R_{j_1\gamma_1}$"
 
-        dr_jy_fig = dr_jy_plotter.plot(
+        dr_jy_fig = dr_jy_plotter.plot_errors(
             xlabel=xlabel,
             ylabel=ylabel,
             xlim=(0.2, 5),
