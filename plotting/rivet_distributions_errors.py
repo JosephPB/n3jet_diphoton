@@ -187,7 +187,7 @@ class RivetDistributions:
             ylabel = r"$1/\sigma$ d$\sigma/$d$p_{T,j_1}$ [GeV$^{-1}$]"
 
         if self.legs == 6:
-            ylim = (10e-7,10e-1)
+            ylim = (1.2e-7,1.8e-1)
         else:
             ylim = None
 
@@ -216,7 +216,7 @@ class RivetDistributions:
             ylabel = r"$1/\sigma$ d$\sigma/$d$p_{T,j_2}$ [GeV$^{-1}$]"
 
         if self.legs == 6:
-            ylim = (10e-7,10e-1)
+            ylim = (1.2e-7,1.8e-1)
         else:
             ylim = None
 
