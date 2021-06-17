@@ -35,7 +35,7 @@ Error messages will display if command line arguments are required.
 -   a plain Python script `NAME.py`, which can be run from the terminal as `./NAME.py`.
 -   a [Jupyter notebook](https://jupyter.org/) `NAME.ipynb`. After installing `jupyter`, a notebook server can be started in the directory with `jupyter notebook` to access the files.
 
-The project is laid out as follows
+The project is laid out as follows:
 
 | Directory   | Description                                                            |
 | ----------- | ---------------------------------------------------------------------- |
@@ -48,7 +48,7 @@ The project is laid out as follows
 | `run`       | Scripts to run Sherpa with NJet and trained models                     |
 | `timing`    | Analysis of inference timings for paper                                |
 
-The `interface` directory contains 
+The `interface` directory contains:
 
 | Subirectory | Description                                                    |
 | ----------- | -------------------------------------------------------------- |
@@ -59,7 +59,7 @@ The `interface` directory contains
 
 The `generic` interface source is configured by setting macros in the various other `interface` subdirectories to produce the interface libraries for different multiplicity and amplitude provider.
 
-The `run` directory contains 
+The `run` directory contains:
 
 | Subirectory          | Description                                                                            |
 | -------------------- | -------------------------------------------------------------------------------------- |
