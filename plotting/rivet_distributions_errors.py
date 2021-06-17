@@ -187,7 +187,7 @@ class RivetDistributions:
             ylabel = r"$1/\sigma$ d$\sigma/$d$p_{T,j_1}$ [GeV$^{-1}$]"
 
         if self.legs == 6:
-            ylim = (1.2e-7,1.8e-1)
+            ylim = (1.2e-7, 1.8e-1)
         else:
             ylim = None
 
@@ -196,8 +196,8 @@ class RivetDistributions:
             ylabel=ylabel,
             training_reruns=self.training_reruns,
             rescaling=self.rescaling,
-            xlim=(0,500),
-            ylim=ylim
+            xlim=(0, 500),
+            ylim=ylim,
         )
         dpt_j1_fig.savefig(self.save_dir + "dpt_j1.pdf", bbox_inches="tight")
 
@@ -216,7 +216,7 @@ class RivetDistributions:
             ylabel = r"$1/\sigma$ d$\sigma/$d$p_{T,j_2}$ [GeV$^{-1}$]"
 
         if self.legs == 6:
-            ylim = (1.2e-7,1.8e-1)
+            ylim = (1.2e-7, 1.8e-1)
         else:
             ylim = None
 
@@ -225,8 +225,8 @@ class RivetDistributions:
             ylabel=ylabel,
             rescaling=self.rescaling,
             training_reruns=self.training_reruns,
-            xlim=(0,500),
-            ylim=ylim
+            xlim=(0, 500),
+            ylim=ylim,
         )
         dpt_j2_fig.savefig(self.save_dir + "dpt_j2.pdf", bbox_inches="tight")
 
