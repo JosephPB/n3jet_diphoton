@@ -5,6 +5,9 @@
 
 [Mirrored on GitHub](https://github.com/JosephPB/n3jet_diphoton)
 
+This project builds on the package [n3jet](https://github.com/JosephPB/n3jet) to use neural networks to evaluate gluon-initiated diphoton scattering amplitudes and integrate these calls into the Monte Carlo event generator Sherpa.
+This demonstrates a high precision and performant simulation pipeline for high multiplicity processes at hadron colliders.
+
 ## Dependencies
 
 This project uses `Python` 3.6+ and `C++14`.
@@ -58,6 +61,7 @@ The `interface` directory contains:
 | `ELSE`      | Some scripts to test the C++ NN inference code                 |
 
 The `generic` interface source is configured by setting macros in the various other `interface` subdirectories to produce the interface libraries for different multiplicity and amplitude provider.
+The C++ inference code is templated and so can be used with any precision of floating-point number.
 
 The `run` directory contains:
 
@@ -69,6 +73,9 @@ The `run` directory contains:
 
 The interface libraries in `interface` must be compiled first as the `run` subdirectories contain symlinks to these compiled libraries.
 The Rivet analysis in `analysis` is also linked to and must be compiled first.
+
+All dataset generation is performed with `f64`s.
+Model training, files, and inference use `f32`s.
 
 ## Continuous integration
 
