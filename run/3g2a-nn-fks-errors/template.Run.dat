@@ -42,6 +42,8 @@
   DeltaR 22 93 0.4 E_CMS
   DeltaR 22 22 0.4 E_CMS
   "PT" 22 40.0,E_CMS [PT_UP] 
+
+  "PT" 22,22 50,E_CMS
   FastjetFinder antikt JJJJJ 20.0 0.0 0.4 0.75 5.0
 }(selector)
 

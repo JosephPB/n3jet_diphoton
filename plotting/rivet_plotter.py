@@ -19,7 +19,7 @@ class RivetPlotter:
         self.rivet_path = rivet_path
         self.dat_file = dat_file
 
-    def extract_data_file(self, return_scales=True, **kwargs):
+    def extract_data(self, return_scales=True, **kwargs):
         """
         Extract data from a data file
 
@@ -79,7 +79,7 @@ class RivetPlotter:
         else:
             return njet_data, nn_data
 
-    def parse_data_step_file(self, data):
+    def parse_data_step(self, data):
         """
         Parse data extracted from a data file
 
@@ -213,15 +213,9 @@ class RivetPlotter:
         )
 
         return fig
-
-    def plot(self, xlabel, ylabel, xlim=None, ylim=None, rescaling="On"):
-
-        njet_scale, nn_scale, njet_data, nn_data = self.extract_data()
-        assert len(njet_data) == len(nn_data)
-
-        njet_bins, njet_vals, njet_errs = self.parse_data_step(njet_data)
-        nn_bins, nn_vals, nn_errs = self.parse_data_step(nn_data)
-
+    
+    def rescale(self, rescaling, njet_vals, nn_vals, njet_errs, nn_errs):
+        
         if rescaling == "On":
             njet_vals_pass = njet_vals
             nn_vals_pass = nn_vals
@@ -232,20 +226,38 @@ class RivetPlotter:
             njet_vals_pass = njet_vals / njet_scale
             nn_vals_pass = nn_vals / nn_scale
             njet_errs_pass = njet_errs / njet_scale
-            nn_errs_pass = nn_errs / njet_scale
+            nn_errs_pass = nn_errs / nn_scale
 
         elif rescaling == "XS":
             njet_vals_pass = njet_vals / np.sum(njet_vals)
             nn_vals_pass = nn_vals / np.sum(nn_vals)
             njet_errs_pass = njet_errs / np.sum(njet_vals)
-            nn_errs_pass = nn_errs / np.sum(njet_vals)
-
+            nn_errs_pass = nn_errs / np.sum(nn_vals)
+            
         else:
             raise ValueError(
                 "rescaling takes values: On/XS/Off but you have passed {}".format(
                     rescaling
                 )
             )
+            
+        return njet_vals_pass, nn_vals_pass, njet_errs_pass, nn_errs_pass
+
+    def plot(self, xlabel, ylabel, xlim=None, ylim=None, rescaling="On"):
+
+        njet_scale, nn_scale, njet_data, nn_data = self.extract_data()
+        assert len(njet_data) == len(nn_data)
+
+        njet_bins, njet_vals, njet_errs = self.parse_data_step(njet_data)
+        nn_bins, nn_vals, nn_errs = self.parse_data_step(nn_data)
+        
+        njet_vals_pass, nn_vals_pass, njet_errs_pass, nn_errs_pass = self.rescale(
+            rescaling = rescaling,
+            njet_vals = njet_vals, 
+            nn_vals = nn_vals, 
+            njet_errs = njet_errs, 
+            nn_errs = nn_errs
+        )
 
         fig = self.plot_distribution(
             njet_bins=njet_bins,
@@ -260,4 +272,80 @@ class RivetPlotter:
             ylim=ylim,
         )
 
+        return fig
+    
+    def plot_errors(
+        self, 
+        xlabel, 
+        ylabel, 
+        xlim = None, 
+        ylim = None, 
+        training_reruns = 20, 
+        rescaling = "On",
+    ):
+        
+        njet_bins_all = []
+        njet_vals_all = []
+        njet_errs_all = []
+        nn_bins_all = []
+        nn_vals_all = []
+        nn_vals_dataset_all = []
+        
+        for i in range(training_reruns):
+            dfile = "rivet-plots-{}/".format(i) + self.dat_file
+            
+            njet_scale, nn_scale, njet_data, nn_data = self.extract_data(
+                dat_file = dfile,
+                return_scales=True,
+            )
+            njet_bins, njet_vals, njet_errs = self.parse_data_step(njet_data)
+            njet_bins_all.append(njet_bins)
+            njet_vals_all.append(njet_vals)
+            njet_errs_all.append(njet_errs)
+            
+            nn_bins, nn_vals, _ = self.parse_data_step(nn_data)
+            nn_bins_all.append(nn_bins)
+            nn_vals_all.append(nn_vals)
+            
+            dfile = "rivet-plots-dataset-{}/".format(i) + self.dat_file
+            
+            njet_scale, nn_scale, njet_data, nn_data = self.extract_data(
+                dat_file = dfile,
+                return_scales=True,
+            )
+            nn_bins, nn_vals, _ = self.parse_data_step(nn_data)
+            nn_vals_dataset_all.append(nn_vals)
+                
+        njet_bins = njet_bins_all[0]
+        njet_vals = njet_vals_all[0]
+        njet_errs = njet_errs_all[0]
+        
+        nn_bins = nn_bins_all[0]
+        nn_vals = np.mean(nn_vals_all, axis=0)
+        nn_errs = (
+            np.sqrt(
+                np.std(nn_vals_all, axis=0)**2 + np.std(nn_vals_dataset_all, axis=0)**2)
+        ) / np.sqrt(20)
+        
+        njet_vals_pass, nn_vals_pass, njet_errs_pass, nn_errs_pass = self.rescale(
+            rescaling = rescaling,
+            njet_vals = njet_vals, 
+            nn_vals = nn_vals, 
+            njet_errs = njet_errs, 
+            nn_errs = nn_errs
+        )
+        
+        fig = self.plot_distribution(
+            njet_bins=njet_bins,
+            nn_bins=nn_bins,
+            njet_vals=njet_vals_pass,
+            nn_vals=nn_vals_pass,
+            njet_errs=njet_errs_pass,
+            nn_errs=nn_errs_pass,
+            xlabel=xlabel,
+            ylabel=ylabel,
+            xlim=None,
+            ylim=None,
+        )
+        
         return fig

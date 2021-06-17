@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-rseed=1
+rseed=$1
 
 for ((nnrun = 0; nnrun < 20; nnrun++)); do
     dir=res-${nnrun}

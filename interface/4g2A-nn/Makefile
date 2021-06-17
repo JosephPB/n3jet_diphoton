@@ -15,7 +15,7 @@ DEFS+=-DNN # do NN calculation only (or return NN result with BOTH)
 #DEFS+=-DREC # record results
 # DEFS+=-DTIMING # recording runtime information
 #DEFS+=-DNAIVE # use naive single NN implementation
-DEFS+=-DNN_MODEL="\"../../models/4g2A/RAMBO/100k_unit_0001_fks_low_prec/\""
+DEFS+=-DNN_MODEL="\"../../models/4g2A/RAMBO/100k_unit_0001_fks/\""
 
 .PHONY: clean all
 
