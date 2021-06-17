@@ -18,7 +18,6 @@ time_O*
 *.pyc
 *.csv
 *.png
-*.pdf
 *.pickle
 prec
 !prec/
