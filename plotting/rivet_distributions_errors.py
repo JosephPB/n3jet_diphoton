@@ -186,12 +186,18 @@ class RivetDistributions:
         elif self.rescaling == "XS":
             ylabel = r"$1/\sigma$ d$\sigma/$d$p_{T,j_1}$ [GeV$^{-1}$]"
 
+        if self.legs == 6:
+            ylim = (10e-7,10e-1)
+        else:
+            ylim = None
+
         dpt_j1_fig = dpt_j1_plotter.plot_errors(
             xlabel=xlabel,
             ylabel=ylabel,
             training_reruns=self.training_reruns,
             rescaling=self.rescaling,
-            xlim=500,
+            xlim=(0,500),
+            ylim=ylim
         )
         dpt_j1_fig.savefig(self.save_dir + "dpt_j1.pdf", bbox_inches="tight")
 
@@ -209,12 +215,18 @@ class RivetDistributions:
         elif self.rescaling == "XS":
             ylabel = r"$1/\sigma$ d$\sigma/$d$p_{T,j_2}$ [GeV$^{-1}$]"
 
+        if self.legs == 6:
+            ylim = (10e-7,10e-1)
+        else:
+            ylim = None
+
         dpt_j2_fig = dpt_j2_plotter.plot_errors(
             xlabel=xlabel,
             ylabel=ylabel,
             rescaling=self.rescaling,
             training_reruns=self.training_reruns,
-            xlim=500,
+            xlim=(0,500),
+            ylim=ylim
         )
         dpt_j2_fig.savefig(self.save_dir + "dpt_j2.pdf", bbox_inches="tight")
 
