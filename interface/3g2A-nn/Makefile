@@ -1,7 +1,7 @@
 SRC_DIR=../generic
 
 CXX?=g++
-CXXFLAGS=-g -O2 -pedantic -Wall -Wextra -fPIC -DPIC -std=c++14 -march=native -mtune=native
+CXXFLAGS=-O2 -pedantic -Wall -Wextra -fPIC -DPIC -std=c++14 -march=native -mtune=native
 CPPFLAGS=$(shell pkg-config eigen3 --cflags) -I$(shell Sherpa-config --incdir)
 LDFLAGS=$(shell Sherpa-config --ldflags)
 DEFS=-DLEGS=5 # choose 5 or 6 for 3g2a or 4g2a

@@ -1,8 +1,7 @@
 CXX?=g++
-CXXFLAGS=-g -O2 -pedantic -Wall -Wextra -fPIC -DPIC -std=c++17 -march=native -mtune=native
-CPPFLAGS=$(shell pkg-config njet2 --cflags) -I$(shell Sherpa-config --incdir)
-LDFLAGS=$(shell pkg-config njet2 --libs) $(shell Sherpa-config --ldflags)
-LDFLAGS+=-lqd
+CXXFLAGS=-O2 -pedantic -Wall -Wextra -fPIC -DPIC -std=c++17 -march=native -mtune=native
+CPPFLAGS=$(shell pkg-config njet3 --cflags) -I$(shell Sherpa-config --incdir)
+LDFLAGS=$(shell pkg-config njet3 --libs) $(shell Sherpa-config --ldflags)
 DEFS=-DLEGS=5 # choose 5 or 6 for 3g2a or 4g2a
 DEFS+=-DDELTA=0.02 # choose delta (y_cut from the paper)
 DEFS+=-DRUNS=20 # choose number of NN runs to average over

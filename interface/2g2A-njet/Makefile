@@ -1,21 +1,20 @@
 SRC_DIR=../generic
 
 CXX?=g++
-CXXFLAGS=-g -O2 -pedantic -Wall -Wextra -fPIC -DPIC -std=c++17
-CPPFLAGS=$(shell pkg-config njet2 --cflags) -I$(shell Sherpa-config --incdir)
-LDFLAGS=$(shell pkg-config njet2 --libs) $(shell Sherpa-config --ldflags)
-LDFLAGS+=-lqd -lnjet2an0q2g2A
+CXXFLAGS=-O2 -pedantic -Wall -Wextra -fPIC -DPIC -std=c++17 -march=native -mtune=native
+CPPFLAGS=$(shell pkg-config njet3 --cflags) -I$(shell Sherpa-config --incdir)
+LDFLAGS=$(shell pkg-config njet3 --libs) $(shell Sherpa-config --ldflags)
 DEFS=-DLEGS=4
-DEFS+=-DDELTA=0.02 # choose delta (y_cut from the paper)
+# DEFS+=-DDELTA=0.02 # choose delta (y_cut from the paper)
 # DEFS+=-DRUNS=20 # choose number of NN runs to average over
-#DEFS+=-DA=0 # the index of the NN run
-DEFS+=-DUNIT # for generating unit integration grid
+# DEFS+=-DINDEX=0 # the index of the NN run
+# DEFS+=-DUNIT # for generating unit integration grid
 DEFS+=-DNJET # do NJet calculation only (or return NJet result with BOTH)
 # DEFS+=-DNN # do NN calculation only (or return NN result with BOTH)
 # DEFS+=-DBOTH # generate both NN and NJet and choose return by one of two above flags
 DEFS+=-DREC # record results
 # DEFS+=-DTIMING # recording runtime information
-#DEFS+=-DNAIVE # use naive single NN implementation
+# DEFS+=-DNAIVE # use naive single NN implementation
 # DEFS+=-DNN_MODEL="\"./models/RAMBO/events_100k_fks_all_legs_all_pairs_new_sherpa_cuts_pdf_njet/\""
 
 .PHONY: clean all
