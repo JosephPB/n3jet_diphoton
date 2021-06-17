@@ -357,8 +357,8 @@ class RivetPlotter:
             nn_errs=nn_errs_pass,
             xlabel=xlabel,
             ylabel=ylabel,
-            xlim=None,
-            ylim=None,
+            xlim=xlim,
+            ylim=ylim,
         )
 
         return fig
