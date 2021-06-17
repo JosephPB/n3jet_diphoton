@@ -2,8 +2,8 @@
 
 all: Rivetdiphoton.so
 
-Rivetdiphoton.so: diphoton.cc
+Rivetdiphoton.so: diphoton.cpp
 	rivet-buildplugin -j $(shell nproc) $@ $<
 
 clean:
-	rm Rivetdiphoton.so
+	-rm Rivetdiphoton.so
