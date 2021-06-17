@@ -1,7 +1,7 @@
 SRC_DIR=../generic
 
 CXX?=g++
-CXXFLAGS=-pedantic -Wall -Wextra -std=c++17 -march=native -mtune=native -O2
+CXXFLAGS=-pedantic -Wall -Wextra -std=c++14 -march=native -mtune=native -O2
 CPPFLAGS=-I${SRC_DIR} $(shell pkg-config njet3 eigen3 --cflags)
 LDFLAGS=$(shell pkg-config njet3 --libs) -lnjet3tools
 

@@ -120,8 +120,8 @@ void run(const int start, const int end) {
     const long dur_nn_f32{
         std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count()};
     tme_nn_f32[a] = dur_nn_f32;
-    const double val_nn_f32{ensemble_f32.mean};
-    const double err_nn_f32{ensemble_f32.std_err};
+    const double val_nn_f32{ensemble_f32.mean()};
+    const double err_nn_f32{ensemble_f32.std_err()};
 
     t0 = std::chrono::high_resolution_clock::now();
     ensemble_f64.compute_with_error(moms_f64);
@@ -129,8 +129,8 @@ void run(const int start, const int end) {
     const long dur_nn_f64{
         std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count()};
     tme_nn_f64[a] = dur_nn_f64;
-    const double val_nn_f64{ensemble_f64.mean};
-    const double err_nn_f64{ensemble_f64.std_err};
+    const double val_nn_f64{ensemble_f64.mean()};
+    const double err_nn_f64{ensemble_f64.std_err()};
 
     const double tr_num{static_cast<double>(dur_num) / dur_nn_f32};
     const double tr_nn_f32{static_cast<double>(dur_nn_f32) / dur_nn_f32};
