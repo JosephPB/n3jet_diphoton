@@ -1,7 +1,7 @@
 SRC_DIR=../generic
 
 CXX?=g++
-CXXFLAGS=-pedantic -Wall -Wextra -std=c++17 -march=native -mtune=native
+CXXFLAGS=-pedantic -Wall -Wextra -std=c++14 -march=native -mtune=native
 CPPFLAGS=-I${SRC_DIR} $(shell pkg-config eigen3 --cflags)
 LDFLAGS=
 

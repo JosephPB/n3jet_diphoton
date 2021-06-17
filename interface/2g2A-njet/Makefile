@@ -1,7 +1,7 @@
 SRC_DIR=../generic
 
 CXX?=g++
-CXXFLAGS=-O2 -pedantic -Wall -Wextra -fPIC -DPIC -std=c++17 -march=native -mtune=native
+CXXFLAGS=-O2 -pedantic -Wall -Wextra -fPIC -DPIC -std=c++14 -march=native -mtune=native
 CPPFLAGS=$(shell pkg-config njet3 --cflags) -I$(shell Sherpa-config --incdir)
 LDFLAGS=$(shell pkg-config njet3 --libs) $(shell Sherpa-config --ldflags)
 DEFS=-DLEGS=4

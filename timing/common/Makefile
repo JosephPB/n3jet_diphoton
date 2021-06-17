@@ -1,5 +1,5 @@
 CXX?=g++
-CXXFLAGS=-O2 -std=c++17 -Wall -Wextra -pedantic -march=native -mtune=native
+CXXFLAGS=-O2 -std=c++14 -Wall -Wextra -pedantic -march=native -mtune=native
 
 all: timing.o
 
