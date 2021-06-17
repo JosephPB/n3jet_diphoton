@@ -249,7 +249,8 @@ if __name__ == "__main__":
     means = numpy.ma.empty((3, 3))
     stds = numpy.ma.empty((3, 3))
 
-    print("Duration values (ms +- %)")
+    print("# With errors")
+    print("## Duration values (ms +- %)")
 
     for j, (m, times_mul) in enumerate(zip(muls, (times_4pt, times_5pt))):
         print(m)
@@ -287,13 +288,43 @@ if __name__ == "__main__":
 
     min_dur = numpy.min(means)
 
-    print("Duration ratios")
+    print("## Duration ratios")
 
-    for impl, means_impl in zip(titles, means):
-        print(impl)
-        for m, mean in zip(muls, means_impl):
-            if mean is not numpy.ma.masked:
-                print(m, round(mean / min_dur, 1))
+    for m, times_mul in zip(muls, numpy.transpose(means)):
+        print(m)
+        min_wo_dur = numpy.min(times_mul)
+        for impl, time in zip(titles, times_mul):
+            if time is not numpy.ma.masked:
+                print(impl, round(time / min_wo_dur, 1))
+
+    print()
+
+    means_wo = numpy.empty_like(means)
+    means_wo[[0, 1], :] = means[[0, 1], :] / 2
+    means_wo[2, :] = means[2, :] / 20
+
+    print("# Without errors")
+    print("## Duration values (ms +- %)")
+
+    titles_wo = ("Numerical", "Analytical", "NN ensemble")
+
+    for m, times_mul in zip(muls, numpy.transpose(means_wo)):
+        print(m)
+
+        for impl, time in zip(titles_wo, times_mul):
+            if time is not numpy.ma.masked:
+                print(impl, time)
+
+    print()
+
+    print("## Duration ratios")
+
+    for m, times_mul in zip(muls, numpy.transpose(means_wo)):
+        print(m)
+        min_wo_dur = numpy.min(times_mul)
+        for impl, time in zip(titles_wo, times_mul):
+            if time is not numpy.ma.masked:
+                print(impl, round(time / min_wo_dur, 1))
 
     print()
 
@@ -302,12 +333,7 @@ if __name__ == "__main__":
 
         sca(means, titles, muls, "timing-ensemble")
 
-        titles_single = ("Numerical", "Analytical", "NN ensemble")
-
-        means[[0, 1], :] = means[[0, 1], :] / 2
-        means[2, :] = means[2, :] / 20
-
-        sca(means, titles_single, muls, "timing-single")
+        sca(means_wo, titles_wo, muls, "timing-single")
 
         # hist(times_5pt, titles, "5", 3)
         # vio(times_rows_5pt, titles, "5")
