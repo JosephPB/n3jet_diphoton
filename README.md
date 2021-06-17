@@ -6,12 +6,12 @@
 [Mirrored on GitHub](https://github.com/JosephPB/n3jet_diphoton)
 
 ## Dependencies
-* [NJet](https://bitbucket.org/njet/njet) develop
+* [NJet](https://bitbucket.org/njet/njet) >= 3.0.0
 * [Sherpa](https://sherpa-team.gitlab.io) 2.2.8
 * [Rivet](https://rivet.hepforge.org) 2.7.2
 * [YODA](https://yoda.hepforge.org/) 1.7.7
 * [FastJet](http://fastjet.fr/) 3.3.3
-* [Eigen](https://eigen.tuxfamily.org) 3.3.9
+* [Eigen](https://eigen.tuxfamily.org) >= 3.3.9
 
 ## Continuous Integration
 [`pre-commit`](https://pre-commit.com/) (the program) is used to manage local continuous integration, namely the `git` hook pre-commit.
