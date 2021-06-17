@@ -8,7 +8,7 @@
 ## Dependencies
 
 This project uses `Python` 3.6+ and `C++14`.
-It also uses the following packages, with tested versions quoted.
+It also uses the following packages, with tested versions quoted:
 
 | Package                                   | Version |
 | ----------------------------------------- | ------- |
@@ -73,20 +73,20 @@ The Rivet analysis in `analysis` is also linked to and must be compiled first.
 ## Continuous integration
 
 [`pre-commit`](https://pre-commit.com/) (the program) is used to manage local continuous integration (CI), namely the `git` hook pre-commit.
-It is integrated with
+It is integrated with:
 
 -   Python formatter [`black`](https://github.com/psf/black) ([docs](https://black.readthedocs.io/en/stable/version_control_integration.html))
 -   Python linter [`flake8`](https://github.com/pycqa/flake8) ([docs](https://flake8.pycqa.org/en/latest/user/using-hooks.html))
 -   YAML formatter [`yamlfmt`](https://github.com/mmlb/yamlfmt) ([hook](https://github.com/jumanjihouse/pre-commit-hook-yamlfmt))
 -   YAML linter [`yamllint`](https://github.com/adrienverge/yamllint) ([docs](https://yamllint.readthedocs.io/en/stable/integration.html))
 
-These hooks can be updated with
+These hooks can be updated with:
 
 ```shell
 pre-commit autoupdate
 ```
 
-Checks and formatters can be manually invoked with
+Checks and formatters can be manually invoked with:
 
 ```shell
 pre-commit run --all-files
