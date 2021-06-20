@@ -10,8 +10,8 @@ fi
 
 if ! type pre-commit >/dev/null; then
     echo "I tried to install pre-commit but now I can't find it."
-    echo "It's up to you now to install it (try `pip install pre-commit`) or add it to your path!"
-    echo "Remember to initialise pre-commit for this repo after with `pre-commit install`"
+    echo "It's up to you now to install it (try \`pip install pre-commit\`) or add it to your path!"
+    echo "Remember to initialise pre-commit for this repo after with \`pre-commit install\`"
 else
     pre-commit install
     echo "Successfully completed initialisation!"
