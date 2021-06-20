@@ -7,6 +7,7 @@
 
 This project builds on the package [n3jet](https://github.com/JosephPB/n3jet) to use neural networks to evaluate gluon-initiated diphoton scattering amplitudes and integrate these calls into the Monte Carlo event generator Sherpa.
 This demonstrates a high precision and performant simulation pipeline for high multiplicity processes at hadron colliders.
+We present this work on [arXiv](https://arxiv.org/abs/2106.09474v1).
 
 ## Dependencies
 
