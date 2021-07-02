@@ -25,7 +25,7 @@ void run(const int start, const int end) {
   std::vector<long> tme_nn_f64(num);
 
   constexpr int cols{6};
-  const std::array<int, cols> cw{{4, 6, 24, 12, 11, 10}};
+  const std::array<int, cols> cw{{4, 7, 24, 12, 11, 10}};
   const std::array<std::string, cols> titles{
       {"pt", "impl", "value", "rel error", "time (ns)", "t ratio"}};
 

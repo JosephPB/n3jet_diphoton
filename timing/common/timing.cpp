@@ -47,25 +47,26 @@ void report(const std::vector<long> &tme_num, const std::vector<long> &tme_ana,
 
   const int abs_prec{1};
   const int perc_prec{1};
+  const int cw{7};
 
   std::cout << '\n'
             << "Mean times (ns)" << '\n'
-            << std::setw(5) << title1 << std::scientific << std::setprecision(abs_prec)
+            << std::setw(cw) << title1 << std::scientific << std::setprecision(abs_prec)
             << mn_num << " ± " << abs_std_err_num << " (" << std::fixed
             << std::setprecision(perc_prec) << 100 * rel_std_err_num << "%)" << '\n'
-            << std::setw(5) << title2 << std::scientific << std::setprecision(abs_prec)
+            << std::setw(cw) << title2 << std::scientific << std::setprecision(abs_prec)
             << mn_ana << " ± " << abs_std_err_ana << " (" << std::fixed
             << std::setprecision(perc_prec) << 100 * rel_std_err_ana << "%)" << '\n'
-            << std::setw(5) << title3 << std::scientific << std::setprecision(abs_prec)
+            << std::setw(cw) << title3 << std::scientific << std::setprecision(abs_prec)
             << mn_nn << " ± " << abs_std_err_nn << " (" << std::fixed
             << std::setprecision(perc_prec) << 100 * rel_std_err_nn << "%)" << '\n';
 
   std::cout << '\n'
             << "Mean time ratios" << '\n'
-            << std::setw(5) << title1 << std::fixed << std::setprecision(abs_prec)
+            << std::setw(cw) << title1 << std::fixed << std::setprecision(abs_prec)
             << mn_num / mn_nn << '\n'
-            << std::setw(5) << title2 << mn_ana / mn_nn << '\n'
-            << std::setw(5) << title3 << mn_nn / mn_nn << '\n';
+            << std::setw(cw) << title2 << mn_ana / mn_nn << '\n'
+            << std::setw(cw) << title3 << mn_nn / mn_nn << '\n';
 }
 
 void report(const std::vector<long> &tme_num, const std::vector<long> &tme_nn) {
@@ -79,18 +80,19 @@ void report(const std::vector<long> &tme_num, const std::vector<long> &tme_nn) {
 
   const int abs_prec{1};
   const int perc_prec{1};
+  const int cw{7};
 
   std::cout << '\n'
             << "Mean times (ns)" << '\n'
-            << std::setw(5) << "num" << std::setprecision(abs_prec) << mn_num << " ± "
+            << std::setw(cw) << "num" << std::setprecision(abs_prec) << mn_num << " ± "
             << abs_std_err_num << " (" << std::setprecision(perc_prec)
             << 100 * rel_std_err_num << "%)" << '\n'
-            << std::setw(5) << "nn" << std::setprecision(abs_prec) << mn_nn << " ± "
+            << std::setw(cw) << "nn" << std::setprecision(abs_prec) << mn_nn << " ± "
             << abs_std_err_nn << " (" << std::setprecision(perc_prec)
             << 100 * rel_std_err_nn << "%)" << '\n';
 
   std::cout << '\n'
             << "Mean time ratios" << '\n'
-            << std::setw(5) << "num" << std::setprecision(abs_prec) << 1. << '\n'
-            << std::setw(5) << "nn" << mn_nn / mn_num << '\n';
+            << std::setw(cw) << "num" << std::setprecision(abs_prec) << 1. << '\n'
+            << std::setw(cw) << "nn" << mn_nn / mn_num << '\n';
 }
