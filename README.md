@@ -25,6 +25,8 @@ It also uses the following packages, with tested versions quoted:
 
 Note that `NJet` must have desired analytic amplitudes enabled at the `configure` stage.
 
+This repo uses [Git LFS](https://git-lfs.github.com/) for binary files.
+
 ## Usage
 
 This project has been tested on Linux and MacOS.
