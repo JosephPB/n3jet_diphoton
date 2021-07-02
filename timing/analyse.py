@@ -63,8 +63,7 @@ def _save(fig, filename):
 
 
 def save(fig, name):
-    for suffix in ("png", "pdf"):
-        # for suffix in ("png",):
+    for suffix in ("pdf",):
         _save(fig, name + "." + suffix)
 
 
