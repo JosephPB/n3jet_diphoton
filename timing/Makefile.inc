@@ -14,8 +14,8 @@ all: test
 test: test.o ${COM_DIR}/timing.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
-test.o: test.cpp ${SRC_DIR}/model_fns.hpp
-	$(CXX) $(CXXFLAGS) -o $@ -c $< $(CPPFLAGS)
+test.o: test.cpp ${SRC_DIR}/model_fns.hpp ${COM_DIR}/timing.hpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ -c $<
 
 clean:
 	-rm *.o $(PRGS)
