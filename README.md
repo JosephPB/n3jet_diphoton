@@ -5,7 +5,7 @@
 
 [Mirrored on GitHub](https://github.com/JosephPB/n3jet_diphoton)
 
-This project builds on the package [n3jet](https://github.com/JosephPB/n3jet) to use neural networks to evaluate gluon-initiated diphoton scattering amplitudes and integrate these calls into the Monte Carlo event generator Sherpa.
+This project builds on the package [`n3jet`](https://github.com/JosephPB/n3jet) to use neural networks to evaluate gluon-initiated diphoton scattering amplitudes and integrate these calls into the Monte Carlo event generator Sherpa.
 This demonstrates a high precision and performant simulation pipeline for high multiplicity processes at hadron colliders.
 We present this work on [arXiv](https://arxiv.org/abs/2106.09474v1).
 
@@ -27,6 +27,39 @@ Note that `NJet` must have desired analytic amplitudes enabled at the `configure
 
 This repo uses [Git LFS](https://git-lfs.github.com/) for binary files.
 
+To run Python scripts and [Jupyter notebooks](https://jupyter.org/) which use `n3jet`, we recommend installing `n3jet` in a Python 2 virtual environment.
+This requires `python2` and [`virtualenv`](https://virtualenv.pypa.io), which can be installed via the system package manager or via `pip`
+```shell
+pip install --user virtualenv
+```
+A Python 2 virtual environment for `n3jet` can be made and activated with
+```shell
+mkdir ~/venvs
+virtualenv ~/venvs/py2-n3jet -p /usr/bin/python2
+source ~/venvs/py2-n3jet/bin/activate
+```
+Then `n3jet` can be installed with
+```shell
+git clone https://github.com/JosephPB/n3jet.git
+cd n3jet
+(py2-n3jet) pip install -e .
+```
+where I indicate the active virtual environment in parentheses.
+Within the `py2-n3jet` virtual environment, Python scripts can now be run that depend on `n3jet`.
+To use `py2-n3jet` with a Jupyter notebook, first install `jupyter` either through the system package manager or by `pip`
+```shell
+pip install --user jupyter
+```
+then add the `py2-n3jet` virtual environment as a kernel
+```shell
+pip install --user ipykernel
+python -m ipykernel install --user --name=py2-n3jet
+```
+Then `py2-n3jet` can be selected as the notebook kernel under `Kernel > Change kernel > py2-n3jet` from the notebook interface after starting the notebook with
+```shell
+jupyter notebook
+```
+
 ## Usage
 
 This project has been tested on Linux and MacOS.
@@ -39,7 +72,7 @@ Error messages will display if command line arguments are required.
 `Python` code is presented as either:
 
 -   a plain Python script `NAME.py`, which can be run from the terminal as `./NAME.py`.
--   a [Jupyter notebook](https://jupyter.org/) `NAME.ipynb`. After installing `jupyter`, a notebook server can be started in the directory with `jupyter notebook` to access the files.
+-   a Jupyter notebook `NAME.ipynb`. After installing `jupyter`, a notebook server can be started in the directory with `jupyter notebook` to access the files.
 
 The project is laid out as follows:
 
