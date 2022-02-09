@@ -64,6 +64,13 @@ jupyter notebook
 
 This project has been tested on Linux and MacOS.
 
+The project can be installed to a directory by either
+* cloning the repository
+    ```shell
+    git clone https://gitlab.com/JosephPB/n3jet_diphoton.git
+    ```
+* or downloading the latest bundled release from the [releases page](https://gitlab.com/JosephPB/n3jet_diphoton/-/releases).
+
 Each directory using `C++` code contains a `Makefile` to compile it.
 It is sufficient to run `make` in each such directory to build all targets.
 Executable targets can then be run as `./NAME`.
