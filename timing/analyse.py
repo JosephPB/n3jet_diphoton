@@ -327,12 +327,17 @@ if __name__ == "__main__":
 
     print()
 
+    titles_thesis = ("Numerical", "Analytical", "NN model")
+
     if args.plot:
         init_plots()
 
         sca(means, titles, muls, "timing-ensemble")
 
         sca(means_wo, titles_wo, muls, "timing-single")
+
+        # this is for ryan's thesis
+        # sca(means_wo, titles_thesis, muls, "timing-single-thesis")
 
         # hist(times_5pt, titles, "5", 3)
         # vio(times_rows_5pt, titles, "5")
